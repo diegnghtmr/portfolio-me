@@ -115,7 +115,7 @@ function horizonInk(x, y, width, height, threshold) {
   if (v >= middle) return 0.15 + 0.55 * Math.min(1, (v - middle) * 3.5) > threshold ? 2 : 1;
   const far = ridge(u, 0.50, 0.34, 4.2, 0.9);
   if (v >= far) return 0.18 + 0.5 * Math.min(1, (v - far) * 3) > threshold ? 1 : 0;
-  const sun = Math.hypot((u - 0.7) * (width / height), v - 0.3);
+  const sun = Math.hypot((u - 0.7) * (width / height), v - 0.4);
   if (sun >= 0.30) return 0;
   const glow = sun < 0.13 ? 0.72 : 0.72 * (1 - (sun - 0.13) / 0.17);
   return glow > threshold ? 3 : 0;

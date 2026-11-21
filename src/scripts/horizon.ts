@@ -43,7 +43,8 @@ function inkAt(x: number, y: number, th: number, t: number): number {
     return 0.15 + 0.55 * Math.min(1, (v - middle[x]!) * 3.5) - mist > th ? 2 : 1;
   }
   if (v >= far[x]!) return 0.18 + 0.5 * Math.min(1, (v - far[x]!) * 3) > th ? 1 : 0;
-  const sy = 0.3 + 0.05 * Math.sin(t * 0.18);
+  // Sun centre stays low enough that its 0.3 glow never touches the top edge (min top = 0.06).
+  const sy = 0.4 + 0.04 * Math.sin(t * 0.18);
   const sun = Math.hypot((u - 0.7) * (COLS / ROWS), v - sy);
   const core = 0.13 + 0.015 * Math.sin(t * 0.7);
   if (sun >= 0.3) return 0;

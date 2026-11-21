@@ -111,7 +111,7 @@
     ],
     "family": "bayer-8x8",
     "cell": 4,
-    "bytes": 861
+    "bytes": 838
   },
   {
     "file": "/dither/portrait-light-0.png",
@@ -216,6 +216,6 @@
     ],
     "family": "bayer-8x8",
     "cell": 4,
-    "bytes": 861
+    "bytes": 838
   }
 ]
