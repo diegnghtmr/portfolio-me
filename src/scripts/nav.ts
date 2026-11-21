@@ -28,6 +28,16 @@ if (header && menuToggle && menu && indicator) {
   const targets = [document.getElementById("intro"), ...links.map((link) => document.getElementById(link.hash.slice(1)))];
   let current: HTMLAnchorElement | null = null;
   let frame = 0;
+  // Scroll spy without layout reads: a section is "passed" while it overlaps the band from the
+  // top of the viewport to 48% of its height; the last overlapping one in page order is current.
+  const inBand = new Set<Element>();
+  const spy = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) inBand.add(entry.target);
+      else inBand.delete(entry.target);
+    }
+    schedule();
+  }, { rootMargin: "0px 0px -52% 0px" });
 
   const setOpen = (open: boolean) => {
     header.toggleAttribute("data-menu-open", open);
@@ -66,11 +76,8 @@ if (header && menuToggle && menu && indicator) {
   );
   const update = () => {
     frame = 0;
-    const line = Math.max(84, innerHeight * .48);
     let id = "intro";
-    for (const section of targets) {
-      if (section && section.getBoundingClientRect().top <= line) id = section.id;
-    }
+    for (const section of targets) if (section && inBand.has(section)) id = section.id;
     const next = links.find((link) => link.hash === `#${id}`) ?? null;
     if (next !== current) {
       current?.removeAttribute("aria-current");
@@ -95,10 +102,11 @@ if (header && menuToggle && menu && indicator) {
     moveIndicator(menu.querySelector("[data-section-link]:hover") ?? current);
   });
   mobile.addEventListener("change", () => { setOpen(false); schedule(); });
-  addEventListener("scroll", schedule, { passive: true });
   addEventListener("resize", schedule);
   addEventListener("themechange", schedule);
   void document.fonts?.ready.then(schedule);
   header.setAttribute("data-menu-ready", "");
-  update();
+  // The observer's first callback arrives after layout, so the indicator's first
+  // measurement never forces a synchronous layout during page load.
+  targets.forEach((section) => section && spy.observe(section));
 }

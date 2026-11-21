@@ -45,13 +45,15 @@ if (marquee && control && caption) {
     });
     row.addEventListener("pointerleave", () => { hovered = null; updateCaption(); });
   }
+  // Read every size first, then write: interleaving them would force one layout per row.
+  let measured = false;
   const duration = () => {
-    for (const track of tracks) {
-      const copy = track.firstElementChild;
-      const width = track.parentElement?.clientWidth;
+    const sizes = Array.from(tracks, (track) => [track.parentElement?.clientWidth, track.firstElementChild?.getBoundingClientRect().width] as const);
+    tracks.forEach((track, index) => {
+      const [width, copy] = sizes[index]!;
       if (width) track.style.setProperty("--row-width", `${width}px`);
-      if (copy) track.style.setProperty("--duration", `${Math.max(1, copy.getBoundingClientRect().width / 32).toFixed(1)}s`);
-    }
+      if (copy) track.style.setProperty("--duration", `${Math.max(1, copy / 32).toFixed(1)}s`);
+    });
   };
   const setup = () => {
     const moving = !motion.matches;
@@ -68,7 +70,7 @@ if (marquee && control && caption) {
     }
     marquee.toggleAttribute("data-moving", moving);
     control.hidden = !moving;
-    if (moving) duration();
+    if (moving && measured) duration();
   };
   control.addEventListener("click", () => {
     paused = !paused;
@@ -77,8 +79,10 @@ if (marquee && control && caption) {
     control.textContent = (paused ? control.dataset.play : control.dataset.pause) ?? "";
   });
   motion.addEventListener("change", setup);
-  const resize = () => { if (!motion.matches) duration(); };
-  addEventListener("resize", resize);
-  void document.fonts?.ready.then(resize);
+  const resize = () => { measured = true; if (!motion.matches) duration(); };
+  // ResizeObserver callbacks run after layout, so the first measurement never forces one.
+  if (typeof ResizeObserver !== "undefined") new ResizeObserver(resize).observe(marquee);
+  else { addEventListener("resize", resize); requestAnimationFrame(() => setTimeout(resize, 0)); }
+  void document.fonts?.ready.then(() => { if (measured) resize(); });
   setup();
 }

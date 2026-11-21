@@ -99,5 +99,14 @@ function mount(figure: HTMLElement) {
     .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }
 
+// The horizon sits at the very bottom of the page: build the canvas only when the footer
+// approaches the viewport, so page load never pays for its first 20k-cell frame.
 const figure = document.querySelector<HTMLElement>("figure.dither-poster.horizon");
-if (figure) mount(figure);
+if (figure) {
+  const near = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    near.disconnect();
+    mount(figure);
+  }, { rootMargin: "400px 0px" });
+  near.observe(figure);
+}

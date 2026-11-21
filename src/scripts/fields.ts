@@ -117,9 +117,9 @@ function mount(host: HTMLElement, shape: Shape) {
     if (active() && !frame) frame = requestAnimationFrame(tick);
     else if (!active() && frame) { cancelAnimationFrame(frame); frame = 0; }
   };
-  size();
+  // ResizeObserver's first callback sizes the canvas after layout, without forcing it at load.
   if (typeof ResizeObserver !== "undefined") new ResizeObserver(size).observe(host);
-  else addEventListener("resize", size);
+  else { size(); addEventListener("resize", size); }
   if (typeof IntersectionObserver !== "undefined") {
     new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? false; sync(); }).observe(host);
   }
