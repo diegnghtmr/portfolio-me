@@ -1,0 +1,221 @@
+[
+  {
+    "file": "/dither/blue-noise-64.png",
+    "width": 64,
+    "height": 64,
+    "inks": [],
+    "family": "blue-noise",
+    "cell": 1,
+    "bytes": 7115
+  },
+  {
+    "file": "/dither/portrait-dark-0.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#27345C",
+      "#7FB4CA",
+      "#F3F6F9"
+    ],
+    "family": "atkinson",
+    "cell": 2,
+    "bytes": 973
+  },
+  {
+    "file": "/dither/portrait-dark-1.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#27345C",
+      "#7FB4CA",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 6665
+  },
+  {
+    "file": "/dither/portrait-dark-2.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#27345C",
+      "#7FB4CA",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 9611
+  },
+  {
+    "file": "/dither/portrait-dark-3.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#27345C",
+      "#7FB4CA",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 11137
+  },
+  {
+    "file": "/dither/portrait-dark-4.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#27345C",
+      "#7FB4CA",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 11505
+  },
+  {
+    "file": "/dither/portrait-dark-5.png",
+    "width": 67,
+    "height": 67,
+    "inks": [],
+    "family": "original",
+    "cell": 2,
+    "bytes": 9989
+  },
+  {
+    "file": "/dither/hero-poster-dark.png",
+    "width": 150,
+    "height": 110,
+    "inks": [
+      "#06080F",
+      "#7FB4CA"
+    ],
+    "family": "bayer-8x8",
+    "cell": 4,
+    "bytes": 677
+  },
+  {
+    "file": "/dither/horizon-dark.png",
+    "width": 360,
+    "height": 55,
+    "inks": [
+      "#06080F",
+      "#27345C",
+      "#7FB4CA",
+      "#E0C15A"
+    ],
+    "family": "bayer-8x8",
+    "cell": 4,
+    "bytes": 861
+  },
+  {
+    "file": "/dither/portrait-light-0.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#24596C",
+      "#91C7DD",
+      "#F3F6F9"
+    ],
+    "family": "atkinson",
+    "cell": 2,
+    "bytes": 1002
+  },
+  {
+    "file": "/dither/portrait-light-1.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#24596C",
+      "#91C7DD",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 6488
+  },
+  {
+    "file": "/dither/portrait-light-2.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#24596C",
+      "#91C7DD",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 9582
+  },
+  {
+    "file": "/dither/portrait-light-3.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#24596C",
+      "#91C7DD",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 11144
+  },
+  {
+    "file": "/dither/portrait-light-4.png",
+    "width": 67,
+    "height": 67,
+    "inks": [
+      "#06080F",
+      "#24596C",
+      "#91C7DD",
+      "#F3F6F9"
+    ],
+    "family": "blue-noise",
+    "cell": 2,
+    "bytes": 11558
+  },
+  {
+    "file": "/dither/portrait-light-5.png",
+    "width": 67,
+    "height": 67,
+    "inks": [],
+    "family": "original",
+    "cell": 2,
+    "bytes": 9989
+  },
+  {
+    "file": "/dither/hero-poster-light.png",
+    "width": 150,
+    "height": 110,
+    "inks": [
+      "#F3F6F9",
+      "#24596C"
+    ],
+    "family": "bayer-8x8",
+    "cell": 4,
+    "bytes": 677
+  },
+  {
+    "file": "/dither/horizon-light.png",
+    "width": 360,
+    "height": 55,
+    "inks": [
+      "#F3F6F9",
+      "#91C7DD",
+      "#24596C",
+      "#E0C15A"
+    ],
+    "family": "bayer-8x8",
+    "cell": 4,
+    "bytes": 861
+  }
+]

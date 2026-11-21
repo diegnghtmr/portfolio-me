@@ -12,7 +12,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "format": "prettier --write src astro.config.mjs package.json pnpm-workspace.yaml tsconfig.json"
+    "format": "prettier --write src astro.config.mjs package.json pnpm-workspace.yaml tsconfig.json",
+    "dither": "node scripts/dither-assets.mjs",
+    "test:assets": "node --test scripts/"
   },
   "dependencies": {
     "@paper-design/shaders": "0.0.82",
