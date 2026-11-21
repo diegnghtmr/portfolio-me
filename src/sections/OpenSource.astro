@@ -1,0 +1,39 @@
+---
+import { openSource } from "../data/home";
+import { t, type Locale } from "../i18n";
+
+const { locale } = Astro.props as { locale: Locale };
+---
+
+<section class="wrap" id="oss" aria-labelledby="oss-heading">
+  <header class="section-head" data-reveal>
+    <h2 id="oss-heading">{t(locale, 'oss')}</h2>
+    <p>{t(locale, 'ossIntro')}</p>
+  </header>
+  <ul>
+    {openSource.map(({ owner, repo, description, kind }) => (
+      <li data-reveal>
+        <a href={`https://github.com/${owner}/${repo}`}>
+          <span class="who"><span class="owner">{owner} /</span><span class="repo">{repo}</span></span>
+          <span class="what">{t(locale, description)}</span><span class="kind">{t(locale, kind)}</span>
+          <span class="go" aria-hidden="true">→</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  ul { border-block-start:1px solid var(--hair); }
+  a { display:grid; grid-template-columns:minmax(220px,1.1fr) minmax(0,1.6fr) 160px 24px; align-items:center; gap:24px; padding:18px 8px; border-block-end:1px solid var(--hair); color:inherit; transition:background-color 150ms ease; }
+  a:hover { background:var(--raised); color:inherit; }
+  .who { display:grid; gap:2px; min-width:0; }
+  .owner, .kind { color:var(--muted); font:500 12px var(--mono); }
+  .repo { color:var(--text); font:600 16px var(--mono); overflow-wrap:anywhere; }
+  .what { color:var(--subtle); font-size:15px; }
+  @media (max-width:900px) {
+    a { grid-template-columns:minmax(0,1fr) 24px; gap:6px 12px; }
+    .what, .kind { grid-column:1; }
+    .go { grid-area:1 / 2; }
+  }
+</style>

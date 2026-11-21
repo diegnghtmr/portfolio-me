@@ -1,5 +1,7 @@
 ---
-import { languages, localePath, otherLocale, sections, siteHandle, siteName, t, type Locale } from "../i18n";
+import DitherPoster from "./DitherPoster.astro";
+import { contact } from "../data/home";
+import { languages, localePath, otherLocale, sections, siteName, t, type Locale } from "../i18n";
 
 interface Props {
   locale: Locale;
@@ -8,12 +10,11 @@ interface Props {
 const { locale } = Astro.props;
 const alternate = otherLocale(locale);
 const year = new Date().getUTCFullYear();
-const github = `https://github.com/${siteHandle}`;
 const elsewhere = [
-  ["github", github],
-  ["linkedin", "https://www.linkedin.com/in/diego-alejandro-flores-quintero/"],
-  ["email", "mailto:floresquintero.da@gmail.com"],
-  ["cv", `${github}/resume-maker`],
+  ["github", contact.github],
+  ["linkedin", contact.linkedin],
+  ["email", "#contact"],
+  ["cvPdf", contact.cvPdf[locale]],
 ] as const;
 ---
 
@@ -22,6 +23,7 @@ const elsewhere = [
     <div class="identity">
       <p class="name">{siteName}</p>
       <p>{t(locale, "footerRole")}</p>
+      <DitherPoster asset="portrait" annotation={t(locale, 'portraitEffect')} />
     </div>
     <nav aria-labelledby="footer-site">
       <h2 id="footer-site">{t(locale, "site")}</h2>
@@ -44,12 +46,17 @@ const elsewhere = [
       </a>
     </div>
   </div>
+  <DitherPoster asset="horizon" annotation={t(locale, 'horizonEffect')} />
 </footer>
+
+<script>
+  import "../scripts/portrait";
+</script>
 
 <style>
   .site-footer {
     margin-block-start: calc(var(--unit) * 10);
-    padding-block: calc(var(--unit) * 4) calc(var(--unit) * 6);
+    padding-block-start: calc(var(--unit) * 4);
     border-block-start: 1px solid var(--hair);
     color: var(--muted);
     font-size: 14px;
@@ -96,7 +103,7 @@ const elsewhere = [
     border-block-start: 1px solid var(--hair);
   }
 
-  @media (max-width: 860px) {
+  @media (max-width: 900px) {
     .footer-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }

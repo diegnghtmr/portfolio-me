@@ -1,0 +1,66 @@
+---
+import { contact } from "../data/home";
+import { t, type Locale } from "../i18n";
+
+const { locale } = Astro.props as { locale: Locale };
+const links = [
+  { label: 'linkedin', value: contact.linkedinHandle, href: contact.linkedin },
+  { label: 'github', value: contact.githubHandle, href: contact.github },
+  { label: 'cv', value: t(locale, 'pdfLanguages'), href: contact.cvPdf[locale] },
+] as const;
+---
+
+<section class="wrap contact" id="contact" aria-labelledby="contact-heading">
+  <div class="band field" data-bayer="tide" aria-hidden="true"></div>
+  <div class="contact-card" data-reveal>
+    <div class="contact-copy">
+      <p class="available"><i aria-hidden="true"></i>{t(locale, 'available')}</p>
+      <h2 id="contact-heading">{t(locale, 'contactTitle')}</h2>
+      <p>{t(locale, 'contactIntro')}</p>
+    </div>
+    <div>
+      <ul>
+        <li>
+          <a href={`mailto:${contact.email}`} data-copy-fallback><span class="key">{t(locale, 'email')}</span><span class="value">{contact.email}</span><span class="action">{t(locale, 'openLink')}</span></a>
+          <button type="button" data-copy-email data-address={contact.email} data-copied={t(locale, 'copied')} data-success={t(locale, 'emailCopied')} data-failed={t(locale, 'copyFailed')} hidden>
+            <span class="key">{t(locale, 'email')}</span><span class="value">{contact.email}</span><span class="action" data-copy-label>{t(locale, 'copy')}</span>
+          </button>
+        </li>
+        {links.map(({ label, href, value }) => (
+          <li>
+            <a {href}><span class="key">{t(locale, label)}</span><span class="value">{value}</span><span class="action">{label === 'cv' ? t(locale, 'downloadCv') : <>{t(locale, 'openLink')} <span aria-hidden="true">→</span></>}</span></a>
+          </li>
+        ))}
+      </ul>
+      <p class="copy-status" role="status" data-copy-status></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact { position:relative; margin-block-start:96px; }
+  .band { height:280px; border-radius:var(--r) var(--r) 0 0; }
+  .band .effect-label { inset-block:8px auto; }
+  .contact-card { position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:48px; margin:-150px 40px 0; padding:40px; border:1px solid var(--hair); border-radius:var(--r); background:var(--raised); }
+  .available { display:inline-flex; align-items:center; gap:8px; margin-block-end:16px; font:500 13px var(--mono); }
+  .available i { width:8px; height:8px; border-radius:50%; background:var(--ink); }
+  h2 { margin-block-end:12px; font-size:32px; font-weight:600; line-height:1.15; letter-spacing:-.015em; }
+  .contact-copy p:last-child { max-width:40ch; color:var(--subtle); }
+  li + li { border-block-start:1px solid var(--hair); }
+  li a, li button { display:grid; grid-template-columns:60px minmax(0,1fr) auto; gap:12px; align-items:center; width:100%; min-height:56px; padding:0 10px; border-radius:var(--r); color:var(--text); text-align:start; transition:background-color 150ms ease; cursor:pointer; }
+  li :is(a,button):hover { background:var(--surface); color:var(--text); }
+  .key { color:var(--muted); font:500 12px var(--mono); }
+  .value { font-size:15px; overflow-wrap:anywhere; }
+  .action { color:var(--ink); font-size:13px; font-weight:600; text-align:end; }
+  button .action { min-width:4.6em; }
+  .copy-status { min-height:1.4em; color:var(--ink); font-size:14px; text-align:end; }
+  @media (max-width:900px) {
+    .band { height:180px; }
+    .contact-card { grid-template-columns:minmax(0,1fr); gap:24px; margin:-90px 12px 0; padding:24px; }
+    li a, li button { grid-template-columns:minmax(0,1fr) auto; gap:2px 12px; padding:10px; }
+    .key, .value { grid-column:1; }
+    .value { grid-row:2; }
+    .action { grid-area:1 / 2 / 3; }
+    .copy-status { text-align:start; }
+  }
+</style>

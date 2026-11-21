@@ -1,0 +1,44 @@
+---
+import DitherPoster from "../components/DitherPoster.astro";
+import { contact } from "../data/home";
+import { siteName, t, type Locale } from "../i18n";
+
+const { locale } = Astro.props as { locale: Locale };
+---
+
+<section class="wrap hero" id="intro" aria-labelledby="hero-heading">
+  <div class="hero-copy">
+    <h1 id="hero-heading" data-reveal>{siteName}</h1>
+    <p data-reveal>{t(locale, 'description')}</p>
+    <div class="ctas" data-reveal>
+      <a class="home-button primary" href="#work">{t(locale, 'seeWork')}</a>
+      <a class="home-button" href={contact.cvPdf[locale]}>{t(locale, 'downloadCv')}</a>
+    </div>
+  </div>
+  <div class="hero-art" data-hero>
+    <DitherPoster asset="hero-poster" annotation={t(locale, 'heroEffect')} />
+    <div class="shader" data-hero-shader aria-hidden="true"></div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/hero";
+</script>
+
+<style>
+  .hero { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:48px; align-items:center; padding-block:64px 48px; }
+  h1 { margin-block-end:20px; font-size:56px; }
+  p { max-width:34ch; margin-block-end:16px; font-size:20px; line-height:1.5; }
+  .ctas { display:flex; flex-wrap:wrap; gap:12px; }
+  .hero-art { position:relative; height:440px; overflow:hidden; }
+  .shader { position:absolute; inset:0; visibility:hidden; }
+  [data-mounted] .shader { visibility:visible; }
+  .shader-label { display:none; }
+  [data-mounted] .shader-label { display:block; }
+  @media (max-width:900px) {
+    .hero { grid-template-columns:minmax(0,1fr); gap:24px; padding-block-start:24px; }
+    .hero-art { order:-1; height:160px; }
+    h1 { font-size:40px; }
+  }
+  @media (forced-colors:active), print { .hero-art { display:none; } }
+</style>

@@ -33,7 +33,10 @@ const light = t(locale, "light");
         type="button"
         aria-label={t(locale, "searchLabel")}
         data-search-trigger
-        disabled
+        aria-haspopup="dialog"
+        aria-controls="command-menu"
+        aria-keyshortcuts="Control+K Meta+K"
+        hidden
       >
         <span class="search-label">{t(locale, "search")}</span>
         <kbd>Ctrl K</kbd>
@@ -68,89 +71,7 @@ const light = t(locale, "light");
 </header>
 
 <script>
-  const root = document.documentElement;
-  const themeToggle = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
-  if (themeToggle) {
-    const sync = () => {
-      themeToggle.setAttribute("aria-pressed", String(root.dataset.theme === "light"));
-    };
-    themeToggle.addEventListener("click", () => {
-      const next = root.dataset.theme === "light" ? "dark" : "light";
-      root.dataset.theme = next;
-      const key = root.dataset.themeStorageKey;
-      if (key) {
-        try {
-          localStorage.setItem(key, next);
-        } catch {
-          // The toggle still works when storage is unavailable.
-        }
-      }
-      sync();
-      window.dispatchEvent(new Event("themechange"));
-    });
-    sync();
-    themeToggle.hidden = false;
-  }
-
-  const header = document.querySelector<HTMLElement>("[data-site-nav]");
-  const menuToggle = header?.querySelector<HTMLButtonElement>("[data-menu-toggle]");
-  const menu = header?.querySelector<HTMLElement>("#primary-nav");
-  const indicator = menu?.querySelector<HTMLElement>("[data-nav-indicator]");
-  if (header && menuToggle && menu && indicator) {
-    const mobile = matchMedia("(max-width: 860px)");
-    const links = menu.querySelectorAll<HTMLAnchorElement>("[data-section-link]");
-    const setOpen = (open: boolean) => {
-      header.toggleAttribute("data-menu-open", open);
-      menuToggle.setAttribute("aria-expanded", String(open));
-    };
-    menuToggle.addEventListener("click", () => {
-      const open = !header.hasAttribute("data-menu-open");
-      setOpen(open);
-      if (open) links[0]?.focus();
-    });
-    header.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape" || !header.hasAttribute("data-menu-open")) return;
-      setOpen(false);
-      menuToggle.focus();
-    });
-
-    const moveIndicator = (link: HTMLAnchorElement | null) => {
-      const label = link?.querySelector("span");
-      if (mobile.matches || !label) {
-        indicator.removeAttribute("data-visible");
-        return;
-      }
-      const { left, width } = label.getBoundingClientRect();
-      indicator.style.width = `${width}px`;
-      indicator.style.transform = `translateX(${left - menu.getBoundingClientRect().left}px)`;
-      indicator.setAttribute("data-visible", "");
-    };
-    const syncIndicator = () => {
-      moveIndicator(menu.querySelector("[data-section-link]:hover, [data-section-link]:focus-visible"));
-    };
-    links.forEach((link) => {
-      link.addEventListener("click", () => {
-        if (!mobile.matches) return;
-        setOpen(false);
-        menuToggle.focus();
-      });
-      link.addEventListener("pointerenter", () => moveIndicator(link));
-      link.addEventListener("focus", () => moveIndicator(link));
-    });
-    menu.addEventListener("pointerleave", () => {
-      moveIndicator(menu.querySelector("[data-section-link]:focus-visible"));
-    });
-    menu.addEventListener("focusout", (event) => {
-      if (event.relatedTarget instanceof Node && menu.contains(event.relatedTarget)) return;
-      moveIndicator(menu.querySelector("[data-section-link]:hover"));
-    });
-    mobile.addEventListener("change", () => {
-      setOpen(false);
-      syncIndicator();
-    });
-    window.addEventListener("resize", syncIndicator);
-    header.setAttribute("data-menu-ready", "");
-  }
+  import "../scripts/nav";
 </script>
 
 <style>
@@ -210,7 +131,7 @@ const light = t(locale, "light");
     font-size: 14px;
   }
 
-  .nav-links a:is(:hover, :focus-visible),
+  .nav-links a:is(:hover, :focus-visible, [aria-current="location"]),
   .nav-control:not(:disabled):hover {
     color: var(--text);
   }
@@ -258,8 +179,11 @@ const light = t(locale, "light");
   }
 
   kbd {
-    font: 500 11px var(--mono);
+    padding: 1px 5px;
+    border: 1px solid var(--hair);
+    border-radius: var(--r-sm);
     color: var(--muted);
+    font: 500 11px var(--mono);
   }
 
   .theme-toggle {
@@ -328,6 +252,8 @@ const light = t(locale, "light");
       padding-block: calc(var(--unit) * 1.5);
       font-size: 16px;
     }
+
+    .nav-links a[aria-current="location"] { font-weight: 600; }
   }
 
   @media (prefers-reduced-motion: reduce) {

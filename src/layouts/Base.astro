@@ -1,4 +1,5 @@
 ---
+import CommandMenu from "../components/CommandMenu.astro";
 import Footer from "../components/Footer.astro";
 import Nav from "../components/Nav.astro";
 import { localePath, siteName, t, type Locale } from "../i18n";
@@ -27,11 +28,7 @@ const absoluteHome = (language: Locale) => new URL(localePath(language), Astro.s
           // Fall back to the system preference when storage is unavailable.
         }
         root.dataset.theme =
-          savedTheme === "dark" || savedTheme === "light"
-            ? savedTheme
-            : matchMedia("(prefers-color-scheme: light)").matches
-              ? "light"
-              : "dark";
+          savedTheme === "dark" || savedTheme === "light" ? savedTheme : "dark";
       })();
     </script>
     <title>{siteName}, {t(locale, "titleRole")}</title>
@@ -46,6 +43,7 @@ const absoluteHome = (language: Locale) => new URL(localePath(language), Astro.s
     <a class="skip-link" href="#main">{t(locale, "skip")}</a>
     <Nav {locale} />
     <slot />
+    <CommandMenu {locale} />
     <slot name="footer">
       <Footer {locale} />
     </slot>

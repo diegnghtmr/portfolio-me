@@ -1,0 +1,74 @@
+---
+import { contact, projects } from "../data/home";
+import { localePath, otherLocale, sections, t, type Locale } from "../i18n";
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const groups = [
+  { label: 'sections', items: sections.map((id) => ({ label: t(locale, id === 'work' ? 'selectedWork' : id === 'about' ? 'experience' : id), target: `#${id}` })) },
+  { label: 'projects', items: projects.map(({ name, id }) => ({ label: name, target: `#${id}` })) },
+  { label: 'actions', items: [
+    { label: t(locale, 'copyEmail'), target: 'copy' },
+    { label: t(locale, 'switchTheme'), target: 'theme' },
+    { label: t(locale, 'downloadCvPdf'), target: contact.cvPdf[locale] },
+    { label: t(locale, 'languageAction'), target: localePath(otherLocale(locale)), lang: otherLocale(locale) },
+  ] },
+] as const;
+---
+
+<dialog id="command-menu" aria-label={t(locale, 'searchSite')}>
+  <div class="query">
+    <span class="prompt" aria-hidden="true">›</span>
+    <label class="sr-only" for="command-query">{t(locale, 'searchInput')}</label>
+    <input id="command-query" type="search" placeholder={t(locale, 'searchPlaceholder')} role="combobox" aria-expanded="true" aria-controls="command-results" autocomplete="off" spellcheck="false" />
+  </div>
+  <ul id="command-results" role="listbox" aria-label={t(locale, 'searchResults')}>
+    {groups.map(({ label, items }) => (
+      <li role="group" aria-labelledby={`command-group-${label}`} data-command-group>
+        <p class="group-title" id={`command-group-${label}`} role="presentation">{t(locale, label)}</p>
+        <ul role="presentation">
+          {items.map((item, i) => (
+            <li id={`command-${label}-${i}`} role="option" aria-selected="false" data-command-target={item.target} data-command-label={item.label}>
+              <span class="option-name" lang={'lang' in item ? item.lang : undefined}><i aria-hidden="true"></i>{item.label}</span><span class="enter" aria-hidden="true">Enter</span>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+  <p class="empty" data-command-empty data-prefix={t(locale, 'nothingMatches')} data-hint={t(locale, 'searchHint')} role="status" hidden></p>
+  <p class="instructions"><span><kbd>↑↓</kbd>{t(locale, 'move')}</span><span><kbd>Enter</kbd>{t(locale, 'open')}</span><span><kbd>Esc</kbd>{t(locale, 'close')}</span></p>
+</dialog>
+
+<script>
+  import "../scripts/command-menu";
+</script>
+
+<style>
+  dialog { position:fixed; inset:var(--dialog-top,76px) auto auto var(--dialog-left,16px); width:min(600px,calc(100% - 32px)); max-width:none; max-height:calc(100dvh - var(--dialog-top,76px) - 16px); margin:0; padding:0; overflow:hidden; border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text); }
+  dialog[open] { display:flex; flex-direction:column; }
+  dialog::backdrop { background:color-mix(in srgb,var(--surface) 72%,transparent); }
+  @supports (backdrop-filter:blur(20px)) {
+    dialog { background:color-mix(in srgb,var(--surface) 95%,transparent); backdrop-filter:blur(20px); }
+  }
+  @media (prefers-reduced-transparency:reduce) { dialog { background:var(--surface); backdrop-filter:none; } }
+  .query { display:flex; gap:12px; align-items:center; padding-inline:24px; border-block-end:1px solid var(--hair); }
+  .prompt { color:var(--gold-text); font:500 15px var(--mono); }
+  input { flex:1; min-width:0; min-height:64px; padding:0 4px; color:var(--text); font:400 19px var(--sans); }
+  input::placeholder { color:var(--muted); }
+  input:focus-visible { outline-offset:-2px; }
+  input::-webkit-search-cancel-button { display:none; }
+  #command-results { min-height:0; max-height:380px; padding:8px 12px 12px; overflow:auto; scroll-behavior:auto; scrollbar-width:thin; }
+  #command-results:not(:has([role="group"]:not([hidden]))) { display:none; }
+  .group-title { padding:14px 12px 6px; color:var(--muted); font:500 11px var(--mono); letter-spacing:.04em; }
+  [role="option"] { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; padding:0 12px; border-radius:var(--r); color:var(--subtle); cursor:pointer; }
+  [aria-selected="true"] { background:var(--whisper); color:var(--text); }
+  .option-name { display:flex; align-items:center; gap:10px; }
+  .option-name i { width:6px; height:6px; flex:none; border-radius:50%; background:var(--control); }
+  [aria-selected="true"] i { background:var(--gold); }
+  .enter { visibility:hidden; color:var(--subtle); font:500 12px var(--mono); }
+  [aria-selected="true"] .enter { visibility:visible; }
+  .empty { padding:28px 24px; color:var(--subtle); overflow-wrap:anywhere; }
+  .instructions { display:flex; flex-wrap:wrap; gap:6px 18px; padding:12px 24px; border-block-start:1px solid var(--hair); color:var(--muted); font-size:12px; }
+  kbd { margin-inline-end:6px; padding:1px 6px; border:1px solid var(--hair); border-radius:var(--r); color:var(--subtle); font:500 11px var(--mono); }
+</style>

@@ -1,0 +1,94 @@
+---
+import { stack } from "../data/home";
+import { t, type Locale } from "../i18n";
+
+const { locale } = Astro.props as { locale: Locale };
+const stats = [{ id: 'work', count: 8, label: 'systems' }, { id: 'oss', count: 6, label: 'contributions' }] as const;
+---
+
+<section class="wrap" aria-label={t(locale, 'atAGlance')}>
+  <ul class="stats">
+    {stats.map(({ id, count, label }) => (
+      <li class="stat" data-reveal>
+        <a href={`#${id}`}>
+          <span class="sr-only">{count}</span><span class="number" data-count={count} aria-hidden="true">{count}</span>
+          <span class="stat-label">{t(locale, label)}</span><span class="go" aria-hidden="true">→</span>
+        </a>
+      </li>
+    ))}
+    <li class="stack" data-reveal data-stack aria-labelledby="stack-heading">
+      <div class="stack-head">
+        <span id="stack-heading">{t(locale, 'stack')}</span>
+        <button class="toggle" type="button" data-stack-pause data-pause={t(locale, 'pause')} data-play={t(locale, 'play')} aria-pressed="false" hidden>{t(locale, 'pause')}</button>
+      </div>
+      <div class="marquee" data-marquee>
+        {stack.map((groups, index) => (
+          <div class:list={['row', { reverse: index === 1 }]}>
+            <div class="track" data-stack-track>
+              <ul class="copy" data-stack-copy>
+                {groups.map(({ label, tools }) => <>
+                  <li class="group">{t(locale, label)}</li>
+                  {tools.map(([name, used]) => (
+                    <li><button class="chip" type="button" title={`${name} ${t(locale, 'usedIn')} ${used}`} data-used={used} aria-describedby="stack-caption"><i aria-hidden="true"></i>{name}</button></li>
+                  ))}
+                </>)}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p class="caption" id="stack-caption" data-stack-caption data-hint={t(locale, 'stackHint')} data-used-in={t(locale, 'usedIn')} aria-live="polite">{t(locale, 'stackHint')}</p>
+    </li>
+  </ul>
+</section>
+
+<script>
+  import "../scripts/stack";
+</script>
+
+<style>
+  .stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-block:1px solid var(--hair); }
+  .stat + .stat { border-inline-start:1px solid var(--hair); }
+  .stat a { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:24px; align-items:center; height:100%; padding:32px 32px 32px 8px; color:inherit; transition:background-color 150ms ease; }
+  .stat + .stat a { padding-inline-start:32px; }
+  .stat a:hover { background:var(--raised); }
+  .number { min-width:1ch; font:600 96px/.9 var(--sans); font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
+  .stat-label { max-width:24ch; color:var(--subtle); font-size:18px; line-height:1.4; }
+  .stack { grid-column:1/-1; min-width:0; border-block-start:1px solid var(--hair); padding-block:24px 20px; }
+  .stack-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-block-end:16px; min-height:32px; }
+  .stack-head, .caption, .toggle { color:var(--muted); font:500 12px/1.3 var(--mono); }
+  .toggle { min-width:5em; min-height:32px; padding-inline:4px; cursor:pointer; text-align:end; text-decoration:underline; text-underline-offset:3px; }
+  .toggle:hover { color:var(--text); }
+  .marquee { display:grid; gap:10px; }
+  .row { min-width:0; padding-block:4px; }
+  .copy { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  .group { padding-inline:18px 4px; color:var(--muted); font:500 11px var(--mono); white-space:nowrap; }
+  .group:first-child { padding-inline-start:4px; }
+  .chip { display:flex; align-items:center; gap:9px; min-height:42px; padding-inline:16px; border:1px solid var(--hair); border-radius:var(--r); background:var(--raised); color:var(--text); font:500 14px var(--mono); white-space:nowrap; cursor:default; transition:transform 200ms var(--ease-out), border-color 140ms ease, opacity 180ms ease; }
+  .chip i { width:7px; height:7px; background:var(--ink); }
+  .chip:is(:hover,:focus-visible,[data-active]) { border-color:var(--ink); transform:translateY(-2px); }
+  .chip:is(:focus-visible,[data-active]) { border-block-end-color:var(--gold); }
+  .row:has([data-active]) .chip:not([data-active]) { opacity:.55; }
+  .caption { min-height:3em; margin-block-start:12px; }
+  .caption :global(b) { color:var(--text); font-weight:600; }
+  @media (prefers-reduced-motion:no-preference) {
+    .marquee[data-moving] .row { overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); }
+    .marquee[data-moving] .track { display:flex; width:max-content; animation:marquee var(--duration,40s) linear infinite; }
+    .marquee[data-moving] .copy { flex-wrap:nowrap; justify-content:space-between; min-width:var(--row-width,0px); padding-inline-end:10px; }
+    .marquee[data-moving] .reverse .track { animation-direction:reverse; }
+    .marquee[data-moving][data-paused] .track, .row:hover .track { animation-play-state:paused; }
+    /* Bring every real chip into view for keyboard users instead of leaving focus in the clipped track. */
+    .marquee[data-moving] .row:focus-within { mask-image:none; }
+    .marquee[data-moving] .row:focus-within .track { width:auto; animation:none; }
+    .marquee[data-moving] .row:focus-within .copy { flex-wrap:wrap; justify-content:flex-start; min-width:0; }
+    .marquee[data-moving] .row:focus-within [inert] { display:none; }
+  }
+  @keyframes marquee { to { transform:translateX(-50%); } }
+  @media (max-width:900px) {
+    .stats { grid-template-columns:minmax(0,1fr); }
+    .stat + .stat { border-inline-start:0; border-block-start:1px solid var(--hair); }
+    .stat a, .stat + .stat a { padding:24px 0; }
+    .number { font-size:64px; }
+    .stat-label { font-size:16px; }
+  }
+</style>

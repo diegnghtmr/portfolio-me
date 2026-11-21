@@ -1,0 +1,27 @@
+---
+import type { Locale } from "../i18n";
+import Contact from "./Contact.astro";
+import Experience from "./Experience.astro";
+import Hero from "./Hero.astro";
+import OpenSource from "./OpenSource.astro";
+import Principles from "./Principles.astro";
+import Proof from "./Proof.astro";
+import Work from "./Work.astro";
+
+const { locale } = Astro.props as { locale: Locale };
+---
+
+<main id="main" tabindex="-1">
+  <Hero {locale} />
+  <Proof {locale} />
+  <Work {locale} />
+  <Principles {locale} />
+  <OpenSource {locale} />
+  <Experience {locale} />
+  <Contact {locale} />
+</main>
+
+<script>
+  import "../scripts/fields";
+  import "../scripts/home-motion";
+</script>
