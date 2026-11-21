@@ -7,7 +7,7 @@ import sharp from 'sharp';
 const sources = new URL('../assets-src/', import.meta.url);
 const output = new URL('../public/dither/', import.meta.url);
 const manifest = new URL('../src/data/dither-manifest.json', import.meta.url);
-const SIZE = 67;
+const SIZE = 44;
 const TILE = 64;
 const DARKEST = '#06080F';
 const LIGHTEST = '#F3F6F9';

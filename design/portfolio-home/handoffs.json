@@ -3,13 +3,14 @@
   "chosen": "01-split-statement.html",
   "handoffs": {
     "01-split-statement.html": {
-      "status": "in_progress",
+      "status": "implemented",
       "queued": false,
       "sentAt": "2026-11-21T21:49:00.834Z",
       "startedAt": "2026-11-21T21:49:15.021Z",
-      "implementedAt": null,
+      "implementedAt": "2026-11-21T22:20:18.046Z",
       "feature": "odd/tasks/portfolio-prd-trd.md",
-      "note": "Scaffolding Astro per TRD, then home sections, interactions and build-time dither assets."
+      "note": "Astro 7 + Tailwind 4, /en/ and /es/. Paper Shaders hero, build-time dither assets (sharp + image-q). Commits bdeccd6..47e3beb on feat/portfolio-home.",
+      "previewUrl": "http://localhost:4321/en/"
     }
   }
 }

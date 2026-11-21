@@ -33,7 +33,7 @@ const poster = (theme: (typeof themes)[number]) => {
       return src && <img class={theme} {src} {...dimensions(src)} alt="" decoding="async" loading={asset === 'horizon' ? 'lazy' : 'eager'} />;
     }
     const src = frames?.[theme]?.[0];
-    return src && <img class={theme} {src} alt="" width="67" height="67" decoding="async" loading="lazy" />;
+    return src && <img class={theme} {src} alt="" width="44" height="44" decoding="async" loading="lazy" />;
   })}
 </figure>
 
@@ -43,7 +43,7 @@ const poster = (theme: (typeof themes)[number]) => {
   .hero-poster img { object-fit: contain; }
   .light, :global([data-theme="light"]) .dark { visibility: hidden; }
   :global([data-theme="light"]) .light { visibility: visible; }
-  .portrait { width: 136px; height: 136px; margin-block-start: 24px; border: 1px solid var(--hair); border-radius: var(--r); cursor: crosshair; }
+  .portrait { width: 88px; height: 88px; margin-block-start: 16px; border: 1px solid var(--hair); border-radius: var(--r); cursor: crosshair; }
   .portrait:not(:has(img)), .dither-poster:not(:has(img)) figcaption { display: none; }
   .portrait figcaption { inset-inline-end: 4px; }
   .horizon { height: 220px; margin-block-start: 40px; }

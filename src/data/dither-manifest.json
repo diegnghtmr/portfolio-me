@@ -10,8 +10,8 @@
   },
   {
     "file": "/dither/portrait-dark-0.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#27345C",
@@ -20,12 +20,12 @@
     ],
     "family": "atkinson",
     "cell": 2,
-    "bytes": 973
+    "bytes": 522
   },
   {
     "file": "/dither/portrait-dark-1.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#27345C",
@@ -34,12 +34,12 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 6665
+    "bytes": 3036
   },
   {
     "file": "/dither/portrait-dark-2.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#27345C",
@@ -48,12 +48,12 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 9611
+    "bytes": 4381
   },
   {
     "file": "/dither/portrait-dark-3.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#27345C",
@@ -62,12 +62,12 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 11137
+    "bytes": 5002
   },
   {
     "file": "/dither/portrait-dark-4.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#27345C",
@@ -76,16 +76,16 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 11505
+    "bytes": 5106
   },
   {
     "file": "/dither/portrait-dark-5.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [],
     "family": "original",
     "cell": 2,
-    "bytes": 9989
+    "bytes": 4587
   },
   {
     "file": "/dither/hero-poster-dark.png",
@@ -115,8 +115,8 @@
   },
   {
     "file": "/dither/portrait-light-0.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#24596C",
@@ -125,12 +125,12 @@
     ],
     "family": "atkinson",
     "cell": 2,
-    "bytes": 1002
+    "bytes": 526
   },
   {
     "file": "/dither/portrait-light-1.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#24596C",
@@ -139,12 +139,12 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 6488
+    "bytes": 3025
   },
   {
     "file": "/dither/portrait-light-2.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#24596C",
@@ -153,12 +153,12 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 9582
+    "bytes": 4398
   },
   {
     "file": "/dither/portrait-light-3.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#24596C",
@@ -167,12 +167,12 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 11144
+    "bytes": 5029
   },
   {
     "file": "/dither/portrait-light-4.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [
       "#06080F",
       "#24596C",
@@ -181,16 +181,16 @@
     ],
     "family": "blue-noise",
     "cell": 2,
-    "bytes": 11558
+    "bytes": 5142
   },
   {
     "file": "/dither/portrait-light-5.png",
-    "width": 67,
-    "height": 67,
+    "width": 44,
+    "height": 44,
     "inks": [],
     "family": "original",
     "cell": 2,
-    "bytes": 9989
+    "bytes": 4587
   },
   {
     "file": "/dither/hero-poster-light.png",

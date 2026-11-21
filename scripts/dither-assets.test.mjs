@@ -74,11 +74,11 @@ test('dither asset generator CLI', async (t) => {
     assert.deepEqual(asset('blue-noise-64.png'), await readFile(new URL('blue-noise-64.png', sourceRoot)));
     for (const [theme, { surface, mid, ink, text }] of Object.entries(colors)) {
       const ramp = [theme === 'dark' ? surface : text, ...[mid, ink].sort(), theme === 'dark' ? text : surface];
-      assertInks(await check(`portrait-${theme}-0.png`, 67, 67, ramp, 'atkinson', 2), ramp);
+      assertInks(await check(`portrait-${theme}-0.png`, 44, 44, ramp, 'atkinson', 2), ramp);
       for (let frame = 1; frame <= 4; frame++) {
-        await check(`portrait-${theme}-${frame}.png`, 67, 67, ramp, 'blue-noise', 2);
+        await check(`portrait-${theme}-${frame}.png`, 44, 44, ramp, 'blue-noise', 2);
       }
-      await check(`portrait-${theme}-5.png`, 67, 67, [], 'original', 2);
+      await check(`portrait-${theme}-5.png`, 44, 44, [], 'original', 2);
       assertInks(await check(`hero-poster-${theme}.png`, 150, 110, [surface, ink], 'bayer-8x8', 4), [surface, ink]);
       const horizonInks = [surface, mid, ink, '#E0C15A'];
       assertInks(await check(`horizon-${theme}.png`, 360, 55, horizonInks, 'bayer-8x8', 4), horizonInks);
@@ -87,22 +87,22 @@ test('dither asset generator CLI', async (t) => {
 
   await t.test('stationary blue-noise reveal resolves to one grayscale original', async () => {
     const noise = await decode(asset('blue-noise-64.png'), 64, 64);
-    const original = await decode(asset('portrait-dark-5.png'), 67, 67);
-    assert.deepEqual(original, await decode(asset('portrait-light-5.png'), 67, 67));
+    const original = await decode(asset('portrait-dark-5.png'), 44, 44);
+    assert.deepEqual(original, await decode(asset('portrait-light-5.png'), 44, 44));
     for (let i = 0; i < original.length; i += 3) {
       assert.equal(original[i], original[i + 1]);
       assert.equal(original[i], original[i + 2]);
     }
     for (const theme of Object.keys(colors)) {
-      const dithered = await decode(asset(`portrait-${theme}-0.png`), 67, 67);
+      const dithered = await decode(asset(`portrait-${theme}-0.png`), 44, 44);
       for (let frame = 1; frame <= 4; frame++) {
         const expected = Buffer.from(dithered);
-        for (let y = 0; y < 67; y++) for (let x = 0; x < 67; x++) {
+        for (let y = 0; y < 44; y++) for (let x = 0; x < 44; x++) {
           const threshold = (noise[((y % 64) * 64 + x % 64) * 3] + 0.5) / 256;
-          const i = (y * 67 + x) * 3;
+          const i = (y * 44 + x) * 3;
           if (threshold < frame / 5) original.copy(expected, i, i, i + 3);
         }
-        assert.deepEqual(await decode(asset(`portrait-${theme}-${frame}.png`), 67, 67), expected);
+        assert.deepEqual(await decode(asset(`portrait-${theme}-${frame}.png`), 44, 44), expected);
       }
     }
   });
