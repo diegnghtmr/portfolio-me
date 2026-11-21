@@ -14,7 +14,9 @@
     "check": "astro check",
     "format": "prettier --write src astro.config.mjs package.json pnpm-workspace.yaml tsconfig.json",
     "dither": "node scripts/dither-assets.mjs",
-    "test:assets": "node --test scripts/"
+    "og": "node scripts/og-image.mjs",
+    "test:site": "node --test scripts/site-output.test.mjs",
+    "test:assets": "node --test scripts/dither-assets.test.mjs scripts/og-image.test.mjs"
   },
   "dependencies": {
     "@paper-design/shaders": "0.0.82",

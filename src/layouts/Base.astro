@@ -2,7 +2,8 @@
 import CommandMenu from "../components/CommandMenu.astro";
 import Footer from "../components/Footer.astro";
 import Nav from "../components/Nav.astro";
-import { localePath, siteName, t, type Locale } from "../i18n";
+import { localePath, otherLocale, siteName, t, type Locale } from "../i18n";
+import { absolute, jsonLd, markdownPath, ogImagePath } from "../lib/profile";
 import "../styles/global.css";
 
 interface Props {
@@ -11,6 +12,14 @@ interface Props {
 
 const { locale } = Astro.props;
 const absoluteHome = (language: Locale) => new URL(localePath(language), Astro.site);
+const title = `${siteName}, ${t(locale, "titleRole")}`;
+const description = t(locale, "description");
+const image = absolute(ogImagePath(locale));
+const imageAlt = locale === "en"
+  ? `${siteName} — ${t(locale, "titleRole")}. Blue dithered sphere on a dark background.`
+  : `${siteName} — ${t(locale, "titleRole")}. Esfera azul tramada sobre fondo oscuro.`;
+const ogLocales = { en: "en_US", es: "es_CO" };
+const graph = JSON.stringify(jsonLd(locale)).replaceAll("<", "\\u003c");
 ---
 
 <!doctype html>
@@ -31,13 +40,33 @@ const absoluteHome = (language: Locale) => new URL(localePath(language), Astro.s
           savedTheme === "dark" || savedTheme === "light" ? savedTheme : "dark";
       })();
     </script>
-    <title>{siteName}, {t(locale, "titleRole")}</title>
-    <meta name="description" content={t(locale, "description")} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#06080F" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={absoluteHome(locale)} />
+    <meta property="og:locale" content={ogLocales[locale]} />
+    <meta property="og:locale:alternate" content={ogLocales[otherLocale(locale)]} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    <script type="application/ld+json" set:html={graph}></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={absoluteHome(locale)} />
     <link rel="alternate" hreflang="en" href={absoluteHome("en")} />
     <link rel="alternate" hreflang="es" href={absoluteHome("es")} />
     <link rel="alternate" hreflang="x-default" href={absoluteHome("en")} />
+    <link rel="alternate" type="text/markdown" href={markdownPath(locale)} />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
   </head>
   <body>
     <a class="skip-link" href="#main">{t(locale, "skip")}</a>
