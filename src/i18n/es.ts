@@ -1,0 +1,26 @@
+import type { MessageKey } from "./en";
+
+export const es = {
+  titleRole: "ingeniero de software",
+  description: "Construyo backends, frontends tipados y herramientas para agentes de IA.",
+  skip: "Saltar al contenido",
+  primary: "Principal",
+  work: "Trabajo",
+  oss: "Open source",
+  about: "Sobre mí",
+  contact: "Contacto",
+  search: "Buscar",
+  searchLabel: "Buscar en el sitio (Ctrl K)",
+  menu: "Menú",
+  dark: "Oscuro",
+  light: "Claro",
+  themeLabel: "Cambiar a tema claro",
+  footerRole: "Desarrollador de software. Armenia, Colombia.",
+  site: "Sitio",
+  elsewhere: "En otros sitios",
+  experience: "Experiencia",
+  email: "Correo",
+  github: "GitHub",
+  linkedin: "LinkedIn",
+  cv: "CV",
+} satisfies Record<MessageKey, string>;

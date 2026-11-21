@@ -1,0 +1,53 @@
+---
+import Footer from "../components/Footer.astro";
+import Nav from "../components/Nav.astro";
+import { localePath, siteName, t, type Locale } from "../i18n";
+import "../styles/global.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const absoluteHome = (language: Locale) => new URL(localePath(language), Astro.site);
+---
+
+<!doctype html>
+<html lang={locale} data-theme="dark" data-theme-storage-key="portfolio-theme">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        let savedTheme;
+        try {
+          savedTheme = localStorage.getItem(root.dataset.themeStorageKey);
+        } catch {
+          // Fall back to the system preference when storage is unavailable.
+        }
+        root.dataset.theme =
+          savedTheme === "dark" || savedTheme === "light"
+            ? savedTheme
+            : matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+      })();
+    </script>
+    <title>{siteName}, {t(locale, "titleRole")}</title>
+    <meta name="description" content={t(locale, "description")} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={absoluteHome(locale)} />
+    <link rel="alternate" hreflang="en" href={absoluteHome("en")} />
+    <link rel="alternate" hreflang="es" href={absoluteHome("es")} />
+    <link rel="alternate" hreflang="x-default" href={absoluteHome("en")} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t(locale, "skip")}</a>
+    <Nav {locale} />
+    <slot />
+    <slot name="footer">
+      <Footer {locale} />
+    </slot>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+export const en = {
+  titleRole: "software engineer",
+  description: "I build backends, typed frontends, and tools for AI agents.",
+  skip: "Skip to content",
+  primary: "Primary",
+  work: "Work",
+  oss: "Open source",
+  about: "About",
+  contact: "Contact",
+  search: "Search",
+  searchLabel: "Search the site (Ctrl K)",
+  menu: "Menu",
+  dark: "Dark",
+  light: "Light",
+  themeLabel: "Toggle light theme",
+  footerRole: "Software developer. Armenia, Colombia.",
+  site: "Site",
+  elsewhere: "Elsewhere",
+  experience: "Experience",
+  email: "Email",
+  github: "GitHub",
+  linkedin: "LinkedIn",
+  cv: "CV",
+} satisfies Record<string, string>;
+
+export type MessageKey = keyof typeof en;

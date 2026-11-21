@@ -1,0 +1,26 @@
+---
+import { languages, localePath, siteName } from "../i18n";
+import "../styles/global.css";
+
+const english = localePath("en");
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content={`0; url=${english}`} />
+    <title>{siteName}</title>
+    <link rel="canonical" href={new URL(english, Astro.site)} />
+  </head>
+  <body>
+    <main class="wrap home-placeholder">
+      <h1>{siteName}</h1>
+      <ul>
+        <li><a class="underline" href={english}>{languages.en.label}</a></li>
+        <li><a class="underline" href={localePath("es")} hreflang="es" lang="es">{languages.es.label}</a></li>
+      </ul>
+    </main>
+  </body>
+</html>

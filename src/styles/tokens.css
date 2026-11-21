@@ -1,0 +1,88 @@
+:root {
+  color-scheme: dark;
+  --surface: #06080f;
+  --raised: #1c212c;
+  --text: #f3f6f9;
+  --subtle: #a3b5c1;
+  --muted: #8a8fa3;
+  --ink: #7fb4ca;
+  --mid: #27345c;
+  --whisper: #191e28;
+  --highlight: #cb7c94;
+  --gold: #e0c15a;
+  --gold-text: #e0c15a;
+  --on-gold: #06080f;
+  --selection: #263356;
+  --hair: #1c212c;
+  --control: #5c6170;
+  --cat-web: #7fb4ca;
+  --cat-api: #b7cc85;
+  --cat-mcp: #b99bf2;
+  --cat-infra: #deba87;
+  --cat-data: #cb7c94;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Iosevka Term", "Iosevka", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --unit: 8px;
+  --container: 1200px;
+  --r: 6px;
+  --r-sm: 6px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --surface: #f3f6f9;
+  --raised: #ffffff;
+  --text: #06080f;
+  --subtle: #4e5362;
+  --muted: #6a6e82;
+  --ink: #24596c;
+  --mid: #91c7dd;
+  --whisper: #e2e6f2;
+  --highlight: #bf7189;
+  --gold: #e0c15a;
+  --gold-text: #866d01;
+  --on-gold: #06080f;
+  --selection: #c9dce6;
+  --hair: #dce1ea;
+  --control: #6a6e82;
+  --cat-web: #43778b;
+  --cat-api: #667833;
+  --cat-mcp: #7f61b3;
+  --cat-infra: #8c6b39;
+  --cat-data: #a45870;
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-text: var(--text);
+  --color-subtle: var(--subtle);
+  --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --color-mid: var(--mid);
+  --color-whisper: var(--whisper);
+  --color-highlight: var(--highlight);
+  --color-gold: var(--gold);
+  --color-gold-text: var(--gold-text);
+  --color-on-gold: var(--on-gold);
+  --color-selection: var(--selection);
+  --color-hair: var(--hair);
+  --color-control: var(--control);
+  --color-cat-web: var(--cat-web);
+  --color-cat-api: var(--cat-api);
+  --color-cat-mcp: var(--cat-mcp);
+  --color-cat-infra: var(--cat-infra);
+  --color-cat-data: var(--cat-data);
+  --font-*: initial;
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+  --spacing: var(--unit);
+  --container-page: var(--container);
+  --radius-*: initial;
+  --radius-panel: var(--r);
+  --radius-control: var(--r-sm);
+  --ease-*: initial;
+  --ease-interface: var(--ease-out);
+}

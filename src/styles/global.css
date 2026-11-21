@@ -1,0 +1,78 @@
+@import "tailwindcss" source(none);
+@import "./tokens.css";
+@source "../";
+
+@layer base {
+  body {
+    min-height: 100vh;
+    background: var(--surface);
+    color: var(--text);
+    font: 400 16px/1.55 var(--sans);
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    color: var(--ink);
+  }
+
+  h1 {
+    font: 600 clamp(2rem, 5vw, 3.5rem) / 1.05 var(--sans);
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  ::selection {
+    background: var(--selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  #main {
+    scroll-margin-block-start: calc(var(--unit) * 10);
+  }
+}
+
+@layer components {
+  .wrap {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: calc(var(--unit) * 4);
+  }
+
+  .skip-link {
+    position: fixed;
+    z-index: 30;
+    inset-block-start: var(--unit);
+    inset-inline-start: var(--unit);
+    translate: 0 calc(-100% - var(--unit));
+    padding: var(--unit) calc(var(--unit) * 1.5);
+    border-radius: var(--r);
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+
+  .skip-link:focus {
+    translate: none;
+  }
+
+  .skip-link:hover {
+    color: var(--on-gold);
+  }
+
+  .home-placeholder {
+    padding-block-start: calc(var(--unit) * 8);
+  }
+
+  @media (max-width: 640px) {
+    .wrap {
+      padding-inline: calc(var(--unit) * 2.5);
+    }
+  }
+}
