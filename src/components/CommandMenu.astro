@@ -56,7 +56,8 @@ const groups = [
   .prompt { color:var(--gold-text); font:500 15px var(--mono); }
   input { flex:1; min-width:0; min-height:64px; padding:0 4px; color:var(--text); font:400 19px var(--sans); }
   input::placeholder { color:var(--muted); }
-  input:focus-visible { outline-offset:-2px; }
+  /* The modal search field is the only thing that can hold focus when the menu opens; the caret and the gold prompt already mark it, so no ring. */
+  input:focus, input:focus-visible { outline:none; box-shadow:none; }
   input::-webkit-search-cancel-button { display:none; }
   #command-results { min-height:0; max-height:380px; padding:8px 12px 12px; overflow:auto; scroll-behavior:auto; scrollbar-width:thin; }
   #command-results:not(:has([role="group"]:not([hidden]))) { display:none; }
