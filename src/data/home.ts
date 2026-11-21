@@ -2,7 +2,7 @@ import { siteHandle } from "../i18n";
 import type { MessageKey } from "../i18n/en";
 
 type ProjectId = `p${1 | 2 | 3 | 4 | 5 | 6}`;
-export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "sphere";
+export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "sphere" | "capacity";
 type Project = {
   id: ProjectId;
   name: string;
@@ -32,7 +32,7 @@ export const projects = [
   { id: "p2", name: "Food Court", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: `${repositories}&q=food-court`, shape: "ripple", seed: 2 },
   { id: "p3", name: "Brújula", description: "brujula", kind: "systemTwo", categories: ["api", "web"], stack: "Spring Modulith, Keycloak", href: `${repositories}&q=brujula`, shape: "wave", seed: 3 },
   { id: "p4", name: "Legajo", description: "legajo", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, React 19", href: `${github}/legajo-frontend`, shape: "orbit", seed: 4, live: true },
-  { id: "p5", name: "Profundiza UQ", description: "profundiza", kind: "systemTwo", categories: ["api", "web"], stack: "Go, pgx, React 19", href: `${github}/profundiza-uq-backend`, shape: "sphere", seed: 5 },
+  { id: "p5", name: "Profundiza UQ", description: "profundiza", kind: "systemTwo", categories: ["api", "web"], stack: "Go, pgx, React 19", href: `${github}/profundiza-uq-backend`, shape: "capacity", seed: 5 },
   { id: "p6", name: "writing-harness", description: "writingHarness", kind: "headless", categories: ["cli"], stack: "Node, zero deps", stackLabel: "noDeps", href: `${github}/writing-harness`, terminal: true },
 ] as const satisfies readonly Project[];
 

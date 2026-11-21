@@ -23,6 +23,19 @@ const shapes: Record<CoverShape, Sample> = {
     const tone = Math.sin(u * 6 + Math.sin(v * 5 + t * .3) * 1.5) * .5 + .5;
     return clamp(tone * v * 1.2);
   },
+  // Profundiza UQ: enrollment groups as columns filling toward a hard capacity line,
+  // each at its own pace (arrival order); a column that reaches its cap stops there.
+  capacity(u, v, t) {
+    const n = 6, slot = u * n, k = Math.floor(slot), local = slot - k;
+    if (local < .18 || local > .82 || v < .12 || v > .9) return 0;
+    const cap = .3 + .1 * ((k * 37) % 5) / 4;
+    // fill 0 = empty (bottom at .9), 1 = at capacity; it saturates at 1, so full groups hold at the cap line.
+    const fill = Math.min(1, .45 + .75 * (.5 + .5 * Math.sin(t * .5 + k * 1.7)));
+    const top = .9 - (.9 - cap) * fill;
+    if (Math.abs(v - cap) < .018) return 1;
+    if (v < top) return 0;
+    return clamp(.35 + .6 * (v - top) / (.9 - top));
+  },
   orbit(u, v, t, a) {
     let sum = 0;
     for (let k = 0; k < 3; k++) {
