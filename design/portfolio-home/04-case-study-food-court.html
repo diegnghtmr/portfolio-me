@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: Food Court: diegnghtmr portfolio prototype</title>
+<style>
+/* Tokens: Gentleman Kanagawa dark (source) + derived light. Source: docs/research/04-gentleman-kanagawa-palette.md */
+:root{
+  --surface:#06080F;--raised:#1C212C;--text:#F3F6F9;--subtle:#A3B5C1;--muted:#8A8FA3;
+  --ink:#7FB4CA;--mid:#27345C;--whisper:#191E28;--highlight:#CB7C94;
+  --gold:#E0C15A;--gold-text:#E0C15A;--on-gold:#06080F;--selection:#263356;
+  --hair:#1C212C;--control:#5C6170;
+  --cat-web:#7FB4CA;--cat-api:#B7CC85;--cat-mcp:#B99BF2;--cat-infra:#DEBA87;--cat-data:#CB7C94;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Iosevka Term","Iosevka",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --r:6px;--r-sm:2px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --surface:#F3F6F9;--raised:#FFFFFF;--text:#06080F;--subtle:#4E5362;--muted:#6A6E82;
+  --ink:#24596C;--mid:#91C7DD;--whisper:#E2E6F2;--highlight:#BF7189;
+  --gold:#E0C15A;--gold-text:#866D01;--on-gold:#06080F;--selection:#C9DCE6;
+  --hair:#DCE1EA;--control:#6A6E82;
+  --cat-web:#43778B;--cat-api:#667833;--cat-mcp:#7F61B3;--cat-infra:#8C6B39;--cat-data:#A45870;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--surface);color:var(--text);font:16px/1.55 var(--sans);-webkit-tap-highlight-color:transparent}
+a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{color:var(--ink)}
+::selection{background:var(--selection)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:var(--r-sm)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+@media (max-width:640px){.wrap{padding:0 20px}}
+.mono{font-family:var(--mono)}
+.annot{font:500 12px/1.3 var(--mono);letter-spacing:.04em;color:var(--muted);margin:8px 0 0}
+.subtle{color:var(--subtle)}
+.muted{color:var(--muted)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--gold);color:var(--on-gold);padding:8px 12px;border-radius:var(--r);z-index:50}
+.skip:focus{left:8px}
+/* Nav with the theme's translucent blur */
+.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid var(--hair)}
+@supports not (backdrop-filter:blur(1px)){.nav{background:var(--surface)}}
+@media (prefers-reduced-transparency:reduce){.nav{background:var(--surface);backdrop-filter:none}}
+.nav .wrap{display:flex;align-items:center;gap:20px;min-height:60px}
+.brand{font:600 15px var(--mono);text-decoration:none;margin-right:auto}
+.nav ul{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+.nav ul a{display:block;padding:10px 12px;border-radius:var(--r);text-decoration:none;color:var(--subtle);font-size:14px}
+.nav ul a:hover,.nav ul a[aria-current]{color:var(--text)}
+.nav ul a[aria-current]{box-shadow:inset 0 -2px 0 var(--gold)}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;min-width:40px;padding:0 10px;border:1px solid var(--hair);border-radius:var(--r);background:transparent;color:var(--subtle);font:500 13px var(--sans);cursor:pointer;transition:transform 160ms var(--ease-out),border-color 150ms ease,color 150ms ease}
+.iconbtn:hover{color:var(--text);border-color:var(--control)}
+.iconbtn:active{transform:scale(.97)}
+.kbd{font:500 11px var(--mono);border:1px solid var(--hair);border-radius:var(--r-sm);padding:1px 5px;color:var(--muted)}
+.menu-btn{display:none}
+@media (max-width:860px){.menu-btn{display:inline-flex}.nav ul{display:none}.nav.open ul{display:flex;flex-direction:column;position:absolute;top:60px;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--hair);padding:8px 20px 16px}.nav.open ul a{padding:14px 4px;font-size:16px}}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r);font:600 14px/1 var(--sans);text-decoration:none;cursor:pointer;border:1px solid transparent;transition:transform 160ms var(--ease-out),background-color 150ms ease,border-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn-gold{background:var(--gold);color:var(--on-gold)}
+.btn-gold:hover{background:var(--text);color:var(--surface)}
+.btn-line{border-color:var(--control);color:var(--text);background:transparent}
+.btn-line:hover{border-color:var(--ink);color:var(--ink)}
+/* Category marks: colour plus a label, never colour alone */
+.cats{display:flex;flex-wrap:wrap;gap:6px 12px;list-style:none;margin:0;padding:0;font:500 12px var(--mono);color:var(--subtle)}
+.cats li{display:inline-flex;align-items:center;gap:6px}
+.cats i{width:8px;height:8px;display:inline-block}
+.c-web{background:var(--cat-web)}.c-api{background:var(--cat-api)}.c-mcp{background:var(--cat-mcp)}.c-infra{background:var(--cat-infra)}.c-data{background:var(--cat-data)}
+canvas.dither{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+.field{position:relative;background:var(--surface);overflow:hidden;line-height:0}
+.status{font:500 12px var(--mono);color:var(--subtle);border:1px solid var(--hair);border-radius:var(--r-sm);padding:2px 6px;white-space:nowrap}
+.status.live{color:var(--text);border-color:var(--ink)}
+footer.site{border-top:1px solid var(--hair);padding:32px 0 48px;margin-top:80px;color:var(--muted);font-size:14px}
+footer.site .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+@media (forced-colors:active){canvas.dither{display:none}}
+@media print{canvas.dither,.nav{display:none}}
+
+.crumbs{padding:24px 0 0;font-size:14px;color:var(--muted)}
+.crumbs a{color:var(--subtle)}
+.cs-head{display:grid;grid-template-columns:1.6fr 1fr;gap:48px;padding:24px 0 40px;border-bottom:1px solid var(--hair)}
+.cs-head h1{font-size:56px;line-height:1.05;letter-spacing:-.02em;margin:0 0 16px;font-weight:600}
+.out{font-size:20px;line-height:1.5;margin:0;max-width:44ch}
+.meta{margin:0}
+.meta div{display:grid;grid-template-columns:80px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--hair);font-size:15px}
+.meta dt{color:var(--muted)}.meta dd{margin:0}
+.mapsec{padding:40px 0}
+.map-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+.map-top h2,.cs-body h2{font-size:28px;margin:0;font-weight:600}
+.seg{display:flex;gap:4px;border:1px solid var(--hair);border-radius:var(--r);padding:3px}
+.seg button{min-height:38px;min-width:64px;border:0;border-radius:4px;background:transparent;color:var(--subtle);font:500 14px var(--sans);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--text);box-shadow:inset 0 -2px 0 var(--gold)}
+.map-wrap{display:grid;grid-template-columns:1fr 300px;gap:24px}
+.map-stage{position:relative;border:1px solid var(--hair)}
+.map-bg{position:absolute;inset:0}
+#map{position:relative;display:block;width:100%;height:auto}
+.edges path{stroke:var(--control);stroke-width:1.4;stroke-dasharray:5 5;fill:none;transition:stroke 150ms ease,opacity 150ms ease}
+.edges path.on{stroke:var(--gold);stroke-dasharray:none;stroke-width:2}
+.node{cursor:pointer;outline:none}
+.node rect{fill:var(--surface);stroke:var(--control);stroke-width:1.2;transition:stroke 150ms ease}
+.node .k{stroke:none}.k.web{fill:var(--cat-web)}.k.api{fill:var(--cat-api)}
+.node text{fill:var(--text);font:13px var(--mono);text-anchor:middle;dominant-baseline:middle}
+.node .t2{fill:var(--subtle);font-size:12px}
+.node:hover rect:first-child,.node.on rect:first-child{stroke:var(--gold)}
+.node:focus-visible rect:first-child{stroke:var(--gold);stroke-width:2.5}
+#map.focus .node:not(.on),#map.focus .edges path:not(.on){opacity:.35}
+.legend{position:absolute;left:12px;bottom:10px;background:var(--surface);padding:4px 8px}
+.panel{border:1px solid var(--hair);background:var(--raised);padding:20px;border-radius:var(--r)}
+.panel h3{font:600 15px var(--mono);margin:0 0 6px}
+.panel p{margin:0 0 10px;color:var(--subtle);font-size:15px}
+.panel a{color:var(--ink);font-size:14px}
+.maplist{list-style:none;margin:0;padding:0}
+.maplist li{padding:12px 0;border-top:1px solid var(--hair)}
+.cs-body{display:grid;gap:48px;max-width:760px}
+.cs-body h2{margin-bottom:12px}
+.cs-body p{color:var(--subtle);margin:0 0 12px}
+.draft{font:500 13px var(--mono);color:var(--gold-text) !important}
+.adr{border-top:1px solid var(--hair);padding:16px 0}
+.adr h3{font-size:17px;margin:0 0 6px}
+.adr strong{color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font:500 12px var(--mono);color:var(--muted);padding:8px 8px 8px 0;border-bottom:1px solid var(--control)}
+td{padding:12px 8px 12px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+.sw{display:inline-block;width:8px;height:8px;margin-right:8px}
+.next{display:flex;justify-content:space-between;gap:16px;margin-top:64px;padding-top:24px;border-top:1px solid var(--hair)}
+.next a{color:var(--ink);font-weight:600;padding:10px 0}
+@media (max-width:980px){.cs-head,.map-wrap{grid-template-columns:1fr}.cs-head h1{font-size:40px}}
+@media (max-width:640px){.map-stage,.panel{display:none !important}.maplist{display:block !important}.map-top .seg{display:none}}
+
+</style></head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap"><a class="brand" href="#top">diegnghtmr</a><nav aria-label="Primary"><ul id="primary-nav"><li><a href="#work" aria-current="page">Work</a></li><li><a href="#oss">Open source</a></li><li><a href="#about">About</a></li><li><a href="#colophon">Colophon</a></li></ul></nav>
+<button class="iconbtn" type="button" aria-label="Open command menu"><span class="kbd">Ctrl K</span></button>
+<button class="iconbtn" type="button" aria-label="Switch language to Spanish">ES</button>
+<button class="iconbtn" type="button" data-theme-toggle aria-label="Toggle light theme" aria-pressed="false"><span>Dark</span></button>
+<button class="iconbtn menu-btn" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button></div></header>
+<main id="main" class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="#work">Work</a> <span aria-hidden="true">/</span> <span aria-current="page">Food Court</span></nav>
+  <header class="cs-head">
+    <div>
+      <h1>Food Court</h1>
+      <p class="out">Restaurant ordering split into four services and one role-based interface, so identity, menu, orders and traceability can change independently.</p>
+    </div>
+    <dl class="meta">
+      <div><dt>Role</dt><dd>Design and implementation, all repositories</dd></div>
+      <div><dt>Period</dt><dd>Last updated January 2026</dd></div>
+      <div><dt>Shape</dt><dd>System, 5 repositories</dd></div>
+      <div><dt>Status</dt><dd><span class="status">Code</span></dd></div>
+    </dl>
+  </header>
+
+  <section class="mapsec" aria-labelledby="map-h">
+    <div class="map-top"><h2 id="map-h">System map</h2>
+      <div class="seg" role="group" aria-label="View"><button type="button" aria-pressed="true" data-v="map">Map</button><button type="button" aria-pressed="false" data-v="list">List</button></div></div>
+    <div class="map-wrap">
+      <div class="map-stage">
+        <div class="map-bg field" id="map-bg"></div>
+        <svg viewBox="0 0 760 360" id="map" role="group" aria-label="Food Court system map. Use arrow keys to move between repositories.">
+          <g class="edges">
+            <path data-to="user" d="M380 92 C 380 170, 104 170, 104 238"/>
+            <path data-to="food" d="M380 92 C 380 170, 284 170, 284 238"/>
+            <path data-to="order" d="M380 92 C 380 170, 476 170, 476 238"/>
+            <path data-to="trace" d="M380 92 C 380 170, 656 170, 656 238"/>
+          </g>
+          <g class="node" data-id="ui" tabindex="0" role="button" aria-label="food-court-ui, web"><rect x="290" y="44" width="180" height="48" rx="2"/><rect class="k web" x="290" y="44" width="4" height="48"/><text x="380" y="68">food-court-ui</text></g>
+          <g class="node" data-id="user" tabindex="-1" role="button" aria-label="user-microservice, api"><rect x="24" y="238" width="160" height="56" rx="2"/><rect class="k api" x="24" y="238" width="4" height="56"/><text x="104" y="258">user</text><text x="104" y="276" class="t2">microservice</text></g>
+          <g class="node" data-id="food" tabindex="-1" role="button" aria-label="food-court-microservice, api"><rect x="204" y="238" width="160" height="56" rx="2"/><rect class="k api" x="204" y="238" width="4" height="56"/><text x="284" y="258">food-court</text><text x="284" y="276" class="t2">microservice</text></g>
+          <g class="node" data-id="order" tabindex="-1" role="button" aria-label="order-microservice, api"><rect x="396" y="238" width="160" height="56" rx="2"/><rect class="k api" x="396" y="238" width="4" height="56"/><text x="476" y="258">order</text><text x="476" y="276" class="t2">microservice</text></g>
+          <g class="node" data-id="trace" tabindex="-1" role="button" aria-label="traceability-microservice, api"><rect x="576" y="238" width="160" height="56" rx="2"/><rect class="k api" x="576" y="238" width="4" height="56"/><text x="656" y="258">traceability</text><text x="656" y="276" class="t2">microservice</text></g>
+        </svg>
+        <ul class="cats legend"><li><i class="c-web"></i>web</li><li><i class="c-api"></i>api</li></ul>
+      </div>
+      <aside class="panel" aria-live="polite" id="panel"><p class="subtle">Select a repository to see its role.</p></aside>
+    </div>
+    <ol class="maplist" id="maplist" hidden></ol>
+    <p class="annot">Whisper field behind the map, static. Links are dashed because they are assumed from repository roles until confirmed in M1.</p>
+  </section>
+
+  <div class="cs-body">
+    <section aria-labelledby="pb-h"><h2 id="pb-h">Problem</h2><p class="draft">Draft inferred from the repositories. Confirm in M1.</p><p>A food court runs many restaurants behind one counter. Owners, employees and customers need different views of the same orders, and nobody should wait for a monolith to redeploy when the menu changes.</p></section>
+    <section aria-labelledby="dc-h"><h2 id="dc-h">Decisions</h2>
+      <p class="draft">Draft from the repositories' descriptions. Final wording comes from the code and ADRs in M1.</p>
+      <div class="adr"><h3>One service per business capability</h3><p><strong>Chosen:</strong> identity, menu, order and traceability as separate Spring Boot services. <strong>Instead of:</strong> one shared backend. <strong>Consequence:</strong> each can deploy alone; cross-service calls need contracts.</p></div>
+      <div class="adr"><h3>Traceability as its own service</h3><p><strong>Chosen:</strong> a dedicated service records the full order history and efficiency reports. <strong>Consequence:</strong> reporting never slows the order path.</p></div>
+    </section>
+    <section aria-labelledby="rp-h"><h2 id="rp-h">Repositories</h2>
+      <table><thead><tr><th scope="col">Repository</th><th scope="col">Surface</th><th scope="col">Role</th></tr></thead><tbody>
+        <tr><td class="mono">food-court-ui</td><td><span class="sw c-web"></span>web</td><td>Role-based frontend for operations</td></tr>
+        <tr><td class="mono">user-microservice</td><td><span class="sw c-api"></span>api</td><td>Authentication, roles and user profiles</td></tr>
+        <tr><td class="mono">food-court-microservice</td><td><span class="sw c-api"></span>api</td><td>Menu and restaurant catalog</td></tr>
+        <tr><td class="mono">order-microservice</td><td><span class="sw c-api"></span>api</td><td>Order lifecycle, creation to delivery</td></tr>
+        <tr><td class="mono">traceability-microservice</td><td><span class="sw c-api"></span>api</td><td>Order traceability and efficiency reports</td></tr>
+      </tbody></table>
+    </section>
+    <section aria-labelledby="rf-h"><h2 id="rf-h">Validation and reflection</h2><p class="draft">Pending: test counts and CI runs are linked here once confirmed. Nothing on this page is presented as measured until it is.</p></section>
+  </div>
+  <nav class="next" aria-label="More projects"><a href="#prev">Previous: StudyDeck AI</a><a href="#next">Next: Brújula</a></nav>
+</main>
+
+<footer class="site"><div class="wrap"><span>Diego Alejandro Flores Quintero, 2026</span><span class="mono">Palette: Gentleman Kanagawa Blur (MIT). Texture: Dither Layer rules.</span><span><a href="#llms">llms.txt</a>, <a href="#md">Markdown</a>, <a href="#json">resume.json</a></span></div></footer>
+<script>
+
+/* Shared prototype runtime: theme toggle, dither engine (cell resolution, linear light), ambient fields.
+   Production uses Paper Shaders for the hero and sharp + image-q at build time (docs/TRD.md section 6);
+   this local engine only exists because artboards must be self-contained. */
+const RM = matchMedia("(prefers-reduced-motion: reduce)");
+const root = document.documentElement;
+const css = n => getComputedStyle(root).getPropertyValue(n).trim();
+document.querySelectorAll("[data-theme-toggle]").forEach(b => {
+  const sync = () => { const light = root.dataset.theme === "light"; b.setAttribute("aria-pressed", String(light)); b.querySelector("span").textContent = light ? "Light" : "Dark"; };
+  b.addEventListener("click", () => { root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light"; sync(); window.dispatchEvent(new Event("themechange")); });
+  sync();
+});
+document.querySelectorAll(".menu-btn").forEach(b => b.addEventListener("click", () => { const nav = b.closest(".nav"), o = nav.classList.toggle("open"); b.setAttribute("aria-expanded", String(o)); }));
+addEventListener("keydown", e => { if (e.key === "Escape") document.querySelectorAll(".nav.open").forEach(n => { n.classList.remove("open"); const b = n.querySelector(".menu-btn"); b.setAttribute("aria-expanded", "false"); b.focus(); }); });
+const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+const lum = h => { const [r, g, b] = rgb(h).map(lin); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const bayer = n => { let m = [[0]]; while (m.length < n) { const s = m.length, o = []; for (let y = 0; y < 2 * s; y++) { o[y] = []; for (let x = 0; x < 2 * s; x++) o[y][x] = m[y % s][x % s] * 4 + (y < s ? (x < s ? 0 : 2) : (x < s ? 3 : 1)); } m = o; } return m.map(r => r.map(v => (v + 0.5) / (n * n))); };
+const B8 = bayer(8);
+/* Procedural tone fields (0 = background ink, 1 = front ink) */
+const FIELDS = {
+  sphere: (u, v, t, a) => { const cx = .5, cy = .5, r = .38; const dx = (u - cx) * a, dy = v - cy, d = Math.hypot(dx, dy); if (d > r) return 0; const z = Math.sqrt(r * r - d * d) / r; const lx = Math.cos(t * .4) * .6, ly = -.55, lz = .6; const nx = dx / r, ny = dy / r; return Math.max(0, Math.min(1, (nx * lx + ny * ly + z * lz) * .95 + .08)); },
+  wave: (u, v, t) => { const y = .55 + .12 * Math.sin(u * 9 + t * .8) + .05 * Math.sin(u * 23 - t * 1.3); return Math.max(0, Math.min(1, (v - y) * 4 + .5)); },
+  ripple: (u, v, t, a) => { const d = Math.hypot((u - .5) * a, v - .5); return .5 + .5 * Math.sin(d * 38 - t * 2) * Math.max(0, 1 - d * 1.6); },
+  dunes: (u, v, t) => { const s = Math.sin(u * 6 + Math.sin(v * 5 + t * .3) * 1.5) * .5 + .5; return Math.max(0, Math.min(1, s * (v * 1.2))); },
+  orbit: (u, v, t, a) => { let s = 0; for (let k = 0; k < 3; k++) { const ang = t * .3 + k * 2.1; const cx = .5 + .28 * Math.cos(ang), cy = .5 + .28 * Math.sin(ang) / a; s += Math.exp(-(((u - cx) * a) ** 2 + (v - cy) ** 2) / .012); } return Math.min(1, s); }
+};
+/* Mount an ambient Statement field into a .field element. Returns {pause, resume, toggle}. */
+function mountField(host, { shape = "sphere", cell = 4, back = "--surface", front = "--ink", fps = 24, seed = 0 } = {}) {
+  const c = document.createElement("canvas"); c.className = "dither"; c.setAttribute("aria-hidden", "true"); host.prepend(c);
+  const ctx = c.getContext("2d"); let cols = 0, rows = 0, img = null, raf = 0, last = 0, t = seed, running = !RM.matches, visible = true;
+  const size = () => { const w = host.clientWidth, h = host.clientHeight; cols = Math.max(1, Math.floor(w / cell)); rows = Math.max(1, Math.floor(h / cell)); c.width = cols; c.height = rows; c.style.width = cols * cell + "px"; c.style.height = rows * cell + "px"; img = ctx.createImageData(cols, rows); };
+  const draw = () => {
+    const A = rgb(css(back)), F = rgb(css(front)), fn = FIELDS[shape], asp = cols / rows, d = img.data;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const tone = fn(x / cols, y / rows, t, asp), k = tone > B8[y % 8][x % 8] ? F : A, o = (y * cols + x) * 4;
+      d[o] = k[0]; d[o + 1] = k[1]; d[o + 2] = k[2]; d[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  };
+  const loop = now => { raf = requestAnimationFrame(loop); if (!running || !visible || now - last < 1000 / fps) return; last = now; t += 1 / fps; draw(); };
+  size(); draw(); raf = requestAnimationFrame(loop);
+  new ResizeObserver(() => { size(); draw(); }).observe(host);
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(host);
+  document.addEventListener("visibilitychange", () => { visible = document.visibilityState === "visible"; });
+  addEventListener("themechange", draw);
+  RM.addEventListener("change", () => { running = !RM.matches; });
+  return { pause: () => { running = false; }, resume: () => { running = !RM.matches; }, get running() { return running; }, redraw: draw };
+}
+/* Wire a pause button to a field (motion over 5 s needs a visible pause control) */
+function pauseButton(btn, f) {
+  if (RM.matches) { btn.hidden = true; return; }
+  btn.addEventListener("click", () => { f.running ? f.pause() : f.resume(); const p = !f.running; btn.setAttribute("aria-pressed", String(p)); btn.querySelector("span").textContent = p ? "Play" : "Pause"; });
+}
+/* Static Atkinson dither of an image into brand inks (luminance ramp). */
+function ditherImage(canvas, img, { cell = 2, inks }) {
+  const W = Math.floor(canvas.parentElement.clientWidth), n = Math.max(1, Math.floor(W / cell)), h = Math.round(n * img.naturalHeight / img.naturalWidth);
+  const o = document.createElement("canvas"); o.width = n; o.height = h; const ox = o.getContext("2d"); ox.imageSmoothingQuality = "high"; ox.drawImage(img, 0, 0, n, h);
+  const src = ox.getImageData(0, 0, n, h).data, P = inks.map(x => ({ c: rgb(x), l: lum(x) })).sort((a, b) => a.l - b.l), E = new Float32Array(n * h);
+  for (let i = 0; i < n * h; i++) E[i] = lin(src[i * 4]);
+  canvas.width = n; canvas.height = h; canvas.style.width = n * cell + "px"; canvas.style.height = h * cell + "px";
+  const ctx = canvas.getContext("2d"), out = ctx.createImageData(n, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < n; x++) {
+    const i = y * n + x; let k = 0; for (let j = 1; j < P.length; j++) if (Math.abs(P[j].l - E[i]) < Math.abs(P[k].l - E[i])) k = j;
+    const e = (E[i] - P[k].l) / 8; [[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]].forEach(([dx, dy]) => { const xx = x + dx, yy = y + dy; if (xx >= 0 && xx < n && yy < h) E[yy * n + xx] += e; });
+    const c = P[k].c, q = i * 4; out.data[q] = c[0]; out.data[q + 1] = c[1]; out.data[q + 2] = c[2]; out.data[q + 3] = 255;
+  }
+  ctx.putImageData(out, 0, 0);
+  return { n, h, src, out: new Uint8ClampedArray(out.data), ctx };
+}
+
+mountField(document.getElementById("map-bg"), { shape: "dunes", cell: 4, front: "--whisper" }).pause();
+const R = {
+  ui: ["food-court-ui", "web", "Role-based frontend for Food Court operations. Owners, employees and customers see different views."],
+  user: ["user-microservice", "api", "Identity backbone: authentication, roles and user profiles."],
+  food: ["food-court-microservice", "api", "Menu and restaurant engine: catalog management with its own API."],
+  order: ["order-microservice", "api", "Order lifecycle from creation to delivery."],
+  trace: ["traceability-microservice", "api", "Full order traceability and efficiency reporting."]
+};
+const map = document.getElementById("map"), panel = document.getElementById("panel");
+const nodes = [...map.querySelectorAll(".node")], edges = [...map.querySelectorAll(".edges path")];
+const select = id => {
+  map.classList.toggle("focus", !!id);
+  nodes.forEach(n => n.classList.toggle("on", n.dataset.id === id || (!!id && id !== "ui" && n.dataset.id === "ui") || id === "ui"));
+  edges.forEach(e => e.classList.toggle("on", !!id && (id === "ui" || e.dataset.to === id)));
+  if (!id) return;
+  const [name, kind, role] = R[id];
+  panel.innerHTML = `<h3>${name}</h3><p>${kind === "web" ? "Web interface" : "API service"}</p><p>${role}</p><a href="#gh">Open repository</a>`;
+};
+nodes.forEach((n, i) => {
+  n.addEventListener("click", () => select(n.dataset.id));
+  n.addEventListener("focus", () => select(n.dataset.id));
+  n.addEventListener("keydown", e => {
+    const k = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if (!k) return;
+    e.preventDefault(); const j = (i + k + nodes.length) % nodes.length;
+    nodes.forEach(x => x.tabIndex = -1); nodes[j].tabIndex = 0; nodes[j].focus();
+  });
+});
+document.getElementById("maplist").innerHTML = Object.values(R).map(([n, k, r]) => `<li><span class="mono">${n}</span> <span class="muted">(${k})</span><br><span class="subtle">${r}</span></li>`).join("");
+document.querySelectorAll(".map-top .seg button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".map-top .seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  const list = b.dataset.v === "list";
+  document.querySelector(".map-wrap").hidden = list; document.getElementById("maplist").hidden = !list;
+}));
+select("order");
+
+</script>
+</body></html>

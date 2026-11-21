@@ -1,0 +1,35 @@
+{
+  "title": "Portfolio home and case study",
+  "brief": "Dither Layer portfolio for diegnghtmr with the Gentleman Kanagawa palette (dark-first, derived light): three home directions and one multi-repo case study",
+  "feature": "odd/tasks/portfolio-prd-trd.md",
+  "artboards": [
+    {
+      "file": "01-split-statement.html",
+      "title": "Split hero with Statement sphere",
+      "tradeoff": "Fast first pass: role, CTA and six projects above the fold; the most conventional layout of the three",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-engineered-index.html",
+      "title": "Engineered work index",
+      "tradeoff": "Fastest for tech leads: every project, filters and repo maps in one view; less emotional pull and a quieter brand moment",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-portrait-editorial.html",
+      "title": "Portrait and chapters",
+      "tradeoff": "Most memorable and personal: dithered portrait plus one chapter per system; slower scan and depends on a clean portrait",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "04-case-study-food-court.html",
+      "title": "Case study: Food Court",
+      "tradeoff": "Shows the multi-repo map, panel and list view that any home direction links to; narrative stays draft until M1 confirms it",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

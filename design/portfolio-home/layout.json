@@ -1,0 +1,25 @@
+{
+  "arrangement": "free",
+  "positions": {
+    "system": {
+      "x": 0,
+      "y": 23
+    },
+    "01-split-statement.html": {
+      "x": 1530,
+      "y": 0
+    },
+    "02-engineered-index.html": {
+      "x": 3050,
+      "y": 0
+    },
+    "03-portrait-editorial.html": {
+      "x": 4570,
+      "y": 0
+    },
+    "04-case-study-food-court.html": {
+      "x": 6090,
+      "y": 0
+    }
+  }
+}

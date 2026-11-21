@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "chosen": "01-split-statement.html",
+  "handoffs": {
+    "01-split-statement.html": {
+      "status": "in_progress",
+      "queued": false,
+      "sentAt": "2026-11-21T21:49:00.834Z",
+      "startedAt": "2026-11-21T21:49:15.021Z",
+      "implementedAt": null,
+      "feature": "odd/tasks/portfolio-prd-trd.md",
+      "note": "Scaffolding Astro per TRD, then home sections, interactions and build-time dither assets."
+    }
+  }
+}
