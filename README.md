@@ -45,6 +45,10 @@ Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or
 
 Every push to `main` deploys to production on Vercel; other branches get preview URLs.
 
+## License
+
+The code is released under the [MIT License](LICENSE). It does not cover the personal portrait (`assets-src/portrait.jpg` and the dithered frames made from it in `public/dither/portrait-*`) or the biographical and project text in `src/i18n`; those remain © Diego Alejandro Flores Quintero. Reuse the code freely, but please replace them with your own.
+
 ## Credits
 
 Color palette: [Gentleman Kanagawa Blur](https://github.com/Gentleman-Programming/gentleman-kanagawa-blur) by Gentleman Programming (MIT). Blue-noise texture: CC0, see [`assets-src/LICENSES.md`](assets-src/LICENSES.md).
