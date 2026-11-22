@@ -4,3 +4,5 @@ dist/
 .vercel/
 design/**/.screenshots/
 .DS_Store
+.vercel
+.env*
