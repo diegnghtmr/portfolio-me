@@ -3,12 +3,14 @@
   "chosen": "02-bayer-sphere.html",
   "handoffs": {
     "02-bayer-sphere.html": {
-      "status": "in_progress",
+      "status": "implemented",
       "queued": false,
       "sentAt": "2026-11-22T02:59:59.998Z",
       "startedAt": "2026-11-22T03:00:04.156Z",
-      "implementedAt": null,
-      "feature": "odd/tasks/portfolio-prd-trd.md"
+      "implementedAt": "2026-11-22T03:02:16.256Z",
+      "feature": "odd/tasks/portfolio-prd-trd.md",
+      "note": "favicon.svg + favicon.ico (16 hand-drawn, 32) + apple-touch 180 + icons 192/512 + maskable 512 + site.webmanifest; live on diegnghtmr.me (c6e1e8e)",
+      "previewUrl": "http://localhost:4321/en/"
     }
   }
 }
