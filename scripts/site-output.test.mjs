@@ -128,6 +128,7 @@ for (const locale of locales) {
     assert.match(html, /\/_vercel\/insights\/script\.js/, "Web Analytics script");
     assert.match(html, /\/_vercel\/speed-insights\/script\.js/, "Speed Insights script");
     assert.doesNotMatch(html, /document\.cookie/, "no cookie writes in the page");
+    assert.match(html, /<meta name="msvalidate\.01" content="E33540A9513582A85D9BDC5B9E294509"/, "Bing Webmaster verification");
   });
 }
 
