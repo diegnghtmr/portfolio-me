@@ -1,0 +1,50 @@
+# diegnghtmr.me
+
+Personal portfolio of **Diego Alejandro Flores Quintero**, software engineer in Armenia, Colombia.
+
+**Live:** [diegnghtmr.me](https://diegnghtmr.me) · English and Spanish · readable by AI agents ([llms.txt](https://diegnghtmr.me/llms.txt))
+
+## What it is
+
+- **Dither Layer design**: images and motion rendered as ordered (Bayer 8×8) dither in the Gentleman Kanagawa palette, dark first with a derived light theme. The rules live in [`docs/reference/DESIGN-dither-layer.md`](docs/reference/DESIGN-dither-layer.md).
+- **Static and fast**: Astro, vanilla TypeScript, about 4 KB of initial JavaScript. Lighthouse 98–100 on mobile.
+- **Search and agents**: JSON-LD, sitemap with hreflang, `llms.txt`, a Markdown twin of every page (`Accept: text/markdown`), `resume.json` (JSON Resume) and `projects.json`.
+
+## Stack
+
+Astro 7 · TypeScript (strict) · Tailwind CSS 4 · [Paper Shaders](https://github.com/paper-design/shaders) for the hero · sharp + image-q for build-time dither assets · Vercel (static output plus Routing Middleware).
+
+## Develop
+
+Requires Node 22.23+ and pnpm 11.
+
+```sh
+pnpm install
+pnpm dev            # http://localhost:4321
+pnpm check          # type check
+pnpm build          # static site in dist/
+pnpm test:assets    # dither, OG card and favicon generators
+pnpm test:site      # SEO and agent outputs (after pnpm build)
+```
+
+Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or `pnpm favicon`.
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `src/sections`, `src/components` | Page sections and shared components |
+| `src/data/home.ts`, `src/i18n` | Content and copy (EN/ES); one source for the page and the agent files |
+| `src/lib/profile.ts` | JSON-LD, Markdown twins, `llms.txt`, JSON Resume, `projects.json` |
+| `src/scripts` | Client behavior: hero shader, cover fields, footer horizon, command menu |
+| `scripts` | Asset generators and their tests |
+| `middleware.js`, `vercel.json` | Markdown negotiation, headers, root locale redirect |
+| `docs`, `design`, `odd` | PRD, TRD, research, design artboards and the task log |
+
+## Deploy
+
+Every push to `main` deploys to production on Vercel; other branches get preview URLs.
+
+## License
+
+Code is MIT. The portrait, written content and project descriptions are © Diego Alejandro Flores Quintero. The Gentleman Kanagawa palette is MIT (Gentleman Programming).
