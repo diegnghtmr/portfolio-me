@@ -73,3 +73,4 @@ Reference design language: docs/reference/DESIGN-dither-layer.md (copied from ~/
 - L23 handoff (canvas, verbatim excerpt) "Implement the design artboard design/favicon/02-bayer-sphere.html" — Bayer sphere chosen; 01, 03, 04 are alternatives.
 - L24 (user, verbatim) "subelo a github, seria bueno que vercel este enlazado con el repo para que al hacer un cambio en el repo y deploy sea automatico gracias a vercel que permite esto" → public repo https://github.com/diegnghtmr/portfolio-me (main + feat/portfolio-home), Vercel project portfolio-me linked to it (production branch main); README added.
 - L25 (user, verbatim) "agrega licensia mit. y hagamos lo de las analitcas de vercel"
+- L26 (user, verbatim) "si salen 2" → Vercel Web Analytics shows 2 visitors after real visits; T25 confirmed end to end.
