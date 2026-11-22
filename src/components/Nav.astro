@@ -189,6 +189,13 @@ const light = t(locale, "light");
     min-width: 5.4em;
   }
 
+  /* With JS the search and theme controls are reserved from first paint; their scripts
+     remove `hidden` moments later, so the toolbar does not shift sideways. */
+  :global(:root[data-js]) .nav-control[hidden] {
+    display: inline-flex;
+    visibility: hidden;
+  }
+
   .theme-light,
   :global([data-theme="light"]) .theme-dark,
   .menu-toggle,
@@ -225,29 +232,31 @@ const light = t(locale, "light");
       flex-wrap: wrap;
     }
 
-    [data-menu-ready] .menu-toggle {
+    /* Collapsed-menu layout keys on :root[data-js], set by an inline head script before
+       first paint, so the header never renders tall and then shrinks when nav.ts runs (CLS). */
+    :global(:root[data-js]) .menu-toggle {
       display: inline-flex;
     }
 
-    [data-menu-ready] .nav-links {
+    :global(:root[data-js]) .nav-links {
       position: absolute;
       inset: 100% 0 auto;
       border-block-end: 1px solid var(--hair);
       background: var(--surface);
     }
 
-    [data-menu-ready]:not([data-menu-open]) .nav-links {
+    :global(:root[data-js]) .site-nav:not([data-menu-open]) .nav-links {
       display: none;
     }
 
-    [data-menu-ready] .nav-links ul {
+    :global(:root[data-js]) .nav-links ul {
       flex-direction: column;
       align-items: stretch;
       max-width: var(--container);
       padding: var(--unit) calc(var(--unit) * 2.5) calc(var(--unit) * 2);
     }
 
-    [data-menu-ready] .nav-links a {
+    :global(:root[data-js]) .nav-links a {
       padding-block: calc(var(--unit) * 1.5);
       font-size: 16px;
     }

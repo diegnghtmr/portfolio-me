@@ -30,6 +30,7 @@ const graph = JSON.stringify(jsonLd(locale)).replaceAll("<", "\\u003c");
     <script is:inline>
       (() => {
         const root = document.documentElement;
+        root.dataset.js = "";
         let savedTheme;
         try {
           savedTheme = localStorage.getItem(root.dataset.themeStorageKey);
