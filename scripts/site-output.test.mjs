@@ -122,6 +122,15 @@ test("projects.json lists the six featured projects in both languages", () => {
   }
 });
 
+for (const locale of locales) {
+  test(`${locale}: Vercel Web Analytics and Speed Insights load without cookies`, () => {
+    const html = read(`${locale}/index.html`);
+    assert.match(html, /\/_vercel\/insights\/script\.js/, "Web Analytics script");
+    assert.match(html, /\/_vercel\/speed-insights\/script\.js/, "Speed Insights script");
+    assert.doesNotMatch(html, /document\.cookie/, "no cookie writes in the page");
+  });
+}
+
 test("middleware serves the markdown twin only to clients that ask for markdown", async () => {
   const { default: middleware, config } = await import(new URL("../middleware.js", import.meta.url));
   assert.deepEqual(config.matcher, ["/en/", "/es/"]);
