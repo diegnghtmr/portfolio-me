@@ -45,6 +45,6 @@ Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or
 
 Every push to `main` deploys to production on Vercel; other branches get preview URLs.
 
-## License
+## Credits
 
-Code is MIT. The portrait, written content and project descriptions are © Diego Alejandro Flores Quintero. The Gentleman Kanagawa palette is MIT (Gentleman Programming).
+Color palette: [Gentleman Kanagawa Blur](https://github.com/Gentleman-Programming/gentleman-kanagawa-blur) by Gentleman Programming (MIT). Blue-noise texture: CC0, see [`assets-src/LICENSES.md`](assets-src/LICENSES.md).
