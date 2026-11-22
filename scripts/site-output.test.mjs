@@ -122,13 +122,24 @@ test("projects.json lists the six featured projects in both languages", () => {
   }
 });
 
-test("vercel.json negotiates markdown and redirects the root by language", () => {
-  const config = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
+test("middleware serves the markdown twin only to clients that ask for markdown", async () => {
+  const { default: middleware, config } = await import(new URL("../middleware.js", import.meta.url));
+  assert.deepEqual(config.matcher, ["/en/", "/es/"]);
+  const call = (path, accept) => middleware(new Request(`${site}${path}`, accept ? { headers: { accept } } : {}));
   for (const locale of locales) {
-    const rewrite = config.rewrites.find((rule) => rule.source === `/${locale}/`);
-    assert.equal(rewrite?.destination, `/${locale}/index.md`);
-    assert.ok(rewrite.has.some((condition) => condition.type === "header" && condition.key === "accept" && /text\/markdown/.test(condition.value)));
+    for (const accept of ["text/markdown", "text/markdown, text/plain;q=0.5", "text/markdown, text/html;q=0.9"]) {
+      const response = await call(`/${locale}/`, accept);
+      assert.equal(response?.headers.get("x-middleware-rewrite"), `${site}/${locale}/index.md`, `${locale} ${accept}`);
+    }
+    for (const accept of [undefined, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "*/*", "text/html, text/markdown;q=0.5"]) {
+      assert.equal(await call(`/${locale}/`, accept), undefined, `${locale} ${accept}`);
+    }
   }
+});
+
+test("vercel.json sets markdown headers, Vary and the root redirect by language", () => {
+  const config = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
+  assert.equal(config.rewrites, undefined, "static files win over rewrites on Vercel; negotiation lives in middleware.js");
   const markdownHeaders = config.headers.find((rule) => rule.source === "/(.*)\\.md").headers;
   assert.ok(markdownHeaders.some((header) => header.key === "Content-Type" && header.value.startsWith("text/markdown")));
   const vary = config.headers.find((rule) => rule.source === "/(en|es)/").headers;

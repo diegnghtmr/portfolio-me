@@ -1,31 +1,61 @@
 {
   "trailingSlash": true,
   "cleanUrls": false,
-  "rewrites": [
+  "headers": [
     {
-      "source": "/en/",
-      "has": [{ "type": "header", "key": "accept", "value": "(.*)text/markdown(.*)" }],
-      "destination": "/en/index.md"
+      "source": "/(.*)\\.md",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        }
+      ]
     },
     {
-      "source": "/es/",
-      "has": [{ "type": "header", "key": "accept", "value": "(.*)text/markdown(.*)" }],
-      "destination": "/es/index.md"
+      "source": "/(en|es)/",
+      "headers": [
+        {
+          "key": "Vary",
+          "value": "Accept"
+        }
+      ]
+    },
+    {
+      "source": "/llms(.*)\\.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/es/llms(.*)\\.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
     }
-  ],
-  "headers": [
-    { "source": "/(.*)\\.md", "headers": [{ "key": "Content-Type", "value": "text/markdown; charset=utf-8" }] },
-    { "source": "/(en|es)/", "headers": [{ "key": "Vary", "value": "Accept" }] },
-    { "source": "/llms(.*)\\.txt", "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }] },
-    { "source": "/es/llms(.*)\\.txt", "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }] }
   ],
   "redirects": [
     {
       "source": "/",
-      "has": [{ "type": "header", "key": "accept-language", "value": "[eE][sS](.*)" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "[eE][sS](.*)"
+        }
+      ],
       "destination": "/es/",
       "permanent": false
     },
-    { "source": "/", "destination": "/en/", "permanent": false }
+    {
+      "source": "/",
+      "destination": "/en/",
+      "permanent": false
+    }
   ]
 }
