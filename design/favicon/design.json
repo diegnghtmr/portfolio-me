@@ -1,0 +1,35 @@
+{
+  "title": "Portfolio favicon directions",
+  "brief": "Compare four Gentleman Kanagawa pixel marks for diegnghtmr at browser-tab size on dark and light chrome.",
+  "feature": "odd/tasks/portfolio-prd-trd.md",
+  "artboards": [
+    {
+      "file": "01-pixel-monogram.html",
+      "title": "Pixel monogram",
+      "tradeoff": "Keeps the familiar d and gold underscore; stays readable at 16 px by confining dither to the larger versions.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-bayer-sphere.html",
+      "title": "Bayer sphere",
+      "tradeoff": "Closest match to the hero's ordered shading at 32 px; the 16 px orb is less personal than an initial.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-terminal-prompt.html",
+      "title": "Terminal prompt",
+      "tradeoff": "Strong 16 px separation and an immediate developer cue; less distinctive, with no dither at any size.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "04-quindio-horizon.html",
+      "title": "Quindío horizon",
+      "tradeoff": "Most place-specific motif, taken from the footer; the terrain simplifies at 16 px to keep the sun and ridge distinct.",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

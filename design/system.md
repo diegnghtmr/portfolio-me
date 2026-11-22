@@ -1,84 +1,150 @@
 # Design system: diegnghtmr portfolio
 
-Source of truth: `docs/PRD.md` section 4.1 and `docs/research/04-gentleman-kanagawa-palette.md` (values computed from Gentleman Kanagawa Blur, MIT). Rules: `docs/reference/DESIGN-dither-layer.md`. Not extracted from code: the project has no source yet.
+Synced from `src/styles/tokens.css` and `src/styles/global.css`. Dark is the default; `[data-theme="light"]` overrides color roles only. Values below are literal CSS declarations. The standalone boards use the declared sans stack and the system-only suffix of the mono stack (from `ui-monospace` onward); these sources declare stacks, not font files.
 
 ## Colors (dark, default)
 
 | Token | Value | Usage | Source |
 |---|---|---|---|
-| `--surface` | `#06080F` | Page canvas | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--raised` | `#1C212C` | Cards, panels | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--text` | `#F3F6F9` | Primary text, 18.45:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--subtle` | `#A3B5C1` | Secondary text, 9.46:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--muted` | `#8A8FA3` | Captions, annotations, 6.23:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--ink` | `#7FB4CA` | Dither ink, links, 8.84:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--mid` | `#27345C` | Dither mid ink, texture only | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--whisper` | `#191E28` | Whisper ink, 1.19:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--highlight` | `#CB7C94` | Dither highlight, one per field | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--gold` | `#E0C15A` | Focus, active borders, primary CTA fill | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--gold-text` | `#E0C15A` | Gold as text, 11.38:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--on-gold` | `#06080F` | Text on gold, 11.38:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--selection` | `#263356` | Text selection | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--hair` | `#1C212C` | Dividers, decoration only | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--control` | `#5C6170` | Control boundaries | `docs/research/04-gentleman-kanagawa-palette.md` |
+| `--surface` | `#06080f` | Page, solid field fallback and effect label plate | `src/styles/tokens.css` |
+| `--raised` | `#1c212c` | Raised surface | `src/styles/tokens.css` |
+| `--text` | `#f3f6f9` | Primary text | `src/styles/tokens.css` |
+| `--subtle` | `#a3b5c1` | Section descriptions | `src/styles/tokens.css` |
+| `--muted` | `#8a8fa3` | Effect labels on the solid surface | `src/styles/tokens.css` |
+| `--ink` | `#7fb4ca` | Cool ink; link and button hover | `src/styles/tokens.css` |
+| `--mid` | `#27345c` | Middle ink for artwork, not text | `src/styles/tokens.css` |
+| `--whisper` | `#191e28` | Low-contrast surface tone | `src/styles/tokens.css` |
+| `--highlight` | `#cb7c94` | Highlight ink for artwork | `src/styles/tokens.css` |
+| `--gold` | `#e0c15a` | Focus outline and primary button fill | `src/styles/tokens.css` |
+| `--gold-text` | `#e0c15a` | Gold foreground | `src/styles/tokens.css` |
+| `--on-gold` | `#06080f` | Text on the gold fill | `src/styles/tokens.css` |
+| `--selection` | `#263356` | Text selection background | `src/styles/tokens.css` |
+| `--hair` | `#1c212c` | Decorative divider; not a control boundary | `src/styles/tokens.css` |
+| `--control` | `#5c6170` | Control boundaries | `src/styles/tokens.css` |
 
-## Colors (light, derived)
+## Colors (light)
 
 | Token | Value | Usage | Source |
 |---|---|---|---|
-| `--surface` | `#F3F6F9` | Page canvas | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--raised` | `#FFFFFF` | Cards, panels | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--text` | `#06080F` | Primary text, 18.45:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--subtle` | `#4E5362` | Secondary text, 7.07:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--muted` | `#6A6E82` | Captions, 4.64:1; never on whisper | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--ink` | `#24596C` | Dither ink, links, 7.11:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--mid` | `#91C7DD` | Dither mid ink, texture only | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--whisper` | `#E2E6F2` | Whisper ink, 1.15:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--highlight` | `#BF7189` | Dither highlight, texture only | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--gold` | `#E0C15A` | Primary CTA fill, focus | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--gold-text` | `#866D01` | Gold as text, 4.60:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--on-gold` | `#06080F` | Text on gold, 11.38:1 | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--selection` | `#C9DCE6` | Text selection | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--hair` | `#DCE1EA` | Dividers, decoration only | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--control` | `#6A6E82` | Control boundaries | `docs/research/04-gentleman-kanagawa-palette.md` |
+| `--surface` | `#f3f6f9` | Page, solid field fallback and effect label plate | `src/styles/tokens.css` |
+| `--raised` | `#ffffff` | Raised surface | `src/styles/tokens.css` |
+| `--text` | `#06080f` | Primary text | `src/styles/tokens.css` |
+| `--subtle` | `#4e5362` | Section descriptions | `src/styles/tokens.css` |
+| `--muted` | `#6a6e82` | Effect labels on the solid surface | `src/styles/tokens.css` |
+| `--ink` | `#24596c` | Cool ink; link and button hover | `src/styles/tokens.css` |
+| `--mid` | `#91c7dd` | Middle ink for artwork, not text | `src/styles/tokens.css` |
+| `--whisper` | `#e2e6f2` | Low-contrast surface tone | `src/styles/tokens.css` |
+| `--highlight` | `#bf7189` | Highlight ink for artwork | `src/styles/tokens.css` |
+| `--gold` | `#e0c15a` | Fixed gold fill and source focus outline | `src/styles/tokens.css` |
+| `--gold-text` | `#866d01` | Gold foreground on the light surface | `src/styles/tokens.css` |
+| `--on-gold` | `#06080f` | Text on the gold fill | `src/styles/tokens.css` |
+| `--selection` | `#c9dce6` | Text selection background | `src/styles/tokens.css` |
+| `--hair` | `#dce1ea` | Decorative divider; not a control boundary | `src/styles/tokens.css` |
+| `--control` | `#6a6e82` | Control boundaries | `src/styles/tokens.css` |
 
 ## Category accents
 
-| Token | Value | Light value | Source |
+| Token | Value | Theme | Source |
 |---|---|---|---|
-| `--cat-web` | `#7FB4CA` | `#43778B` | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--cat-api` | `#B7CC85` | `#667833` | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--cat-mcp` | `#B99BF2` | `#7F61B3` | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--cat-infra` | `#DEBA87` | `#8C6B39` | `docs/research/04-gentleman-kanagawa-palette.md` |
-| `--cat-data` | `#CB7C94` | `#A45870` | `docs/research/04-gentleman-kanagawa-palette.md` |
+| `--cat-web` | `#7fb4ca` | Dark | `src/styles/tokens.css` |
+| `--cat-api` | `#b7cc85` | Dark | `src/styles/tokens.css` |
+| `--cat-mcp` | `#b99bf2` | Dark | `src/styles/tokens.css` |
+| `--cat-infra` | `#deba87` | Dark | `src/styles/tokens.css` |
+| `--cat-data` | `#cb7c94` | Dark | `src/styles/tokens.css` |
+| `--cat-web` | `#43778b` | Light | `src/styles/tokens.css` |
+| `--cat-api` | `#667833` | Light | `src/styles/tokens.css` |
+| `--cat-mcp` | `#7f61b3` | Light | `src/styles/tokens.css` |
+| `--cat-infra` | `#8c6b39` | Light | `src/styles/tokens.css` |
+| `--cat-data` | `#a45870` | Light | `src/styles/tokens.css` |
 
 ## Typography
 
+| Token or rule | Value | Usage | Source |
+|---|---|---|---|
+| `--sans` | `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` | Body, headings, buttons | `src/styles/tokens.css` |
+| `--mono` | `"Iosevka Term", "Iosevka", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace` | Effect labels | `src/styles/tokens.css` |
+| `body` | `400 16px/1.55 var(--sans)` | Body type | `src/styles/global.css` |
+| `h1` | `600 clamp(2rem, 5vw, 3.5rem) / 1.05 var(--sans)` | Display type; tracking `-0.02em` | `src/styles/global.css` |
+| `.section-head h2` | `28px` | Section title; weight `600`, line height `1.2`, tracking `-.01em` | `src/styles/global.css` |
+| `.home-button` | `600 14px/1 var(--sans)` | Button label | `src/styles/global.css` |
+| `.effect-label` | `500 11px/1.3 var(--mono)` | Effect annotation | `src/styles/global.css` |
+
+## Spacing and layout
+
+| Token or rule | Value | Usage | Source |
+|---|---|---|---|
+| `--unit` | `8px` | Base spacing unit | `src/styles/tokens.css` |
+| `--container` | `1200px` | Maximum `.wrap` width | `src/styles/tokens.css` |
+| `.wrap` | `calc(var(--unit) * 4)` | Inline padding; `calc(var(--unit) * 2.5)` at `max-width: 640px` | `src/styles/global.css` |
+| `.section-head` | `96px 28px` | Block margins; start reduces to `72px` at `max-width: 900px`; inner gap `4px` | `src/styles/global.css` |
+| `#main` and section/card anchors inside it | `84px` | Scroll margin at block start | `src/styles/global.css` |
+
+## Radius
+
 | Token | Value | Usage | Source |
 |---|---|---|---|
-| `--sans` | `system-ui stack` | Everything people read (production font to confirm: Host Grotesk or Schibsted Grotesk) | `docs/PRD.md` |
-| `--mono` | `Iosevka Term, ui-monospace stack` | Effect annotations, repo names, versions only | `docs/PRD.md` |
-| `display` | `56px / 600 / 1.05 / -0.02em` | Hero and case-study titles | `docs/reference/DESIGN-dither-layer.md` |
-| `headline` | `28px / 600 / 1.2` | Section titles | `docs/reference/DESIGN-dither-layer.md` |
-| `body` | `16px / 400 / 1.55` | Body copy | `docs/reference/DESIGN-dither-layer.md` |
-| `annotation` | `12px / 500 / 1.3 mono` | Effect annotations | `docs/reference/DESIGN-dither-layer.md` |
+| `--r` | `6px` | Panel alias, skip link and home button | `src/styles/tokens.css` |
+| `--r-sm` | `6px` | Control alias and effect label; same size as `--r` | `src/styles/tokens.css` |
 
-## Spacing and radius
+## Motion
 
 | Token | Value | Usage | Source |
 |---|---|---|---|
-| `--unit` | `8px` | Grid | `docs/reference/DESIGN-dither-layer.md` |
-| `--container` | `1200px` | Max content width | `docs/reference/DESIGN-dither-layer.md` |
-| `--r` | `6px` | Cards, buttons | `docs/reference/DESIGN-dither-layer.md` |
-| `--r-sm` | `2px` | Inputs, plates, status chips | `docs/reference/DESIGN-dither-layer.md` |
-| `--ease-out` | `cubic-bezier(0.23, 1, 0.32, 1)` | Entrances, press feedback | `docs/PRD.md` section 8 |
+| `--ease-out` | `cubic-bezier(0.23, 1, 0.32, 1)` | Interface easing | `src/styles/tokens.css` |
+
+Smooth scrolling, reveals and button feedback are defined in `src/styles/global.css`. Reduced motion switches scrolling to `auto`, disables transitions and animations, and removes the press and link-arrow transforms.
+
+## Shadows
+
+No shadow values are declared in `src/styles/tokens.css` or `src/styles/global.css`. The shared components demonstrated on the board are flat.
+
+## Tailwind aliases
+
+| Token | Value | Usage | Source |
+|---|---|---|---|
+| `--color-surface` | `var(--surface)` | Page surface | `src/styles/tokens.css` |
+| `--color-raised` | `var(--raised)` | Raised surface | `src/styles/tokens.css` |
+| `--color-text` | `var(--text)` | Primary text | `src/styles/tokens.css` |
+| `--color-subtle` | `var(--subtle)` | Secondary text | `src/styles/tokens.css` |
+| `--color-muted` | `var(--muted)` | Label text | `src/styles/tokens.css` |
+| `--color-ink` | `var(--ink)` | Cool ink | `src/styles/tokens.css` |
+| `--color-mid` | `var(--mid)` | Middle ink | `src/styles/tokens.css` |
+| `--color-whisper` | `var(--whisper)` | Low-contrast tone | `src/styles/tokens.css` |
+| `--color-highlight` | `var(--highlight)` | Highlight ink | `src/styles/tokens.css` |
+| `--color-gold` | `var(--gold)` | Gold fill | `src/styles/tokens.css` |
+| `--color-gold-text` | `var(--gold-text)` | Gold foreground | `src/styles/tokens.css` |
+| `--color-on-gold` | `var(--on-gold)` | Text on gold | `src/styles/tokens.css` |
+| `--color-selection` | `var(--selection)` | Selection fill | `src/styles/tokens.css` |
+| `--color-hair` | `var(--hair)` | Decorative divider | `src/styles/tokens.css` |
+| `--color-control` | `var(--control)` | Control border | `src/styles/tokens.css` |
+| `--color-cat-web` | `var(--cat-web)` | Web accent | `src/styles/tokens.css` |
+| `--color-cat-api` | `var(--cat-api)` | API accent | `src/styles/tokens.css` |
+| `--color-cat-mcp` | `var(--cat-mcp)` | MCP accent | `src/styles/tokens.css` |
+| `--color-cat-infra` | `var(--cat-infra)` | Infrastructure accent | `src/styles/tokens.css` |
+| `--color-cat-data` | `var(--cat-data)` | Data accent | `src/styles/tokens.css` |
+| `--font-sans` | `var(--sans)` | Sans utilities | `src/styles/tokens.css` |
+| `--font-mono` | `var(--mono)` | Mono utilities | `src/styles/tokens.css` |
+| `--spacing` | `var(--unit)` | Spacing scale | `src/styles/tokens.css` |
+| `--container-page` | `var(--container)` | Page width | `src/styles/tokens.css` |
+| `--radius-panel` | `var(--r)` | Panel radius | `src/styles/tokens.css` |
+| `--radius-control` | `var(--r-sm)` | Control radius | `src/styles/tokens.css` |
+| `--ease-interface` | `var(--ease-out)` | Interface easing | `src/styles/tokens.css` |
+
+## Tailwind resets
+
+| Token namespace | Value | Usage | Source |
+|---|---|---|---|
+| `--color-*` | `initial` | Resets built-in colors | `src/styles/tokens.css` |
+| `--font-*` | `initial` | Resets built-in font families | `src/styles/tokens.css` |
+| `--radius-*` | `initial` | Resets built-in radii | `src/styles/tokens.css` |
+| `--ease-*` | `initial` | Resets built-in easing | `src/styles/tokens.css` |
 
 ## Component rules
 
-- Flat: no shadows. Hierarchy from surface tone, hairlines and spacing.
-- Primary button: gold fill, dark text; hover inverts to text colour. Press scales to 0.97.
-- Focus: 2px gold outline, offset 2px, on every interactive element.
-- Nav, command menu and drawers: 82 to 95 percent surface plus 20px backdrop blur; opaque fallback.
-- Dither: Statement only in the hero art zone and section bands, Documentary in image boxes, Whisper behind maps; never under text, controls, numbers or code. Every field carries a mono effect annotation.
-- Category accents always come with a label or glyph, never colour alone.
-- Shadows: none.
+| Component | Rule | Source |
+|---|---|---|
+| Home button | `44px` minimum height, `18px` horizontal padding, `1px solid var(--control)` border and `var(--r)` radius. Hover changes border and label to `var(--ink)`; press uses `scale(.97)` when motion is enabled. | `src/styles/global.css` |
+| Primary home button | `var(--gold)` fill and `var(--on-gold)` text; hover inverts to `var(--text)` fill and `var(--surface)` text. | `src/styles/global.css` |
+| Keyboard focus | Source uses a `2px solid var(--gold)` outline with `2px` offset. The system board adds an ink-colored outer backing to the sample outline in light mode so the outline has contrast on the light surface. | `src/styles/global.css` (source outline) |
+| Section heading | Heading and description are grouped; description uses `var(--subtle)`. | `src/styles/global.css` |
+| Dither field | Contained and clipped; solid `var(--surface)` fallback, pixelated canvas, and a solid surface behind the mono label. Hidden in forced colors and print. | `src/styles/global.css` |

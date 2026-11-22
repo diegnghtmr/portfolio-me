@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel monogram | Favicon study</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface: #06080f; --raised: #1c212c; --text: #f3f6f9; --subtle: #a3b5c1;
+    --ink: #7fb4ca; --gold: #e0c15a; --control: #5c6170;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --unit: 8px; --container: 1200px; --r: 6px; --r-sm: 6px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface); color: var(--text); font: 400 16px/1.55 var(--sans); }
+  main { max-width: var(--container); margin-inline: auto; padding: calc(var(--unit) * 4); }
+  h1, h2, h3, p, figure { margin: 0; }
+  h1 { font: 600 clamp(2rem, 5vw, 3.5rem)/1.05 var(--sans); letter-spacing: -.02em; }
+  h2 { font: 600 28px/1.2 var(--sans); letter-spacing: -.01em; }
+  h3 { font: 600 16px/1.55 var(--sans); }
+  .intro { margin-block: var(--unit) calc(var(--unit) * 3); max-inline-size: 64ch; color: var(--subtle); }
+  .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--unit) * 2); margin-block-start: var(--unit); }
+  .bench { padding: var(--unit); border: 1px solid var(--control); border-radius: var(--r); background: var(--raised); color: var(--text); }
+  .bench.light { color-scheme: light; --surface: #f3f6f9; --text: #06080f; --subtle: #4e5362; --control: #6a6e82; background: var(--surface); }
+  .strip { border-block-end: 1px solid var(--control); margin-block-start: var(--unit); }
+  .tab { display: inline-flex; align-items: center; gap: var(--unit); padding: var(--unit); border: 1px solid var(--control); border-block-end: 0; border-radius: var(--r) var(--r) 0 0; font-size: 14px; }
+  .tab svg { flex: none; }
+  .specimens, .zoom { display: flex; align-items: flex-end; flex-wrap: wrap; gap: calc(var(--unit) * 2); padding-block: calc(var(--unit) * 2); }
+  .zoom { border-block-start: 1px solid var(--control); padding-block-end: var(--unit); }
+  figcaption, .note { color: var(--subtle); font: 500 11px/1.3 var(--mono); }
+  figcaption { margin-block-start: var(--unit); }
+  svg { display: block; }
+  .mask-preview { position: relative; inline-size: 128px; block-size: 128px; }
+  .mask-preview > svg { inline-size: 100%; block-size: 100%; }
+  .guide { position: absolute; inset: 0; pointer-events: none; }
+  .exports { margin-block-start: calc(var(--unit) * 2); display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: calc(var(--unit) * 2); }
+  .exports p { color: var(--subtle); margin-block: var(--unit); }
+  details { margin-block-start: var(--unit); border-block-start: 1px solid var(--control); }
+  summary { min-block-size: 44px; padding: var(--unit); cursor: pointer; }
+  .copy { min-block-size: 44px; padding-inline: 18px; border: 1px solid var(--control); border-radius: var(--r); background: var(--surface); color: var(--text); font: 600 14px/1 var(--sans); cursor: pointer; }
+  .copy:hover { border-color: var(--ink); color: var(--ink); }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; user-select: all; font: 500 14px/1.55 var(--mono); background: var(--raised); border-radius: var(--r-sm); padding: var(--unit); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  @media (min-width: 1200px) {
+    main { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--unit) * 27); gap: calc(var(--unit) * 2); }
+    main > header { grid-column: 1 / -1; }
+    .intro { margin-block-end: var(--unit); }
+    .exports { display: block; margin-block-start: 0; }
+    .exports figure { margin-block-end: calc(var(--unit) * 2); }
+  }
+  @media (max-width: 900px) { .comparison { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 640px) { main { padding-inline: calc(var(--unit) * 2.5); } .exports { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" shape-rendering="crispEdges" aria-hidden="true" style="position:absolute">
+  <defs>
+    <pattern id="bayer" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path fill="#27345c" d="M0 0h1v1H0zM4 0h1v1H4zM0 2h1v1H0zM2 2h1v1H2zM6 2h1v1H6zM0 4h1v1H0zM4 4h1v1H4zM2 6h1v1H2zM4 6h1v1H4zM6 6h1v1H6z"/>
+    </pattern>
+    <symbol id="icon16" viewBox="0 0 16 16">
+      <rect width="16" height="16" rx="3" fill="#06080f"/>
+      <path fill="#7fb4ca" fill-rule="evenodd" d="M10 3h2v9H6v-1H4V7h1V6h5zM6 8v2h4V8z"/>
+      <path fill="#e0c15a" d="M8 13h4v1H8z"/>
+    </symbol>
+    <symbol id="icon32" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="6" fill="#06080f"/>
+      <path fill="#7fb4ca" fill-rule="evenodd" d="M20 4h4v22H12v-1H9v-2H8v-8h1v-2h2v-1h9zM12 16v6h8v-6z"/>
+      <path fill="url(#bayer)" d="M9 15h3v8H9zM12 22h7v4h-7z"/>
+      <path fill="#e0c15a" d="M16 27h8v2h-8z"/>
+    </symbol>
+    <symbol id="touch" viewBox="0 0 180 180">
+      <rect width="180" height="180" fill="#06080f"/>
+      <use href="#icon32" x="10" y="10" width="160" height="160"/>
+    </symbol>
+    <symbol id="maskable" viewBox="0 0 512 512">
+      <rect width="512" height="512" fill="#06080f"/>
+      <use href="#icon32" x="64" y="64" width="384" height="384"/>
+    </symbol>
+  </defs>
+</svg>
+<main>
+  <header>
+    <h1>Pixel monogram</h1>
+    <p class="intro"><strong>Tradeoff:</strong> Keeps the familiar celeste <strong>d</strong> and gold underscore. The letter stays clear at 16 px; dither is confined to its lower bowl at larger sizes.</p>
+  </header>
+  <section aria-labelledby="compare">
+    <h2 id="compare">Browser tab comparison</h2>
+    <div class="comparison">
+      <article class="bench" aria-labelledby="dark">
+        <h3 id="dark">Dark browser</h3>
+        <div class="strip"><p class="tab"><svg width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="16" height="16"/></svg><span>Diego Alejandro Flores Quintero, software engineer</span></p></div>
+        <div class="specimens" aria-label="Actual size specimens">
+          <figure><svg width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="16" height="16"/></svg><figcaption>16 px</figcaption></figure>
+          <figure><svg width="32" height="32" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon32" width="32" height="32"/></svg><figcaption>32 px</figcaption></figure>
+          <figure><svg width="48" height="48" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="48" height="48"/></svg><figcaption>48 px</figcaption></figure>
+          <figure><svg width="180" height="180" shape-rendering="crispEdges" aria-hidden="true"><use href="#touch" width="180" height="180"/></svg><figcaption>180 px Apple touch</figcaption></figure>
+        </div>
+        <div class="zoom" aria-label="Eight times magnification">
+          <figure><svg width="128" height="128" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="128" height="128"/></svg><figcaption>16 px × 8 / solid</figcaption></figure>
+          <figure><svg width="256" height="256" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon32" width="256" height="256"/></svg><figcaption>32 px × 8 / Bayer 8×8</figcaption></figure>
+        </div>
+      </article>
+      <article class="bench light" aria-labelledby="light">
+        <h3 id="light">Light browser</h3>
+        <div class="strip"><p class="tab"><svg width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="16" height="16"/></svg><span>Diego Alejandro Flores Quintero, software engineer</span></p></div>
+        <div class="specimens" aria-label="Actual size specimens">
+          <figure><svg width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="16" height="16"/></svg><figcaption>16 px</figcaption></figure>
+          <figure><svg width="32" height="32" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon32" width="32" height="32"/></svg><figcaption>32 px</figcaption></figure>
+          <figure><svg width="48" height="48" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="48" height="48"/></svg><figcaption>48 px</figcaption></figure>
+          <figure><svg width="180" height="180" shape-rendering="crispEdges" aria-hidden="true"><use href="#touch" width="180" height="180"/></svg><figcaption>180 px Apple touch</figcaption></figure>
+        </div>
+        <div class="zoom" aria-label="Eight times magnification">
+          <figure><svg width="128" height="128" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon16" width="128" height="128"/></svg><figcaption>16 px × 8 / solid</figcaption></figure>
+          <figure><svg width="256" height="256" shape-rendering="crispEdges" aria-hidden="true"><use href="#icon32" width="256" height="256"/></svg><figcaption>32 px × 8 / Bayer 8×8</figcaption></figure>
+        </div>
+      </article>
+    </div>
+  </section>
+  <section class="exports" aria-labelledby="exports">
+    <figure>
+      <div class="mask-preview">
+        <svg width="512" height="512" viewBox="0 0 512 512" shape-rendering="crispEdges" aria-hidden="true"><use href="#maskable" width="512" height="512"/></svg>
+        <svg class="guide" viewBox="0 0 128 128" aria-hidden="true"><circle cx="64" cy="64" r="51.2" fill="none" stroke="var(--ink)" stroke-dasharray="2 4"/></svg>
+      </div>
+      <figcaption>512 px maskable, shown at ¼ scale</figcaption>
+    </figure>
+    <div>
+      <h2 id="exports">Icon assets</h2>
+      <p>One dark tile for both themes keeps the ink contrast fixed. The 48 px preview uses the solid 16 px grid at 3×. The dashed 80% safe-zone guide is not part of the maskable icon.</p>
+      <p class="note">Ordered Bayer 8×8 on the bowl, one cell per source pixel at 32 px. Coverage sets the linear-light mix of two solid inks; the 16 px silhouette is untextured.</p>
+      <details>
+        <summary>32 px SVG source</summary>
+        <p>Select the SVG below to copy it.</p>
+        <button type="button" class="copy" hidden>Copy SVG</button> <span class="note" role="status"></span>
+        <pre tabindex="0" role="region" aria-label="Copyable 32 px SVG"><code>&lt;svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges"&gt;
+  &lt;defs&gt;
+    &lt;pattern id="bayer" width="8" height="8" patternUnits="userSpaceOnUse"&gt;
+      &lt;path fill="#27345c" d="M0 0h1v1H0zM4 0h1v1H4zM0 2h1v1H0zM2 2h1v1H2zM6 2h1v1H6zM0 4h1v1H0zM4 4h1v1H4zM2 6h1v1H2zM4 6h1v1H4zM6 6h1v1H6z"/&gt;
+    &lt;/pattern&gt;
+  &lt;/defs&gt;
+  &lt;rect width="32" height="32" rx="6" fill="#06080f"/&gt;
+  &lt;path fill="#7fb4ca" fill-rule="evenodd" d="M20 4h4v22H12v-1H9v-2H8v-8h1v-2h2v-1h9zM12 16v6h8v-6z"/&gt;
+  &lt;path fill="url(#bayer)" d="M9 15h3v8H9zM12 22h7v4h-7z"/&gt;
+  &lt;path fill="#e0c15a" d="M16 27h8v2h-8z"/&gt;
+&lt;/svg&gt;</code></pre>
+      </details>
+    </div>
+  </section>
+</main>
+<script>
+  const copy = document.querySelector('.copy');
+  const source = document.querySelector('pre');
+  const status = document.querySelector('[role="status"]');
+  copy.hidden = false;
+  copy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(source.textContent);
+      status.textContent = 'SVG copied.';
+    } catch {
+      source.focus();
+      const range = document.createRange();
+      range.selectNodeContents(source);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      status.textContent = 'SVG selected. Use your device’s Copy command.';
+    }
+  });
+</script>
+</body>
+</html>

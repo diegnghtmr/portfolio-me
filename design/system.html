@@ -1,21 +1,164 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Design system: diegnghtmr portfolio</title>
-<style>body{margin:0;background:#06080F;color:#F3F6F9;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}main{max-width:1376px;margin:0 auto;padding:40px 32px}h1{font-size:40px;margin:0 0 8px}h2{font-size:22px;margin:40px 0 16px;border-top:1px solid #1C212C;padding-top:24px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}.sw{display:grid;gap:2px;font-size:13px}.sw i{height:64px;border:1px solid #5C6170;display:block;margin-bottom:6px}.sw code{font:12px "Iosevka Term",ui-monospace,monospace;color:#A3B5C1}.sw span{color:#8A8FA3}
-.light{background:#F3F6F9;color:#06080F;padding:24px;margin-top:8px}.light .sw code{color:#4E5362}.light .sw span{color:#6A6E82}.light .sw i{border-color:#6A6E82}
-.type p{margin:8px 0}.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:6px;font-weight:600;font-size:14px;margin-right:12px;border:1px solid transparent}.gold{background:#E0C15A;color:#06080F}.line{border-color:#5C6170;color:#F3F6F9}.focus{outline:2px solid #E0C15A;outline-offset:2px}
-.mono{font:500 12px "Iosevka Term",ui-monospace,monospace;color:#8A8FA3;letter-spacing:.04em}canvas{image-rendering:pixelated;display:block}</style></head><body><main>
-<h1>Design system</h1><p style="color:#A3B5C1">Gentleman Kanagawa Blur palette (MIT), dark-first with a derived light theme. Rules from the Dither Layer DESIGN.md. Source: <code>docs/research/04-gentleman-kanagawa-palette.md</code>.</p>
-<h2>Dark theme</h2><div class="grid"><div class="sw"><i style="background:#06080F"></i><b>--surface</b><code>#06080F</code><span>Page canvas</span></div><div class="sw"><i style="background:#1C212C"></i><b>--raised</b><code>#1C212C</code><span>Cards, panels</span></div><div class="sw"><i style="background:#F3F6F9"></i><b>--text</b><code>#F3F6F9</code><span>Primary text, 18.45:1</span></div><div class="sw"><i style="background:#A3B5C1"></i><b>--subtle</b><code>#A3B5C1</code><span>Secondary text, 9.46:1</span></div><div class="sw"><i style="background:#8A8FA3"></i><b>--muted</b><code>#8A8FA3</code><span>Captions, annotations, 6.23:1</span></div><div class="sw"><i style="background:#7FB4CA"></i><b>--ink</b><code>#7FB4CA</code><span>Dither ink, links, 8.84:1</span></div><div class="sw"><i style="background:#27345C"></i><b>--mid</b><code>#27345C</code><span>Dither mid ink, texture only</span></div><div class="sw"><i style="background:#191E28"></i><b>--whisper</b><code>#191E28</code><span>Whisper ink, 1.19:1</span></div><div class="sw"><i style="background:#CB7C94"></i><b>--highlight</b><code>#CB7C94</code><span>Dither highlight, one per field</span></div><div class="sw"><i style="background:#E0C15A"></i><b>--gold</b><code>#E0C15A</code><span>Focus, active borders, primary CTA fill</span></div><div class="sw"><i style="background:#E0C15A"></i><b>--gold-text</b><code>#E0C15A</code><span>Gold as text, 11.38:1</span></div><div class="sw"><i style="background:#06080F"></i><b>--on-gold</b><code>#06080F</code><span>Text on gold, 11.38:1</span></div><div class="sw"><i style="background:#263356"></i><b>--selection</b><code>#263356</code><span>Text selection</span></div><div class="sw"><i style="background:#1C212C"></i><b>--hair</b><code>#1C212C</code><span>Dividers, decoration only</span></div><div class="sw"><i style="background:#5C6170"></i><b>--control</b><code>#5C6170</code><span>Control boundaries</span></div></div>
-<h2>Light theme (derived)</h2><div class="light"><div class="grid"><div class="sw"><i style="background:#F3F6F9"></i><b>--surface</b><code>#F3F6F9</code><span>Page canvas</span></div><div class="sw"><i style="background:#FFFFFF"></i><b>--raised</b><code>#FFFFFF</code><span>Cards, panels</span></div><div class="sw"><i style="background:#06080F"></i><b>--text</b><code>#06080F</code><span>Primary text, 18.45:1</span></div><div class="sw"><i style="background:#4E5362"></i><b>--subtle</b><code>#4E5362</code><span>Secondary text, 7.07:1</span></div><div class="sw"><i style="background:#6A6E82"></i><b>--muted</b><code>#6A6E82</code><span>Captions, 4.64:1; never on whisper</span></div><div class="sw"><i style="background:#24596C"></i><b>--ink</b><code>#24596C</code><span>Dither ink, links, 7.11:1</span></div><div class="sw"><i style="background:#91C7DD"></i><b>--mid</b><code>#91C7DD</code><span>Dither mid ink, texture only</span></div><div class="sw"><i style="background:#E2E6F2"></i><b>--whisper</b><code>#E2E6F2</code><span>Whisper ink, 1.15:1</span></div><div class="sw"><i style="background:#BF7189"></i><b>--highlight</b><code>#BF7189</code><span>Dither highlight, texture only</span></div><div class="sw"><i style="background:#E0C15A"></i><b>--gold</b><code>#E0C15A</code><span>Primary CTA fill, focus</span></div><div class="sw"><i style="background:#866D01"></i><b>--gold-text</b><code>#866D01</code><span>Gold as text, 4.60:1</span></div><div class="sw"><i style="background:#06080F"></i><b>--on-gold</b><code>#06080F</code><span>Text on gold, 11.38:1</span></div><div class="sw"><i style="background:#C9DCE6"></i><b>--selection</b><code>#C9DCE6</code><span>Text selection</span></div><div class="sw"><i style="background:#DCE1EA"></i><b>--hair</b><code>#DCE1EA</code><span>Dividers, decoration only</span></div><div class="sw"><i style="background:#6A6E82"></i><b>--control</b><code>#6A6E82</code><span>Control boundaries</span></div></div></div>
-<h2>Category accents</h2><div class="grid"><div class="sw"><i style="background:#7FB4CA"></i><b>--cat-web</b><code>#7FB4CA / #43778B</code></div><div class="sw"><i style="background:#B7CC85"></i><b>--cat-api</b><code>#B7CC85 / #667833</code></div><div class="sw"><i style="background:#B99BF2"></i><b>--cat-mcp</b><code>#B99BF2 / #7F61B3</code></div><div class="sw"><i style="background:#DEBA87"></i><b>--cat-infra</b><code>#DEBA87 / #8C6B39</code></div><div class="sw"><i style="background:#CB7C94"></i><b>--cat-data</b><code>#CB7C94 / #A45870</code></div></div>
-<h2>Type</h2><div class="type"><p style="font-size:56px;font-weight:600;letter-spacing:-.02em;line-height:1.05">Display 56</p><p style="font-size:28px;font-weight:600">Headline 28</p><p>Body 16. Plain, readable text that never sits on texture.</p><p class="mono">Annotation 12 mono: Bayer 8x8, 4 px cell, 2 inks</p></div>
-<h2>Components</h2><p><span class="btn gold">See the work</span><span class="btn line">Download CV</span><span class="btn line focus">Focused</span></p>
-<h2>Dither profiles</h2><div class="grid" id="prof"></div>
-</main><script>
-const B=(()=>{let m=[[0]];while(m.length<8){const s=m.length,o=[];for(let y=0;y<2*s;y++){o[y]=[];for(let x=0;x<2*s;x++)o[y][x]=m[y%s][x%s]*4+(y<s?(x<s?0:2):(x<s?3:1));}m=o;}return m.map(r=>r.map(v=>(v+.5)/64));})();
-const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
-[["Statement","#06080F","#7FB4CA"],["Whisper","#06080F","#191E28"],["Statement light","#F3F6F9","#24596C"],["Whisper light","#F3F6F9","#E2E6F2"],["Highlight","#06080F","#CB7C94"]].forEach(([n,a,b])=>{
- const d=document.createElement("div");d.className="sw";const c=document.createElement("canvas");const W=60,H=16;c.width=W;c.height=H;c.style.width=W*4+"px";c.style.height=H*4+"px";c.style.maxWidth="100%";
- const x=c.getContext("2d"),im=x.createImageData(W,H),A=rgb(a),F=rgb(b);for(let y=0;y<H;y++)for(let i=0;i<W;i++){const k=(i/W)>B[y%8][i%8]?F:A,o=(y*W+i)*4;im.data[o]=k[0];im.data[o+1]=k[1];im.data[o+2]=k[2];im.data[o+3]=255;}x.putImageData(im,0,0);
- d.append(c);d.insertAdjacentHTML("beforeend",`<b>${n}</b><span class="mono">Bayer 8x8, 4 px, ${a} and ${b}</span>`);document.getElementById("prof").append(d);});
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design system | diegnghtmr</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface: #06080f; --raised: #1c212c; --text: #f3f6f9; --subtle: #a3b5c1; --muted: #8a8fa3;
+    --ink: #7fb4ca; --mid: #27345c; --whisper: #191e28; --highlight: #cb7c94;
+    --gold: #e0c15a; --gold-text: #e0c15a; --on-gold: #06080f; --selection: #263356; --hair: #1c212c; --control: #5c6170;
+    --cat-web: #7fb4ca; --cat-api: #b7cc85; --cat-mcp: #b99bf2; --cat-infra: #deba87; --cat-data: #cb7c94;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --unit: 8px; --container: 1200px; --r: 6px; --r-sm: 6px; --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  [data-theme="light"] {
+    color-scheme: light;
+    --surface: #f3f6f9; --raised: #ffffff; --text: #06080f; --subtle: #4e5362; --muted: #6a6e82;
+    --ink: #24596c; --mid: #91c7dd; --whisper: #e2e6f2; --highlight: #bf7189;
+    --gold: #e0c15a; --gold-text: #866d01; --on-gold: #06080f; --selection: #c9dce6; --hair: #dce1ea; --control: #6a6e82;
+    --cat-web: #43778b; --cat-api: #667833; --cat-mcp: #7f61b3; --cat-infra: #8c6b39; --cat-data: #a45870;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface); color: var(--text); font: 400 16px/1.55 var(--sans); }
+  main { max-width: var(--container); margin-inline: auto; padding: calc(var(--unit) * 4); }
+  h1, h2, h3, p { margin: 0; }
+  h1 { font: 600 clamp(2rem, 5vw, 3.5rem)/1.05 var(--sans); letter-spacing: -.02em; overflow-wrap: anywhere; }
+  h2, .headline-sample { font: 600 28px/1.2 var(--sans); letter-spacing: -.01em; }
+  h3 { font-weight: 600; }
+  p { color: var(--subtle); }
+  code { font-family: var(--mono); overflow-wrap: anywhere; }
+  ::selection { background: var(--selection); color: var(--text); }
+  section { margin-block-start: calc(var(--unit) * 4); }
+  section > h2 { margin-block-end: var(--unit); }
+  .themes, .details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--unit) * 2); }
+  .theme, .spec { background: var(--surface); color: var(--text); border: 1px solid var(--control); border-radius: var(--r); padding: calc(var(--unit) * 2); }
+  .palette { display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: var(--unit); padding: 0; margin: var(--unit) 0 calc(var(--unit) * 2); list-style: none; }
+  .palette li { display: grid; gap: 4px; align-content: start; font: 500 11px/1.3 var(--mono); }
+  .palette li span { block-size: calc(var(--unit) * 2); border: 1px solid var(--control); border-radius: var(--r-sm); background: var(--swatch); }
+  .palette li code:last-child { color: var(--subtle); }
+  .actions { display: flex; gap: var(--unit); flex-wrap: wrap; margin-block: calc(var(--unit) * 2) var(--unit); }
+  .home-button { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 18px; border: 1px solid var(--control); border-radius: var(--r); color: var(--text); font: 600 14px/1 var(--sans); text-decoration: none; transition: transform 160ms var(--ease-out), background-color 150ms ease, border-color 150ms ease; }
+  .home-button:hover { border-color: var(--ink); color: var(--ink); }
+  .home-button:active { transform: scale(.97); }
+  .primary { border-color: transparent; background: var(--gold); color: var(--on-gold); }
+  .primary:hover { background: var(--text); color: var(--surface); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  [data-theme="light"] :focus-visible { box-shadow: 0 0 0 6px var(--ink); }
+  .display-sample { font: 600 clamp(2rem, 5vw, 3.5rem)/1.05 var(--sans); letter-spacing: -.02em; color: var(--text); }
+  .headline-sample { color: var(--text); }
+  .spec > * + * { margin-block-start: var(--unit); }
+  .measure { display: inline-block; inline-size: var(--unit); block-size: var(--unit); background: var(--ink); }
+  .radius { display: inline-block; inline-size: calc(var(--unit) * 3); block-size: calc(var(--unit) * 3); border: 1px solid var(--control); border-radius: var(--r); vertical-align: middle; }
+  .radius.control { border-radius: var(--r-sm); }
+  .field { position: relative; display: grid; justify-items: start; gap: var(--unit); padding: var(--unit); border: 1px solid var(--control); background: var(--surface); overflow: hidden; }
+  .field svg { display: block; max-inline-size: 100%; height: auto; }
+  .effect-label { padding: 2px 4px; border-radius: var(--r-sm); background: var(--surface); color: var(--muted); font: 500 11px/1.3 var(--mono); }
+  .source { margin-block-start: calc(var(--unit) * 3); }
+  @media (max-width: 900px) { .themes, .details { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 640px) { main { padding-inline: calc(var(--unit) * 2.5); } }
+  @media (prefers-reduced-motion: reduce) { .home-button { transition: none; } .home-button:active { transform: none; } }
+  @media (forced-colors: active) { [data-theme="light"] :focus-visible { outline-color: Highlight; box-shadow: none; } }
+  @media (forced-colors: active), (prefers-contrast: more), print { .field svg { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Portfolio design system</h1>
+    <p>Gentleman Kanagawa in dark and light. Source: <code>src/styles/tokens.css</code> and <code>src/styles/global.css</code>.</p>
+  </header>
+  <section aria-labelledby="palette">
+    <h2 id="palette">Color and controls</h2>
+    <div class="themes">
+      <article class="theme" aria-labelledby="dark">
+        <h3 id="dark">Dark</h3>
+        <ul class="palette" aria-label="Dark colors">
+          <li style="--swatch:var(--surface)"><span aria-hidden="true"></span><code>--surface</code><code>#06080f</code></li>
+          <li style="--swatch:var(--raised)"><span aria-hidden="true"></span><code>--raised</code><code>#1c212c</code></li>
+          <li style="--swatch:var(--text)"><span aria-hidden="true"></span><code>--text</code><code>#f3f6f9</code></li>
+          <li style="--swatch:var(--subtle)"><span aria-hidden="true"></span><code>--subtle</code><code>#a3b5c1</code></li>
+          <li style="--swatch:var(--muted)"><span aria-hidden="true"></span><code>--muted</code><code>#8a8fa3</code></li>
+          <li style="--swatch:var(--ink)"><span aria-hidden="true"></span><code>--ink</code><code>#7fb4ca</code></li>
+          <li style="--swatch:var(--mid)"><span aria-hidden="true"></span><code>--mid</code><code>#27345c</code></li>
+          <li style="--swatch:var(--whisper)"><span aria-hidden="true"></span><code>--whisper</code><code>#191e28</code></li>
+          <li style="--swatch:var(--highlight)"><span aria-hidden="true"></span><code>--highlight</code><code>#cb7c94</code></li>
+          <li style="--swatch:var(--gold)"><span aria-hidden="true"></span><code>--gold</code><code>#e0c15a</code></li>
+          <li style="--swatch:var(--gold-text)"><span aria-hidden="true"></span><code>--gold-text</code><code>#e0c15a</code></li>
+          <li style="--swatch:var(--on-gold)"><span aria-hidden="true"></span><code>--on-gold</code><code>#06080f</code></li>
+          <li style="--swatch:var(--selection)"><span aria-hidden="true"></span><code>--selection</code><code>#263356</code></li>
+          <li style="--swatch:var(--hair)"><span aria-hidden="true"></span><code>--hair</code><code>#1c212c</code></li>
+          <li style="--swatch:var(--control)"><span aria-hidden="true"></span><code>--control</code><code>#5c6170</code></li>
+          <li style="--swatch:var(--cat-web)"><span aria-hidden="true"></span><code>--cat-web</code><code>#7fb4ca</code></li>
+          <li style="--swatch:var(--cat-api)"><span aria-hidden="true"></span><code>--cat-api</code><code>#b7cc85</code></li>
+          <li style="--swatch:var(--cat-mcp)"><span aria-hidden="true"></span><code>--cat-mcp</code><code>#b99bf2</code></li>
+          <li style="--swatch:var(--cat-infra)"><span aria-hidden="true"></span><code>--cat-infra</code><code>#deba87</code></li>
+          <li style="--swatch:var(--cat-data)"><span aria-hidden="true"></span><code>--cat-data</code><code>#cb7c94</code></li>
+        </ul>
+        <nav class="actions" aria-label="Dark theme component examples">
+          <a class="home-button primary" href="#typography">View typography</a>
+          <a class="home-button" href="#geometry">View geometry</a>
+        </nav>
+      </article>
+      <article class="theme" data-theme="light" aria-labelledby="light">
+        <h3 id="light">Light</h3>
+        <ul class="palette" aria-label="Light colors">
+          <li style="--swatch:var(--surface)"><span aria-hidden="true"></span><code>--surface</code><code>#f3f6f9</code></li>
+          <li style="--swatch:var(--raised)"><span aria-hidden="true"></span><code>--raised</code><code>#ffffff</code></li>
+          <li style="--swatch:var(--text)"><span aria-hidden="true"></span><code>--text</code><code>#06080f</code></li>
+          <li style="--swatch:var(--subtle)"><span aria-hidden="true"></span><code>--subtle</code><code>#4e5362</code></li>
+          <li style="--swatch:var(--muted)"><span aria-hidden="true"></span><code>--muted</code><code>#6a6e82</code></li>
+          <li style="--swatch:var(--ink)"><span aria-hidden="true"></span><code>--ink</code><code>#24596c</code></li>
+          <li style="--swatch:var(--mid)"><span aria-hidden="true"></span><code>--mid</code><code>#91c7dd</code></li>
+          <li style="--swatch:var(--whisper)"><span aria-hidden="true"></span><code>--whisper</code><code>#e2e6f2</code></li>
+          <li style="--swatch:var(--highlight)"><span aria-hidden="true"></span><code>--highlight</code><code>#bf7189</code></li>
+          <li style="--swatch:var(--gold)"><span aria-hidden="true"></span><code>--gold</code><code>#e0c15a</code></li>
+          <li style="--swatch:var(--gold-text)"><span aria-hidden="true"></span><code>--gold-text</code><code>#866d01</code></li>
+          <li style="--swatch:var(--on-gold)"><span aria-hidden="true"></span><code>--on-gold</code><code>#06080f</code></li>
+          <li style="--swatch:var(--selection)"><span aria-hidden="true"></span><code>--selection</code><code>#c9dce6</code></li>
+          <li style="--swatch:var(--hair)"><span aria-hidden="true"></span><code>--hair</code><code>#dce1ea</code></li>
+          <li style="--swatch:var(--control)"><span aria-hidden="true"></span><code>--control</code><code>#6a6e82</code></li>
+          <li style="--swatch:var(--cat-web)"><span aria-hidden="true"></span><code>--cat-web</code><code>#43778b</code></li>
+          <li style="--swatch:var(--cat-api)"><span aria-hidden="true"></span><code>--cat-api</code><code>#667833</code></li>
+          <li style="--swatch:var(--cat-mcp)"><span aria-hidden="true"></span><code>--cat-mcp</code><code>#7f61b3</code></li>
+          <li style="--swatch:var(--cat-infra)"><span aria-hidden="true"></span><code>--cat-infra</code><code>#8c6b39</code></li>
+          <li style="--swatch:var(--cat-data)"><span aria-hidden="true"></span><code>--cat-data</code><code>#a45870</code></li>
+        </ul>
+        <nav class="actions" aria-label="Light theme component examples">
+          <a class="home-button primary" href="#typography">View typography</a>
+          <a class="home-button" href="#geometry">View geometry</a>
+        </nav>
+      </article>
+    </div>
+  </section>
+  <div class="details">
+    <section class="spec" aria-labelledby="typography">
+      <h2 id="typography">Typography</h2>
+      <p class="display-sample">Selected work</p>
+      <p class="headline-sample">Open source</p>
+      <p>I build software for the web.</p>
+      <div class="field">
+        <svg viewBox="0 0 8 8" width="32" height="32" shape-rendering="crispEdges" aria-hidden="true">
+          <path fill="var(--mid)" d="M0 2h2V1h2V0h4v8H0z"/>
+          <path fill="var(--ink)" d="M4 0h4v1H4zM4 2h1v1H4zM6 2h1v1H6zM0 2h1v1H0zM2 2h1v1H2zM5 3h1v1H5zM7 3h1v1H7zM0 4h1v1H0zM4 4h1v1H4zM6 4h1v1H6zM5 5h1v1H5zM7 5h1v1H7zM6 6h1v1H6z"/>
+        </svg>
+        <span class="effect-label">Pixel cells, 4 px, solid label plate</span>
+      </div>
+      <p>Standalone previews use the declared system fallbacks for the mono label.</p>
+    </section>
+    <section class="spec" aria-labelledby="geometry">
+      <h2 id="geometry">Spacing and shape</h2>
+      <p><span class="measure" aria-hidden="true"></span> <code>--unit</code>: 8 px</p>
+      <p><code>--container</code>: 1200 px. Page padding: 4 units, 2.5 at 640 px and under.</p>
+      <p><span class="radius" aria-hidden="true"></span> <code>--r</code>: 6 px</p>
+      <p><span class="radius control" aria-hidden="true"></span> <code>--r-sm</code>: 6 px</p>
+      <p>Hierarchy comes from tone and borders. No shadow token is declared. The light focus sample uses an extra ink ring; that is a preview-only accessibility treatment.</p>
+    </section>
+  </div>
+  <p class="source">Tailwind aliases resolve to the swatches and values above; namespace resets have no visual sample.</p>
+</main>
+</body>
+</html>
