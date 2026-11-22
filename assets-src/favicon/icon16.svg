@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- Hand-drawn 16 px grid: solid orb plus highlight, no dither (cells would be single pixels). -->
+  <rect width="16" height="16" rx="3" fill="#06080f"/>
+  <path fill="#7fb4ca" d="M6 2h4v1h2v1h1v2h1v4h-1v2h-1v1h-2v1H6v-1H4v-1H3v-2H2V6h1V4h1V3h2z"/>
+  <path fill="#f3f6f9" d="M6 4h3v1H7v1H6v1H5V5h1z"/>
+</svg>

@@ -61,7 +61,10 @@ const graph = JSON.stringify(jsonLd(locale)).replaceAll("<", "\\u003c");
     <meta name="twitter:image" content={image} />
     <meta name="twitter:image:alt" content={imageAlt} />
     <script type="application/ld+json" set:html={graph}></script>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={absoluteHome(locale)} />
     <link rel="alternate" hreflang="en" href={absoluteHome("en")} />
     <link rel="alternate" hreflang="es" href={absoluteHome("es")} />

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "chosen": "02-bayer-sphere.html",
+  "handoffs": {
+    "02-bayer-sphere.html": {
+      "status": "in_progress",
+      "queued": false,
+      "sentAt": "2026-11-22T02:59:59.998Z",
+      "startedAt": "2026-11-22T03:00:04.156Z",
+      "implementedAt": null,
+      "feature": "odd/tasks/portfolio-prd-trd.md"
+    }
+  }
+}

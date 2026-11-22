@@ -1,5 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!-- Bayer sphere (design/favicon/02-bayer-sphere.html): lit side solid ink, a 50% and a
+       sparse Bayer 8x8 band toward the shadow, a cell-stepped highlight. Brand inks only. -->
+  <defs>
+    <path id="disc" d="M11 4h10v1h3v2h2v3h1v3h1v6h-1v3h-1v3h-2v2h-3v1H11v-1H8v-2H6v-3H5v-3H4v-6h1v-3h1V7h2V5h3z"/>
+    <clipPath id="disc-clip"><use href="#disc"/></clipPath>
+    <pattern id="sparse" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path fill="#7fb4ca" d="M0 0h1v1H0zM4 0h1v1H4zM0 2h1v1H0zM2 2h1v1H2zM6 2h1v1H6zM0 4h1v1H0zM4 4h1v1H4zM2 6h1v1H2zM4 6h1v1H4zM6 6h1v1H6z"/>
+    </pattern>
+    <pattern id="half" width="2" height="2" patternUnits="userSpaceOnUse">
+      <path fill="#7fb4ca" d="M0 0h1v1H0zM1 1h1v1H1z"/>
+    </pattern>
+  </defs>
   <rect width="32" height="32" rx="6" fill="#06080f"/>
-  <path fill="none" stroke="#7fb4ca" stroke-width="3" d="M21 7v17H13a5 5 0 0 1 0-10h8"/>
-  <path stroke="#e0c15a" stroke-width="2" d="M23 24h3"/>
+  <use href="#disc" fill="#27345c"/>
+  <g clip-path="url(#disc-clip)">
+    <rect width="32" height="32" fill="url(#sparse)"/>
+    <path fill="#27345c" d="M0 0h28v6h-3v3h-2v4h-2v4h-2v4h-3v3h-4v2H0z"/>
+    <path fill="url(#half)" d="M0 0h28v6h-3v3h-2v4h-2v4h-2v4h-3v3h-4v2H0z"/>
+    <path fill="#7fb4ca" d="M0 0h22v5h-2v3h-2v4h-2v4h-3v3h-3v2H6v2H0z"/>
+    <path fill="#f3f6f9" d="M11 7h5v1h-3v1h-2v2H9v2H8v-3h1V8h2z"/>
+  </g>
 </svg>
