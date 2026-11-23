@@ -6,6 +6,8 @@ import { atlasProjects } from "./data/projects";
 import { placeholder } from "./lib/case-study-content";
 
 const text = z.string().trim().min(1).refine((value) => !placeholder.test(value) && !/^(?:pending|pendiente|n\/a|[-–—])$/i.test(value), "Omit unverified facts rather than supplying placeholders");
+// A transcript is verbatim evidence, not editorial copy. Check for blank values without trimming.
+const transcript = z.string().refine((value) => value.trim().length > 0, "Provide non-blank terminal text");
 const url = z.url({ protocol: /^https?$/ });
 const screenshotPath = /^\.\/shots\/[a-z0-9]+(?:-[a-z0-9]+)*\.png$/;
 const link = z.strictObject({ label: text, url });
@@ -64,8 +66,8 @@ const caseStudies = defineCollection({
         caption: text,
         source: z.enum(["run", "readme"]),
         steps: z.array(z.strictObject({
-          command: text,
-          output: z.string().refine((value) => value.trim().length > 0 && !placeholder.test(value), "Provide real output without placeholders"),
+          command: transcript,
+          output: transcript,
         })).min(1),
       }) }),
     ]),

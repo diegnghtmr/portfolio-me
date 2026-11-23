@@ -6,7 +6,13 @@ import { absolute } from "./profile";
 import { caseBodySections } from "./case-study-content";
 import type { CaseStudies, CaseStudy } from "./case-studies";
 
-const link = (text: string, url: string) => `[${text.replace(/[[\]\\]/g, "\\$&")}](${url.replaceAll("(", "%28").replaceAll(")", "%29")})`;
+const link = (text: string, url: string) => {
+  const destination = new URL(url).href.replaceAll("(", "%28").replaceAll(")", "%29").replaceAll("\\", "%5C");
+  return `[${text.replace(/[[\]\\]/g, "\\$&")}](${destination})`;
+};
+
+// Continuations must start under the list item text, including after a blank line.
+const listItem = (text: string) => `- ${text.replace(/\r?\n(?=\S|[ \t]+\S)/g, "\n  ")}`;
 
 export async function caseStudyMarkdown(locale: Locale, { project, entries }: CaseStudy) {
   const m = caseStudyMessages[locale];
@@ -39,13 +45,13 @@ export async function caseStudyMarkdown(locale: Locale, { project, entries }: Ca
     "", `## ${m.decisions}`, "",
     ...decisions.flatMap(({ question, options, consequence, evidence, quote }) => [
       `### ${question}`, "",
-      ...options.map(({ label, reason, chosen }) => `- **${label}** (${chosen ? m.chosen : m.notChosen}): ${reason}`),
+      ...options.map(({ label, reason, chosen }) => listItem(`**${label}** (${chosen ? m.chosen : m.notChosen}): ${reason}`)),
       "", `**${m.consequence}:** ${consequence}`, "",
       ...(quote ? [quote.split("\n").map((line) => `> ${line}`).join("\n"), ""] : []),
       `**${m.evidence}:** ${evidence.map(({ label, url }) => link(label, url)).join(", ")}`, "",
     ]),
-    ...(results ? [`## ${m.results}`, "", ...results.map(({ label, detail, url }) => `- ${url ? link(label, url) : `**${label}**`}: ${detail}`), ""] : []),
-    ...(limitations ? [`## ${m.limitations}`, "", ...limitations.map((item) => `- ${item}`), ""] : []),
+    ...(results ? [`## ${m.results}`, "", ...results.map(({ label, detail, url }) => listItem(`${url ? link(label, url) : `**${label}**`}: ${detail}`)), ""] : []),
+    ...(limitations ? [`## ${m.limitations}`, "", ...limitations.map(listItem), ""] : []),
   ].join("\n");
 }
 

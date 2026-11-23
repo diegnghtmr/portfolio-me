@@ -1,11 +1,14 @@
 // Checks the built site (dist/) for the SEO and agent-facing outputs (odd T17-T20).
 // Run after `pnpm build`: `pnpm test:site`.
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, dirname, join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
-const root = new URL("..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("..", import.meta.url));
 const dist = join(root, "dist");
 const site = "https://diegnghtmr.me";
 const read = (path) => readFileSync(join(dist, path), "utf8");
@@ -16,10 +19,13 @@ const workRoutes = { en: "/en/work/", es: "/es/trabajo/" };
 const workTitles = { en: "Work", es: "Trabajo" };
 const pageRoutes = ["/en/", "/es/", ...Object.values(workRoutes)];
 const caseDir = join(root, "src/content/case-studies");
-const slugs = existsSync(caseDir) ? readdirSync(caseDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name) : [];
-const complete = slugs.filter((slug) => locales.every((locale) => existsSync(join(caseDir, slug, `${locale}.md`))));
+// The production contract must not shrink if a locale file goes missing.
+const publishedSlugs = [
+  "academic-triage", "brujula", "doc-sentinel", "enterprise-monitoring-stack", "food-court", "legajo", "nexride",
+  "profundiza-uq", "resume-maker", "saber-inverso", "savia", "studydeck-ai", "vale", "writing-harness",
+];
 const caseRoute = (locale, slug) => `${workRoutes[locale]}${slug}/`;
-const caseRoutes = complete.flatMap((slug) => locales.map((locale) => caseRoute(locale, slug)));
+const caseRoutes = publishedSlugs.flatMap((slug) => locales.map((locale) => caseRoute(locale, slug)));
 const trainingBots = ["GPTBot", "ClaudeBot", "Google-Extended", "CCBot", "Applebot-Extended"];
 const github = "https://github.com/diegnghtmr";
 const repoUrl = (name) => `${github}/${name}`;
@@ -221,7 +227,7 @@ for (const locale of locales) {
       const links = [...row.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
       assert.equal(links.length, 1);
       const slug = attr(row.match(/<li\b[^>]*>/)[0], "id");
-      if (complete.includes(slug)) {
+      if (publishedSlugs.includes(slug)) {
         assert.equal(links[0][1], caseRoute(locale, slug));
         assert.doesNotMatch(links[0][0], /rel="external"/);
       } else {
@@ -280,7 +286,7 @@ for (const locale of locales) {
     const bySlug = new Map(rows.map(([, tag, body]) => [attr(tag, "id"), body]));
     for (const [slug, row] of bySlug) {
       const name = row.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1];
-      assert.equal(attr(row.match(/<a\b[^>]*>/)[0], "href"), complete.includes(slug) ? caseRoute(locale, slug) : fallbacks[name], name);
+      assert.equal(attr(row.match(/<a\b[^>]*>/)[0], "href"), publishedSlugs.includes(slug) ? caseRoute(locale, slug) : fallbacks[name], name);
     }
     const edgesFor = (name) => {
       const row = byName.get(name);
@@ -416,19 +422,170 @@ test("vercel.json sets markdown headers, Vary and the root redirect by language"
   assert.equal(spanish.permanent, false);
 });
 
-test("only complete bilingual content pairs are published", () => {
-  assert.ok(complete.includes("writing-harness"), "terminal case study fixture");
+const dossierSlugs = (output, locale, extension) => {
+  const folder = join(output, workRoutes[locale]);
+  return readdirSync(folder, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && existsSync(join(folder, entry.name, `index.${extension}`)))
+    .map((entry) => entry.name).sort();
+};
+
+function assertDossierInventory(output, expected) {
   for (const locale of locales) {
-    for (const slug of slugs) assert.equal(resolves(caseRoute(locale, slug)), complete.includes(slug), `${locale} ${slug}`);
+    for (const extension of ["html", "md"]) assert.deepEqual(dossierSlugs(output, locale, extension), expected, `${locale} ${extension}`);
   }
+}
+
+test("production publishes exactly the 14 pinned dossiers in HTML and Markdown in both locales", () => {
+  assertDossierInventory(dist, publishedSlugs);
+  const catalog = JSON.parse(read("projects.json")).projects;
+  assert.deepEqual(catalog.flatMap(({ caseStudy }) => caseStudy ? [caseStudy] : []).sort(),
+    publishedSlugs.map((slug) => `${site}${caseRoute("en", slug)}`));
 });
 
-for (const slug of complete) {
+const caseSource = (slug, locale) => readFileSync(join(caseDir, slug, `${locale}.md`), "utf8");
+
+function buildCaseFixture(t, english = caseSource("writing-harness", "en"), extra = {}) {
+  const fixture = mkdtempSync(join(tmpdir(), "portfolio-case-"));
+  t.after(() => rmSync(fixture, { recursive: true, force: true }));
+  // Run the real Astro config, loader and routes, with their own output and caches.
+  for (const file of ["astro.config.mjs", "package.json", "tsconfig.json"]) cpSync(join(root, file), join(fixture, file));
+  cpSync(join(root, "src"), join(fixture, "src"), {
+    recursive: true,
+    filter: (path) => path !== caseDir && !basename(path).startsWith("."),
+  });
+  const dependencies = JSON.parse(readFileSync(join(fixture, "package.json"), "utf8"));
+  for (const name of Object.keys({ ...dependencies.dependencies, ...dependencies.devDependencies })) {
+    const target = join(fixture, "node_modules", name);
+    mkdirSync(dirname(target), { recursive: true });
+    symlinkSync(join(root, "node_modules", name), target, "junction");
+  }
+  for (const [path, content] of Object.entries({
+    "writing-harness/en.md": english,
+    "writing-harness/es.md": caseSource("writing-harness", "es"),
+    ...extra,
+  })) {
+    const file = join(fixture, "src/content/case-studies", path);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, content);
+  }
+  const build = spawnSync(process.execPath, [join(fixture, "node_modules/astro/bin/astro.mjs"), "build"], {
+    cwd: fixture, encoding: "utf8", env: { ...process.env, ASTRO_TELEMETRY_DISABLED: "1" },
+  });
+  assert.ifError(build.error);
+  const output = join(fixture, "dist");
+  return { build, output, read: (path) => readFileSync(join(output, path), "utf8") };
+}
+
+const assertBuilt = ({ build }) => {
+  assert.equal(build.status, 0, `${build.stdout}\n${build.stderr}`);
+  assert.equal(build.stderr, "");
+};
+const writingDossier = (extension) => `${caseRoute("en", "writing-harness")}index.${extension}`;
+
+test("terminal commands and output preserve literal placeholder-like words", (t) => {
+  const command = "  onboarding --prompt TBD  ";
+  const output = "Press Enter to confirm\npending";
+  const english = caseSource("writing-harness", "en")
+    .replace("command: node src/cli.ts evals/fixtures/sucio.txt", `command: ${JSON.stringify(command)}`)
+    .replace(/(output: \|-\n)[\s\S]*?(?=\n      - command:)/, `$1${output.split("\n").map((line) => `          ${line}`).join("\n")}`);
+  const fixture = buildCaseFixture(t, english);
+  assertBuilt(fixture);
+  const html = fixture.read(writingDossier("html"));
+  assert.ok(html.includes(`<pre class="terminal-command"><code><span>$ </span>${command}</code></pre>`));
+  assert.ok(html.includes(`<pre data-terminal-output><code>${output}</code></pre>`));
+  assert.ok(fixture.read(writingDossier("md")).includes(`\`\`\`\n$ ${command}\n${output}\n\`\`\``));
+  assertNoEditorialPlaceholders(fixture.output);
+});
+
+test("the build still rejects editorial placeholders in a terminal caption", (t) => {
+  const english = caseSource("writing-harness", "en").replace(/^    caption: .*$/m, "    caption: Pending");
+  const { build, output } = buildCaseFixture(t, english);
+  assert.equal(build.status, 1, build.stdout);
+  assert.match(build.stderr, /terminal\.caption: Omit unverified facts rather than supplying placeholders/);
+  assert.ok(!existsSync(join(output, writingDossier("html"))));
+  assert.ok(!existsSync(join(output, writingDossier("md"))));
+});
+
+test("fenced heading-like lines survive in the dossier HTML and Markdown without adding sections", (t) => {
+  const code = "````text\n```\n## Not a section\n````";
+  const tildeCode = "~~~text\n## Also not a section\n~~~";
+  const english = caseSource("writing-harness", "en").replace("\n## How it works\n", `\n${code}\n\n## How it works\n`)
+    + `\n${tildeCode}\n`;
+  const fixture = buildCaseFixture(t, english);
+  assertBuilt(fixture);
+  const html = fixture.read(writingDossier("html"));
+  for (const [chapter, line] of [["problem", "## Not a section"], ["architecture", "## Also not a section"]]) {
+    const section = html.match(new RegExp(`<section\\b[^>]*id="${chapter}"[^>]*>([\\s\\S]*?)</section>`))?.[1];
+    assert.ok(section, chapter);
+    const codeBlock = section.match(/<pre\b[^>]*>[\s\S]*?<\/pre>/)?.[0];
+    assert.ok(codeBlock?.includes(line), line);
+    assert.equal([...section.matchAll(/<h2\b/g)].length, 1, chapter);
+  }
+  const twin = fixture.read(writingDossier("md"));
+  assert.ok(twin.includes(`\n${code}\n\n## Demonstration\n`));
+  assert.ok(twin.includes(`\n${tildeCode}\n\n### Repositories\n`));
+});
+
+test("a single-locale case study stays unpublished and links to GitHub from both work indexes", (t) => {
+  const slug = "doc-sentinel";
+  const fixture = buildCaseFixture(t, undefined, { [`${slug}/en.md`]: caseSource(slug, "en") });
+  assertBuilt(fixture);
+  const xml = fixture.read("sitemap.xml");
+  const { projects } = JSON.parse(fixture.read("projects.json"));
+  const project = projects.find(({ id }) => id === slug);
+  assert.ok(project, "the catalog still lists the project");
+  assert.ok(!Object.hasOwn(project, "caseStudy"));
+  for (const locale of locales) {
+    const route = caseRoute(locale, slug);
+    assert.ok(!xml.includes(`${site}${route}`), route);
+    assert.ok(xml.includes(`<loc>${site}${caseRoute(locale, "writing-harness")}</loc>`));
+    assert.ok(!projects.some(({ caseStudy }) => caseStudy === `${site}${route}`));
+    const row = workRows(fixture.read(`${workRoutes[locale]}index.html`)).find(([, tag]) => attr(tag, "id") === slug);
+    assert.ok(row, `${locale} work-index row`);
+    const links = row[2].match(/<a\b[^>]*>/g);
+    assert.equal(links?.length, 1);
+    assert.equal(attr(links[0], "href"), repoUrl(slug));
+    assert.equal(attr(links[0], "rel"), "external");
+  }
+  assertDossierInventory(fixture.output, ["writing-harness"]);
+  // Unlike the old source-derived check, the production checker must fail if
+  // this source tree is missing a dossier it was expected to publish.
+  assert.throws(() => assertDossierInventory(fixture.output, [slug, "writing-harness"]), { message: /^en html/ });
+});
+
+test("the Markdown twin keeps both plain-text paragraphs inside their list item", (t) => {
+  const english = caseSource("writing-harness", "en")
+    .replace(/^        reason: .*$/m, "        reason: |-\n          First reason paragraph.\n\n          Second reason paragraph.")
+    .replace(/^    consequence: .*$/m, "    consequence: |-\n      First consequence paragraph.\n\n      Second consequence paragraph.")
+    .replace(/^    detail: .*$/m, "    detail: |-\n      First result paragraph.\n\n      Second result paragraph.")
+    .replace(/(^limitations:\n)  - .*$/m, "$1  - |-\n    First limitation paragraph.\n\n    Second limitation paragraph.");
+  const fixture = buildCaseFixture(t, english);
+  assertBuilt(fixture);
+  const twin = fixture.read(writingDossier("md"));
+  for (const block of [
+    "- **Repeat the base in each tone guide** (Not chosen): First reason paragraph.\n\n  Second reason paragraph.\n- **Give the layers explicit precedence**",
+    "**Consequence:** First consequence paragraph.\n\nSecond consequence paragraph.\n\n**Evidence:**",
+    "- **Core test run**: First result paragraph.\n\n  Second result paragraph.\n- [Coverage registry]",
+    "- First limitation paragraph.\n\n  Second limitation paragraph.\n- The source corpus is not included",
+  ]) assert.ok(twin.includes(block), block);
+});
+
+test("the Markdown twin serializes evidence destinations without raw spaces", (t) => {
+  const url = "https://example.com/technical notes/café (v2).html?mode=quick test#section one";
+  const english = caseSource("writing-harness", "en").replace(/^        url: .*$/m, `        url: ${JSON.stringify(url)}`);
+  const fixture = buildCaseFixture(t, english);
+  assertBuilt(fixture);
+  const twin = fixture.read(writingDossier("md"));
+  const destination = twin.match(/\[Precedence in the README\]\(([^)\s]+)\)/)?.[1];
+  assert.equal(destination, "https://example.com/technical%20notes/caf%C3%A9%20%28v2%29.html?mode=quick%20test#section%20one");
+});
+
+for (const slug of publishedSlugs) {
   for (const locale of locales) {
     const path = caseRoute(locale, slug);
     const other = locale === "en" ? "es" : "en";
-    const source = readFileSync(join(caseDir, slug, `${locale}.md`), "utf8");
     test(`${locale} ${slug}: localized dossier, adaptive facts, decisions and evidence`, () => {
+      const source = caseSource(slug, locale);
       const html = read(`${path.slice(1)}index.html`);
       assert.match(html, new RegExp(`<html lang="${locale}"`));
       assert.ok(html.includes(`<link rel="canonical" href="${site}${path}"`));
@@ -473,6 +630,7 @@ for (const slug of complete) {
     });
 
     test(`${locale} ${slug}: catalog links, Markdown twin, sitemap and structured data agree`, () => {
+      const source = caseSource(slug, locale);
       const html = read(`${path.slice(1)}index.html`);
       const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
       const byType = (type) => graph.find((node) => node["@type"] === type);
@@ -516,8 +674,18 @@ test("writing-harness is indexed under TypeScript without adding absent demo and
   for (const locale of locales) assert.doesNotMatch(read(`${caseRoute(locale, "writing-harness").slice(1)}index.html`), /data-case-fact="(?:demo|team)"/);
 });
 
-test("published pages and agent outputs do not expose placeholders", () => {
-  for (const file of readdirSync(dist, { recursive: true }).filter((file) => /\.(?:html|md|txt|json)$/.test(file))) {
-    assert.doesNotMatch(read(file), /\b(?:to confirm|TBD|por confirmar)\b/i, file);
+function assertNoEditorialPlaceholders(output) {
+  for (const file of readdirSync(output, { recursive: true }).filter((file) => /\.(?:html|md|txt|json)$/.test(file))) {
+    let content = readFileSync(join(output, file), "utf8");
+    if (file.endsWith(".html")) {
+      content = content.replace(/<pre\b[^>]*(?:class="terminal-command"|data-terminal-output)[^>]*>[\s\S]*?<\/pre>/g, "");
+    } else if (/\.(?:md|txt)$/.test(file)) {
+      content = content.replace(/^(`{3,})\n\$ [\s\S]*?^\1$/gm, "");
+    }
+    assert.doesNotMatch(content, /\b(?:to confirm|TBD|por confirmar)\b/i, file);
   }
+}
+
+test("published pages and agent outputs do not expose editorial placeholders", () => {
+  assertNoEditorialPlaceholders(dist);
 });
