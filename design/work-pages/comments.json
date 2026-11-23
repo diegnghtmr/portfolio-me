@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "comments": [
+    {
+      "id": "hijnz9si",
+      "file": "02-systems-atlas-index.html",
+      "selector": "#results > section:nth-of-type(1) > ul > li:nth-of-type(6) > a",
+      "excerpt": "Notes →",
+      "comment": "todos deben ser caso de estudio",
+      "createdAt": "2026-11-23T05:33:48.341Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    },
+    {
+      "id": "xmcjtbve",
+      "file": "02-systems-atlas-index.html",
+      "selector": "#results > section:nth-of-type(1) > ul > li:nth-of-type(5) > a",
+      "excerpt": "Case study →",
+      "comment": "mejora visualmente esto",
+      "createdAt": "2026-11-23T05:33:57.100Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    },
+    {
+      "id": "8qb78csd",
+      "file": "02-systems-atlas-index.html",
+      "selector": "body > header > div",
+      "excerpt": "diegnghtmr Work Open source About Contact EN / ES Search ⌘K Dark",
+      "comment": "valida como se ve esto, ya que debe ser igual al meno pero realmente tiene mas sentido que sea diferente y muestre unicamente lo afin a este espacio. Ademas si tenemos lo de idiomas, busqueda y tema eso si debe ser igual al home en el mismo orden.",
+      "createdAt": "2026-11-23T05:35:09.805Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    },
+    {
+      "id": "hl3erg93",
+      "file": "02-systems-atlas-index.html",
+      "selector": "#main > header > div > p:nth-of-type(1)",
+      "excerpt": "SYSTEMS ATLAS / 2025–2026",
+      "comment": "quita las fechas",
+      "createdAt": "2026-11-23T05:35:25.678Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    },
+    {
+      "id": "i37hjgh6",
+      "file": "02-systems-atlas-index.html",
+      "selector": "#filters",
+      "excerpt": "Filter projects Clear filters Surface Web app API & services CLI & tooling Infrastructure Repos Single repo Multi-repo Stack Java TypeScript Go Node",
+      "comment": "mejora este filtro",
+      "createdAt": "2026-11-23T05:35:41.671Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    },
+    {
+      "id": "5s6sflzh",
+      "file": "02-systems-atlas-index.html",
+      "selector": "#main > div > div > div:nth-of-type(1)",
+      "excerpt": "14 projects 6 case studies · 8 project notes",
+      "comment": "usa las skills de anti ai slop en este nuevo apartado",
+      "createdAt": "2026-11-23T05:36:09.985Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    },
+    {
+      "id": "t6011mk8",
+      "file": "02-systems-atlas-index.html",
+      "selector": "body > footer",
+      "excerpt": "diegnghtmr Back to top ↑",
+      "comment": "mejora esta UI",
+      "createdAt": "2026-11-23T05:36:45.415Z",
+      "status": "resolved",
+      "sentAt": "2026-11-23T05:36:47.352Z",
+      "resolvedAt": "2026-11-23T05:50:00.809Z",
+      "resolution": "All 14 are case studies; whole-row links with arrow; contextual nav (← Home / Work) with Search·ES·Theme in home order; no dates; toggle filters with counts and removable selections; honest surface breakdown; real footer with Bayer horizon."
+    }
+  ]
+}

@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Food Court — Case study · diegnghtmr</title>
+<meta name="description" content="A case study of Food Court: a role-based ordering interface and four Spring Boot services for identity, menus, orders, and state history.">
+<style>
+:root {
+  --surface:#06080f; --raised:#1c212c; --text:#f3f6f9; --subtle:#a3b5c1; --ink:#7fb4ca;
+  --mid:#27345c; --gold:#e0c15a; --gold-text:#e0c15a; --on-gold:#06080f;
+  --selection:#263356; --hair:#1c212c; --control:#5c6170; --cat-web:#7fb4ca; --cat-api:#b7cc85;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --unit:8px; --container:1200px; --r:6px; --ease-out:cubic-bezier(0.23,1,0.32,1);
+  color-scheme:dark;
+}
+:root[data-theme="light"] {
+  --surface:#f3f6f9; --raised:#ffffff; --text:#06080f; --subtle:#4e5362; --ink:#24596c;
+  --mid:#91c7dd; --gold-text:#866d01; --selection:#c9dce6;
+  --hair:#dce1ea; --control:#6a6e82; --cat-web:#43778b; --cat-api:#667833;
+  color-scheme:light;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--surface); color:var(--text); font:400 16px/1.55 var(--sans); }
+[hidden] { display:none !important; }
+::selection { background:var(--selection); color:var(--text); }
+:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:var(--r); }
+[data-theme="light"] :focus-visible { outline-color:var(--gold-text); }
+a { color:inherit; text-underline-offset:.24em; text-decoration-thickness:1px; }
+a:hover { color:var(--ink); }
+button, summary { cursor:pointer; }
+button, input { font:inherit; }
+h1, h2, h3, p, dl, dd, figure { margin:0; }
+h1 { font:600 clamp(2rem,5vw,3.5rem)/1.05 var(--sans); letter-spacing:-.02em; }
+h2 { font:600 28px/1.2 var(--sans); letter-spacing:-.01em; }
+h3 { font:600 18px/1.35 var(--sans); }
+main, main [id] { scroll-margin-top:84px; }
+.wrap { max-width:var(--container); margin-inline:auto; padding-inline:calc(var(--unit) * 4); }
+.list { list-style:none; margin:0; padding:0; }
+.mono, kbd, .facts dt { font:500 12px/1.4 var(--mono); }
+.overline { letter-spacing:.08em; text-transform:uppercase; }
+.subtle { color:var(--subtle); }
+.skip { position:absolute; inset:8px auto auto 8px; z-index:10; padding:8px 16px; background:var(--gold); color:var(--on-gold); border-radius:var(--r); transform:translateY(-200%); }
+.skip:focus { transform:none; }
+.site-header { position:sticky; top:0; z-index:5; background:var(--surface); border-bottom:1px solid var(--hair); }
+.site-header .wrap { display:flex; align-items:center; min-height:64px; gap:8px; }
+.brand { margin-inline-end:auto; font:600 15px/1.4 var(--mono); text-decoration:none; }
+.primary ul { display:flex; }
+.primary a { display:flex; align-items:center; min-height:44px; padding:8px; border-bottom:2px solid transparent; color:var(--subtle); font-size:14px; text-decoration:none; }
+.primary a[aria-current] { color:var(--text); border-bottom-color:var(--gold-text); font-weight:600; }
+.primary a:hover { color:var(--ink); }
+.control { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; gap:8px; padding:4px 8px; border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text); font:600 14px/1.3 var(--sans); }
+.control:hover { color:var(--ink); border-color:var(--ink); }
+.locale { position:relative; flex:none; }
+.locale > summary { list-style:none; }
+.locale > summary::-webkit-details-marker { display:none; }
+.locale-panel { position:absolute; z-index:1; top:calc(100% + 8px); right:0; width:min(224px,65vw); padding:16px; border:1px solid var(--control); border-radius:var(--r); background:var(--raised); font-size:14px; }
+.locale-panel strong { display:block; margin-bottom:4px; }
+#menu-toggle { display:none; }
+.crumbs { margin-top:24px; color:var(--subtle); }
+.crumbs ol { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.crumbs li + li::before { content:"/" / ""; margin-right:8px; }
+.crumbs [aria-current] { color:var(--text); }
+.back { display:inline-flex; align-items:center; min-height:44px; gap:8px; color:var(--subtle); font-size:14px; }
+.hero { display:grid; grid-template-columns:1fr minmax(0,.94fr); align-items:stretch; gap:32px; margin:24px 0 24px; }
+.hero-copy { align-self:center; padding-block:8px; }
+.hero-copy .overline { display:flex; align-items:center; gap:8px; margin-bottom:16px; color:var(--subtle); }
+.dot { display:inline-block; flex:none; width:8px; height:8px; background:var(--cat-web); }
+.hero-copy p:last-child { max-width:49ch; margin-top:16px; color:var(--subtle); font-size:18px; }
+.cover { display:block; width:100%; height:clamp(176px,15vw,208px); background:var(--surface); border:1px solid var(--hair); border-radius:var(--r); }
+.facts { display:grid; grid-template-columns:1fr 1.1fr 1.2fr 1.15fr; background:var(--raised); border:1px solid var(--hair); border-radius:var(--r); }
+.facts > div { padding:16px; min-width:0; }
+.facts > div + div { border-left:1px solid var(--hair); }
+.facts dt { text-transform:uppercase; letter-spacing:.05em; color:var(--subtle); margin-bottom:8px; }
+.facts dd { font-size:14px; }
+.facts a { display:inline-flex; align-items:center; min-height:24px; }
+.gold-link { font-weight:600; color:var(--gold-text); }
+.layout { display:grid; grid-template-columns:192px minmax(0,1fr); align-items:start; gap:56px; margin-top:48px; }
+.toc { position:sticky; top:96px; padding:8px 0; border-top:1px solid var(--hair); }
+.toc h2 { margin:8px 0; color:var(--subtle); }
+.toc a { display:flex; align-items:center; gap:8px; min-height:40px; padding:4px 0 4px 8px; border-left:2px solid var(--hair); color:var(--subtle); font-size:14px; text-decoration:none; }
+.toc a:hover { color:var(--ink); }
+.toc a[aria-current] { border-left-color:var(--gold-text); color:var(--text); font-weight:600; }
+.toc a span { color:var(--subtle); }
+.chapters { min-width:0; }
+.chapter + .chapter { margin-top:96px; }
+.section-head { display:flex; align-items:baseline; gap:16px; border-top:1px solid var(--hair); padding-top:16px; margin-bottom:24px; }
+.section-head span { color:var(--gold-text); }
+.lede { max-width:66ch; color:var(--subtle); margin-bottom:24px; }
+.lede strong { color:var(--text); }
+.roles { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.roles > div { border-top:1px solid var(--hair); padding-top:8px; }
+.roles dt { font-weight:600; }
+.roles dd { color:var(--subtle); font-size:14px; }
+.captures { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 16px; }
+.captures figure:first-child { grid-column:1/-1; }
+.capture { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:136px; padding:16px; background:var(--raised); border:1px dashed var(--control); border-radius:var(--r); text-align:center; }
+.captures figure:first-child .capture { min-height:240px; }
+.capture svg { width:24px; height:24px; color:var(--subtle); }
+figcaption { margin-top:8px; color:var(--subtle); font-size:14px; }
+.map { padding:24px 16px 16px; background:var(--raised); border:1px solid var(--hair); border-radius:var(--r); }
+.map svg { display:block; width:100%; height:auto; }
+.map .map-mobile { display:none; max-width:448px; margin-inline:auto; }
+.map rect.node { fill:var(--surface); stroke:var(--control); }
+.map path { fill:none; stroke:var(--subtle); stroke-width:1.5; }
+.map .node-title { fill:var(--text); font:600 18px var(--sans); }
+.map .node-note { fill:var(--subtle); font:500 13px var(--mono); }
+.map .web { fill:var(--cat-web); }
+.map .api { fill:var(--cat-api); }
+.repo-title { margin:32px 0 8px; }
+.repos li { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); align-items:center; column-gap:16px; border-bottom:1px solid var(--hair); }
+.repos a { display:flex; align-items:center; gap:8px; min-height:44px; padding-block:8px; font-family:var(--mono); font-size:14px; overflow-wrap:anywhere; }
+.repos .api { background:var(--cat-api); }
+.repos p { color:var(--subtle); font-size:14px; }
+.decision { padding-block:16px; border-bottom:1px solid var(--hair); }
+.decision header { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
+.draft { color:var(--subtle); border:1px solid var(--control); border-radius:var(--r); padding:4px 8px; }
+.decision dl > div { display:grid; grid-template-columns:144px 1fr; gap:8px 16px; margin-top:8px; }
+.decision dd, .result dd { color:var(--subtle); }
+.result { display:grid; gap:16px; }
+.result dt { font-weight:600; }
+.next { display:grid; gap:16px; margin-top:64px; }
+.next > a:first-child { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px; border:1px solid var(--control); border-radius:var(--r); background:var(--raised); text-decoration:none; }
+.next > a:first-child:hover { border-color:var(--gold-text); color:var(--text); }
+.next .mono { display:block; color:var(--subtle); }
+.next strong { display:block; margin-top:8px; font-size:22px; font-weight:600; }
+.arrow { color:var(--gold-text); transition:transform 180ms var(--ease-out); }
+.next > a:first-child:is(:hover,:focus-visible) .arrow { transform:translateX(4px); }
+.next .back { justify-self:start; }
+.site-footer { border-top:1px solid var(--hair); margin-top:80px; padding:32px 0 48px; font-size:14px; }
+.site-footer .wrap, .site-footer nav { display:flex; flex-wrap:wrap; justify-content:space-between; gap:16px; }
+.site-footer strong { color:var(--text); }
+.search { width:min(560px,calc(100% - 40px)); max-height:80vh; padding:24px; border:1px solid var(--control); border-radius:var(--r); background:var(--raised); color:var(--text); }
+.search::backdrop { background:var(--surface); opacity:.84; }
+.search header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:16px; }
+.search .control:not(:hover), .search input { border-color:var(--subtle); }
+.search input { width:100%; min-height:44px; margin:4px 0 8px; padding:8px; border:1px solid var(--subtle); border-radius:var(--r); background:var(--surface); color:var(--text); }
+.search li a { display:flex; align-items:center; min-height:44px; border-bottom:1px solid var(--hair); }
+canvas.cover { image-rendering:pixelated; }
+@media (max-width:1040px) { .map .map-wide { display:none; } .map .map-mobile { display:block; } }
+@media (max-width:900px) { .chapter + .chapter { margin-top:72px; } }
+@media (max-width:860px) {
+  #menu-toggle:not([hidden]) { display:inline-flex; }
+  .primary { position:absolute; top:100%; left:0; right:0; display:none; padding:8px 20px; background:var(--surface); border-bottom:1px solid var(--control); }
+  .primary[data-open="true"] { display:block; }
+  .primary ul { display:flex; flex-direction:column; }
+  .primary a[aria-current] { border-bottom-color:transparent; border-left:2px solid var(--gold-text); }
+  .layout { display:block; }
+  .toc { position:static; margin-bottom:32px; }
+  .toc ol { display:flex; flex-wrap:wrap; gap:0 16px; }
+  .toc a { min-height:44px; }
+  .facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .facts > div:nth-child(3) { border-left:0; }
+  .facts > div:nth-child(n+3) { border-top:1px solid var(--hair); }
+}
+@media (max-width:640px) {
+  .wrap { padding-inline:calc(var(--unit) * 2.5); }
+  .hero { grid-template-columns:1fr; gap:16px; margin-block:8px 16px; }
+  .hero-copy .overline { margin-bottom:8px; }
+  .cover { height:104px; }
+  .layout { margin-top:32px; }
+  .site-header .wrap { gap:4px; }
+  .site-header .control { padding-inline:6px; }
+  .search-word { display:none; }
+  .roles, .captures, .repos li, .decision dl > div { grid-template-columns:1fr; }
+  .captures figure:first-child .capture { min-height:176px; }
+  .repos li { padding-bottom:8px; }
+  .map { padding:16px 8px; }
+  .decision dl > div { gap:0; }
+  .section-head { gap:8px; }
+}
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } .next > a:first-child:is(:hover,:focus-visible) .arrow { transform:none; } }
+@media (forced-colors:active) { .cover { display:none; } :focus-visible { outline-color:Highlight !important; } .map .node-title, .map .node-note { fill:CanvasText; } .map rect.node { fill:Canvas; stroke:CanvasText; } .map path { stroke:CanvasText; } }
+@media print { .cover, .site-header, .toc { display:none; } .layout { display:block; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../portfolio-home/01-split-statement.html">diegnghtmr</a>
+    <nav class="primary" id="primary-nav" aria-label="Primary"><ul class="list">
+      <li><a href="01-ledger-index.html" aria-current="location">Work</a></li>
+      <li><a href="../portfolio-home/01-split-statement.html#oss">Open source</a></li>
+      <li><a href="../portfolio-home/01-split-statement.html#about">About</a></li>
+      <li><a href="../portfolio-home/01-split-statement.html#contact">Contact</a></li>
+    </ul></nav>
+    <button class="control" id="search-toggle" type="button" aria-label="Search (Command or Control K)" aria-keyshortcuts="Meta+K Control+K" aria-haspopup="dialog" hidden><span class="search-word">Search</span><kbd aria-hidden="true">⌘K</kbd></button>
+    <details class="locale"><summary class="control">EN / ES</summary><div class="locale-panel"><strong>English · current</strong><span class="subtle">Spanish case study unavailable in this preview.</span></div></details>
+    <button class="control" id="theme-toggle" type="button" aria-label="Dark theme. Switch to light" hidden>Dark</button>
+    <button class="control" id="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" hidden>Menu</button>
+  </div>
+</header>
+<main id="main" class="wrap" tabindex="-1">
+  <nav class="crumbs mono" aria-label="Breadcrumb"><ol class="list"><li><a href="../portfolio-home/01-split-statement.html">Home</a></li><li><a href="01-ledger-index.html">Work</a></li><li aria-current="page">Food Court</li></ol></nav>
+  <a class="back" href="01-ledger-index.html"><span aria-hidden="true">←</span> All projects</a>
+  <article aria-labelledby="title">
+    <header>
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="mono overline"><i class="dot" aria-hidden="true"></i>Case study / Web platform</p>
+          <h1 id="title">Food Court</h1>
+          <p>A role-based ordering platform where customers place orders, restaurant owners manage menus, and staff move orders through states with a record of each change.</p>
+        </div>
+        <canvas class="cover" id="cover" width="144" height="48" aria-hidden="true"></canvas>
+      </div>
+      <dl class="facts" aria-label="Project facts">
+        <div><dt>Role</dt><dd>Contribution split to confirm</dd></div>
+        <div><dt>Timeframe</dt><dd>Repositories updated <time datetime="2026-01">Jan 2026</time></dd></div>
+        <div><dt>Surface &amp; stack</dt><dd>Web + APIs<br>React, TypeScript, Spring Boot</dd></div>
+        <div><dt>Repositories &amp; demo</dt><dd><a class="gold-link" href="#repositories">5 repositories <span aria-hidden="true">&nbsp;↓</span></a><br><span class="subtle">Live demo not confirmed</span></dd></div>
+      </dl>
+    </header>
+    <div class="layout">
+      <nav class="toc" aria-labelledby="toc-title">
+        <h2 id="toc-title" class="mono overline">On this page</h2>
+        <ol class="list">
+          <li><a href="#problem" aria-current="location"><span class="mono" aria-hidden="true">01</span> Problem</a></li>
+          <li><a href="#demo"><span class="mono" aria-hidden="true">02</span> Demonstration</a></li>
+          <li><a href="#architecture"><span class="mono" aria-hidden="true">03</span> Architecture</a></li>
+          <li><a href="#decisions"><span class="mono" aria-hidden="true">04</span> Decisions</a></li>
+          <li><a href="#result"><span class="mono" aria-hidden="true">05</span> Result &amp; next steps</a></li>
+        </ol>
+      </nav>
+      <div class="chapters">
+        <section class="chapter" aria-labelledby="problem">
+          <header class="section-head"><span class="mono" aria-hidden="true">01</span><h2 id="problem" tabindex="-1">One order, three kinds of work</h2></header>
+          <p class="lede">An order starts with a customer’s menu choice and then becomes work for staff. Each role needs a different view, while the order must keep a trace of every state change.</p>
+          <dl class="roles">
+            <div><dt>Customers</dt><dd>Browse menus and place orders.</dd></div>
+            <div><dt>Restaurant owners</dt><dd>Manage restaurants and dishes.</dd></div>
+            <div><dt>Employees</dt><dd>Move orders through states.</dd></div>
+          </dl>
+        </section>
+        <section class="chapter" aria-labelledby="demo">
+          <header class="section-head"><span class="mono" aria-hidden="true">02</span><h2 id="demo" tabindex="-1">Demonstration</h2></header>
+          <p class="lede">Capture plan for one order: customer placement, an employee’s state change, and the matching history entry.</p>
+          <div class="captures">
+            <figure>
+              <div class="capture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="6"/><path d="M2 9h20m-13 0v11m3-7h6m-6 3h6"/></svg><strong>Screenshot: order board</strong><span class="mono subtle">To capture</span></div>
+              <figcaption>Employee view · Show an order before and after a status change.</figcaption>
+            </figure>
+            <figure>
+              <div class="capture"><strong>Screenshot: customer ordering</strong><span class="mono subtle">To capture</span></div>
+              <figcaption>Customer view · Show the menu and the order it produces.</figcaption>
+            </figure>
+            <figure>
+              <div class="capture"><strong>Screenshot: order history</strong><span class="mono subtle">To capture</span></div>
+              <figcaption>Traceability · Show the record of that same state change.</figcaption>
+            </figure>
+          </div>
+        </section>
+        <section class="chapter" aria-labelledby="architecture">
+          <header class="section-head"><span class="mono" aria-hidden="true">03</span><h2 id="architecture" tabindex="-1">System map</h2></header>
+          <p class="lede">One web interface serves three roles. Four Spring Boot services separate who can act, what’s on the menu, what state an order is in, and how it got there.</p>
+          <figure class="map">
+            <svg class="map-wide" viewBox="0 0 840 282" role="img" aria-labelledby="map-title map-desc">
+              <title id="map-title">Food Court responsibility map</title><desc id="map-desc">The Food Court system contains a role-based web interface and four services: Identity, Menu, Orders, and History. Connector lines group components; they do not indicate network calls.</desc>
+              <g text-anchor="middle"><text class="node-title" x="420" y="22">Food Court system</text><text class="node-note" x="420" y="44">Customers · Restaurant owners · Employees</text></g>
+              <path d="M420 54 V74 M420 146 V193 M109 215 V193 H731 V215 M317 193 V215 M523 193 V215"/>
+              <g><rect class="node" x="276" y="74" width="288" height="72" rx="6"/><rect class="web" x="296" y="95" width="8" height="8"/><text class="node-title" x="315" y="105">Role-based web interface</text><text class="node-note" x="315" y="127">React + TypeScript</text></g>
+              <g transform="translate(12 215)"><rect class="node" width="194" height="60" rx="6"/><rect class="api" x="14" y="16" width="8" height="8"/><text class="node-title" x="32" y="25">Identity</text><text class="node-note" x="32" y="45">Roles and JWT</text></g>
+              <g transform="translate(220 215)"><rect class="node" width="194" height="60" rx="6"/><rect class="api" x="14" y="16" width="8" height="8"/><text class="node-title" x="32" y="25">Menu</text><text class="node-note" x="32" y="45">Restaurants, dishes</text></g>
+              <g transform="translate(426 215)"><rect class="node" width="194" height="60" rx="6"/><rect class="api" x="14" y="16" width="8" height="8"/><text class="node-title" x="32" y="25">Orders</text><text class="node-note" x="32" y="45">State transitions</text></g>
+              <g transform="translate(634 215)"><rect class="node" width="194" height="60" rx="6"/><rect class="api" x="14" y="16" width="8" height="8"/><text class="node-title" x="32" y="25">History</text><text class="node-note" x="32" y="45">Order state changes</text></g>
+            </svg>
+            <svg class="map-mobile" viewBox="0 0 316 324" role="img" aria-labelledby="map-mobile-title map-mobile-desc">
+              <title id="map-mobile-title">Food Court responsibility map</title><desc id="map-mobile-desc">The Food Court system contains a role-based web interface and four services: Identity, Menu, Orders, and History. Connector lines group components; they do not indicate network calls.</desc>
+              <g text-anchor="middle"><text class="node-title" x="158" y="22">Food Court system</text><text class="node-note" x="158" y="44">Customers · Owners · Employees</text></g>
+              <path d="M158 54 V66 M158 132 V281 M147 196 H169 M147 281 H169"/>
+              <g transform="translate(19 66)"><rect class="node" width="278" height="66" rx="6"/><rect class="web" x="16" y="20" width="8" height="8"/><text class="node-title" x="34" y="30">Role-based web interface</text><text class="node-note" x="34" y="52">React + TypeScript</text></g>
+              <g transform="translate(3 164)"><rect class="node" width="144" height="64" rx="6"/><rect class="api" x="12" y="16" width="8" height="8"/><text class="node-title" x="30" y="27">Identity</text><text class="node-note" x="12" y="48">Roles and JWT</text></g>
+              <g transform="translate(169 164)"><rect class="node" width="144" height="64" rx="6"/><rect class="api" x="12" y="16" width="8" height="8"/><text class="node-title" x="30" y="27">Menu</text><text class="node-note" x="12" y="48">Restaurants</text></g>
+              <g transform="translate(3 249)"><rect class="node" width="144" height="64" rx="6"/><rect class="api" x="12" y="16" width="8" height="8"/><text class="node-title" x="30" y="27">Orders</text><text class="node-note" x="12" y="48">State changes</text></g>
+              <g transform="translate(169 249)"><rect class="node" width="144" height="64" rx="6"/><rect class="api" x="12" y="16" width="8" height="8"/><text class="node-title" x="30" y="27">History</text><text class="node-note" x="12" y="48">State history</text></g>
+            </svg>
+            <figcaption>Lines group responsibilities, not network calls. Service-to-service integration is still to confirm.</figcaption>
+          </figure>
+          <h3 class="repo-title" id="repositories" tabindex="-1">Repositories</h3>
+          <ul class="repos list">
+            <li><a href="https://github.com/diegnghtmr/food-court-ui"><i class="dot" aria-hidden="true"></i><span>food-court-ui <span aria-hidden="true">↗</span></span></a><p>Role-based React and TypeScript interface.</p></li>
+            <li><a href="https://github.com/diegnghtmr/user-microservice"><i class="dot api" aria-hidden="true"></i><span>user-microservice <span aria-hidden="true">↗</span></span></a><p>Identity, roles, and JWT.</p></li>
+            <li><a href="https://github.com/diegnghtmr/food-court-microservice"><i class="dot api" aria-hidden="true"></i><span>food-court-microservice <span aria-hidden="true">↗</span></span></a><p>Restaurants, dishes, and menus.</p></li>
+            <li><a href="https://github.com/diegnghtmr/order-microservice"><i class="dot api" aria-hidden="true"></i><span>order-microservice <span aria-hidden="true">↗</span></span></a><p>Orders and their state transitions.</p></li>
+            <li><a href="https://github.com/diegnghtmr/traceability-microservice"><i class="dot api" aria-hidden="true"></i><span>traceability-microservice <span aria-hidden="true">↗</span></span></a><p>History of order state changes.</p></li>
+          </ul>
+        </section>
+        <section class="chapter" aria-labelledby="decisions">
+          <header class="section-head"><span class="mono" aria-hidden="true">04</span><h2 id="decisions" tabindex="-1">Decisions &amp; trade-offs</h2></header>
+          <p class="lede">The repository boundaries are visible. The reasons for choosing them still need confirmation.</p>
+          <div class="decision">
+            <header><h3>Separate services or one API?</h3><span class="mono draft">Draft — to confirm</span></header>
+            <dl>
+              <div><dt>Options considered</dt><dd>One API with internal modules, or one service per responsibility.</dd></div>
+              <div><dt>Choice</dt><dd>Separate identity, menu, order, and traceability services.</dd></div>
+              <div><dt>Consequence</dt><dd>Each capability has a clear home, but behavior that crosses services needs explicit contracts.</dd></div>
+            </dl>
+          </div>
+          <div class="decision">
+            <header><h3>Order history as a separate concern</h3><span class="mono draft">Draft — to confirm</span></header>
+            <dl>
+              <div><dt>Options considered</dt><dd>An audit table inside the order service, or a dedicated history service.</dd></div>
+              <div><dt>Choice</dt><dd>Give order history its own service.</dd></div>
+              <div><dt>Consequence</dt><dd>History has a clear owner, but the handoff from a state change to its record needs verification.</dd></div>
+            </dl>
+          </div>
+        </section>
+        <section class="chapter" aria-labelledby="result">
+          <header class="section-head"><span class="mono" aria-hidden="true">05</span><h2 id="result" tabindex="-1">Result &amp; next steps</h2></header>
+          <dl class="result">
+            <div><dt>What you can verify</dt><dd>The <a href="#repositories">five repositories</a> separate the role-based UI from identity, menus, orders, and history.</dd></div>
+            <div><dt>What this case study doesn’t verify</dt><dd>Diego’s exact contribution by repository, a hosted demo, and how the services hand off an order state change are not confirmed here.</dd></div>
+            <div><dt>What I’d do next</dt><dd>Capture one order end to end and link a repeatable check that compares its state change with the corresponding history entry.</dd></div>
+          </dl>
+        </section>
+        <nav class="next" aria-label="More projects">
+          <a href="../portfolio-home/01-split-statement.html#p3"><span><span class="mono overline">Next project</span><strong>Brújula</strong></span><span class="arrow" aria-hidden="true">→</span></a>
+          <a class="back" href="01-ledger-index.html"><span aria-hidden="true">←</span> All projects</a>
+        </nav>
+      </div>
+    </div>
+  </article>
+</main>
+<footer class="site-footer"><div class="wrap"><span><strong>Diego Alejandro Flores Quintero</strong><br><span class="subtle">Software developer</span></span><nav aria-label="Footer"><a href="01-ledger-index.html">Work</a><a href="https://github.com/diegnghtmr">GitHub</a><a href="../portfolio-home/01-split-statement.html#contact">Contact</a></nav></div></footer>
+<dialog class="search" id="search" aria-labelledby="search-title">
+  <header><h2 id="search-title">Search this preview</h2><form method="dialog"><button class="control" type="submit">Close</button></form></header>
+  <label for="query">Sections and site links</label><input id="query" type="search" autocomplete="off" autofocus>
+  <p class="subtle" id="search-status" role="status"></p><ul class="list" id="search-results"></ul>
+</dialog>
+<script>
+const root = document.documentElement;
+const cover = document.getElementById('cover');
+const context = cover.getContext('2d');
+const bayer = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+function drawCover() {
+  if (!context || !cover.clientWidth) return;
+  const palette = getComputedStyle(root);
+  const width = cover.width = Math.ceil(cover.clientWidth / 4);
+  const height = cover.height = Math.ceil(cover.clientHeight / 4);
+  context.fillStyle = palette.getPropertyValue('--surface').trim();
+  context.fillRect(0, 0, width, height);
+  const mid = palette.getPropertyValue('--mid').trim();
+  const ink = palette.getPropertyValue('--ink').trim();
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const dx = (x - width * .67) / height;
+      const dy = (y - height * .89) / height;
+      const distance = Math.hypot(dx * .72, dy * 1.12);
+      const fade = Math.max(0, 1 - distance / 2.25);
+      const crest = (.5 + .5 * Math.cos(distance * 17)) ** 2;
+      const threshold = (bayer[y % 4][x % 4] + .5) / 16;
+      if (fade * (.22 + .7 * crest) <= threshold) continue;
+      context.fillStyle = fade * crest > .62 ? ink : mid;
+      context.fillRect(x, y, 1, 1);
+    }
+  }
+}
+new ResizeObserver(drawCover).observe(cover);
+const theme = document.getElementById('theme-toggle');
+theme.hidden = false;
+theme.addEventListener('click', () => {
+  const light = root.dataset.theme !== 'light';
+  root.dataset.theme = light ? 'light' : 'dark';
+  theme.setAttribute('aria-label', light ? 'Light theme. Switch to dark' : 'Dark theme. Switch to light');
+  theme.textContent = light ? 'Light' : 'Dark';
+  drawCover();
+});
+const menu = document.getElementById('menu-toggle');
+const primary = document.getElementById('primary-nav');
+menu.hidden = false;
+function setMenu(open) {
+  menu.setAttribute('aria-expanded', String(open));
+  primary.dataset.open = String(open);
+}
+menu.addEventListener('click', () => setMenu(menu.getAttribute('aria-expanded') !== 'true'));
+const narrow = matchMedia('(max-width:860px)');
+function syncNav() {
+  if (narrow.matches && primary.contains(document.activeElement)) menu.focus();
+  if (!narrow.matches && document.activeElement === menu) primary.querySelector('a').focus();
+  setMenu(false);
+}
+narrow.addEventListener('change', syncNav);
+
+const dialog = document.getElementById('search');
+const search = document.getElementById('search-toggle');
+const query = document.getElementById('query');
+const matches = document.getElementById('search-results');
+const status = document.getElementById('search-status');
+const toc = [...document.querySelectorAll('.toc a')];
+const headings = toc.map(link => document.querySelector(link.hash));
+const searchLinks = [...toc, document.querySelector('.gold-link'), ...primary.querySelectorAll('a')];
+let returnFocus;
+function showMatches() {
+  matches.replaceChildren();
+  const filter = query.value.trim().toLowerCase();
+  for (const link of searchLinks) {
+    const label = link.hash.startsWith('#') && link.closest('.toc') ? document.querySelector(link.hash).textContent : link.textContent.trim().replace(/\s*↓$/, '');
+    if (!`${label} ${link.textContent}`.toLowerCase().includes(filter)) continue;
+    const item = document.createElement('li');
+    const result = document.createElement('a');
+    result.href = link.getAttribute('href');
+    result.textContent = label;
+    item.append(result);
+    matches.append(item);
+  }
+  const count = matches.childElementCount;
+  status.textContent = count ? `${count} ${count === 1 ? 'result' : 'results'}` : 'No matches. Try a different section name.';
+}
+function openSearch() {
+  if (dialog.open) return;
+  returnFocus = document.activeElement;
+  query.value = '';
+  showMatches();
+  dialog.showModal();
+}
+search.hidden = false;
+search.addEventListener('click', openSearch);
+query.addEventListener('input', showMatches);
+dialog.addEventListener('close', () => {
+  if (returnFocus?.matches('body') || !returnFocus?.getClientRects().length) search.focus();
+  else returnFocus.focus({preventScroll:true});
+});
+matches.addEventListener('click', event => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) return;
+  returnFocus = document.querySelector(link.hash);
+  dialog.close();
+});
+document.addEventListener('keydown', event => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    openSearch();
+  }
+  if (event.key === 'Escape' && !dialog.open && menu.getAttribute('aria-expanded') === 'true') {
+    setMenu(false);
+    menu.focus();
+  }
+});
+let current;
+let pending = false;
+function syncContents() {
+  pending = false;
+  const threshold = document.querySelector('.site-header').offsetHeight + 48;
+  const index = Math.max(0, headings.findLastIndex(heading => heading.getBoundingClientRect().top <= threshold));
+  if (index === current) return;
+  if (current !== undefined) toc[current].removeAttribute('aria-current');
+  toc[index].setAttribute('aria-current', 'location');
+  current = index;
+}
+addEventListener('scroll', () => {
+  if (!pending) { pending = true; requestAnimationFrame(syncContents); }
+}, {passive:true});
+syncContents();
+</script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work | diegnghtmr</title>
+<script>document.documentElement.dataset.js = '';</script>
+<style>
+:root {
+  --surface:#06080f; --raised:#1c212c; --text:#f3f6f9; --subtle:#a3b5c1; --muted:#8a8fa3;
+  --whisper:#191e28; --gold:#e0c15a; --gold-text:#e0c15a; --on-gold:#06080f;
+  --selection:#263356; --hair:#1c212c; --control:#5c6170;
+  --cat-web:#7fb4ca; --cat-api:#b7cc85; --cat-mcp:#b99bf2; --cat-infra:#deba87; --cat-data:#cb7c94;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --unit:8px; --container:1200px; --r:6px; --r-sm:6px; --ease-out:cubic-bezier(0.23,1,0.32,1);
+  color-scheme:dark;
+}
+:root[data-theme="light"] {
+  --surface:#f3f6f9; --raised:#ffffff; --text:#06080f; --subtle:#4e5362; --muted:#6a6e82;
+  --whisper:#e2e6f2; --gold-text:#866d01; --selection:#c9dce6; --hair:#dce1ea; --control:#6a6e82;
+  --cat-web:#43778b; --cat-api:#667833; --cat-mcp:#7f61b3; --cat-infra:#8c6b39; --cat-data:#a45870;
+  color-scheme:light;
+}
+*,*::before,*::after {box-sizing:border-box}
+[hidden] {display:none !important}
+html {scroll-padding-block-start:84px}
+body {margin:0; background:var(--surface); color:var(--text); font:400 16px/1.55 var(--sans)}
+a {color:inherit; text-underline-offset:.22em}
+a:hover {color:var(--text)}
+button,input {font:inherit; color:inherit}
+button {cursor:pointer}
+::selection {background:var(--selection)}
+:focus-visible {outline:2px solid var(--gold-text); outline-offset:2px; border-radius:var(--r-sm)}
+.wrap {max-width:var(--container); margin-inline:auto; padding-inline:calc(var(--unit) * 4)}
+.skip {position:absolute; inset:var(--unit) auto auto calc(var(--unit) * 2); z-index:3; padding:var(--unit) calc(var(--unit) * 2); background:var(--gold); color:var(--on-gold); border-radius:var(--r); transform:translateY(-200%)}
+.skip:hover {color:var(--on-gold)}
+.skip:focus {transform:none}
+.site-nav {position:sticky; inset-block-start:0; z-index:2; background:var(--surface); border-block-end:1px solid var(--hair)}
+.nav-inner,.nav-links ul,.nav-tools {display:flex; align-items:center; gap:calc(var(--unit) / 2)}
+.nav-inner {min-height:calc(var(--unit) * 7.5); gap:calc(var(--unit) * 2.5)}
+.brand {font:600 15px/1.55 var(--mono); text-decoration:none}
+.nav-links {margin-inline-end:auto}
+.nav-links ul {margin:0; padding:0; list-style:none}
+.nav-links li:last-child::before {content:'/'; color:var(--muted); padding-inline-end:var(--unit)}
+.nav-links a,.nav-links [aria-current] {display:inline-flex; align-items:center; gap:calc(var(--unit) / 2); padding:var(--unit) calc(var(--unit) * 1.5); color:var(--subtle); font-size:14px; text-decoration:none}
+.nav-links a:hover,.nav-links [aria-current] {color:var(--text)}
+.nav-links [aria-current] {padding-inline-start:0; font-weight:600}
+.nav-control {
+  display:inline-flex; align-items:center; justify-content:center; gap:calc(var(--unit) * .75);
+  min-height:calc(var(--unit) * 5); min-width:calc(var(--unit) * 5); padding:0 var(--unit);
+  border:1px solid var(--control); border-radius:var(--r-sm); background:transparent; color:var(--subtle);
+  font:500 13px var(--sans); text-decoration:none; white-space:nowrap;
+}
+.nav-control:hover {color:var(--text)}
+:root[data-js] .nav-control[hidden] {display:inline-flex !important; visibility:hidden}
+kbd {padding:1px 5px; border:1px solid var(--hair); border-radius:var(--r-sm); color:var(--muted); font:500 11px var(--mono)}
+.theme-toggle {min-width:5.4em}
+.theme-light,[data-theme="light"] .theme-dark,.menu-toggle {display:none}
+[data-theme="light"] .theme-light {display:inline}
+.hero {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,248px); gap:calc(var(--unit) * 4); align-items:end; padding-block:calc(var(--unit) * 7) calc(var(--unit) * 4); border-block-end:1px solid var(--hair)}
+.kicker {margin:0 0 var(--unit); color:var(--gold-text); font:600 12px/1.5 var(--mono); letter-spacing:.09em; text-transform:uppercase}
+h1 {margin:0; font:600 clamp(2rem,5vw,3.5rem)/1.05 var(--sans); letter-spacing:-.02em}
+.intro {color:var(--subtle); margin:calc(var(--unit) * 1.5) 0 0}
+.key {display:grid; grid-template-columns:48px minmax(0,1fr); align-items:center; gap:var(--unit); margin:0; color:var(--subtle); font-size:13px; line-height:1.45}
+.key svg {display:block; width:48px; color:var(--subtle)}
+.key strong {display:block; color:var(--text); font-size:14px; font-weight:600}
+.atlas {display:grid; grid-template-columns:232px minmax(0,1fr); gap:calc(var(--unit) * 4); margin-block-start:calc(var(--unit) * 3)}
+.atlas:not(:has(.filters:not([hidden]))) {grid-template-columns:minmax(0,1fr)}
+.filters {align-self:start; min-inline-size:0}
+.filter-top {display:flex; align-items:center; min-block-size:44px}
+.filter-heading {margin:0; font:600 16px/1.4 var(--sans)}
+.control.filter-toggle {display:none}
+.control {display:inline-flex; justify-content:center; align-items:center; gap:var(--unit); min-block-size:44px; padding:var(--unit) calc(var(--unit) * 1.5); border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text); font:600 14px var(--sans); text-decoration:none}
+.control:hover {border-color:var(--gold-text)}
+.primary {background:var(--gold); border-color:var(--gold); color:var(--on-gold)}
+.primary:hover {background:var(--text); border-color:var(--text); color:var(--surface)}
+.facets {display:grid; gap:calc(var(--unit) * 2)}
+fieldset {min-inline-size:0; margin:0; padding:0; border:0}
+legend {width:100%; margin:0; padding:var(--unit) 0; border-block-start:1px solid var(--hair); color:var(--subtle); font:500 12px/1.5 var(--mono)}
+.options {display:flex; flex-wrap:wrap; gap:var(--unit)}
+.facet {display:inline-flex; align-items:center; justify-content:space-between; gap:var(--unit); min-block-size:40px; padding:calc(var(--unit) / 2) var(--unit); border:1px solid var(--control); border-radius:var(--r-sm); background:transparent; font:500 13px/1.3 var(--sans)}
+.facet:hover {background:var(--raised)}
+.facet-count {min-inline-size:1.5ch; text-align:end; color:var(--subtle); font:500 12px/1 var(--mono); font-variant-numeric:tabular-nums}
+.facet[aria-pressed="true"] {border-color:var(--gold-text); background:var(--gold); color:var(--on-gold)}
+.facet[aria-pressed="true"] .facet-count {color:inherit}
+.result-head {padding-block:calc(var(--unit) / 2) calc(var(--unit) * 2); border-block-end:1px solid var(--hair)}
+.count {width:fit-content; margin:0; font:600 19px/1.4 var(--sans); letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+.breakdown {display:flex; flex-wrap:wrap; gap:calc(var(--unit) / 2) calc(var(--unit) * 2); margin:var(--unit) 0 0; padding:0; list-style:none; color:var(--subtle); font-size:13px}
+.breakdown strong {color:var(--text); font:500 12px var(--mono)}
+.active-bar {display:flex; flex-wrap:wrap; align-items:center; gap:0 var(--unit); margin-block-start:var(--unit)}
+.active {display:flex; flex-wrap:wrap; align-items:center; gap:var(--unit); min-inline-size:0}
+.chip {min-block-size:36px; max-inline-size:100%; padding:calc(var(--unit) / 2) var(--unit); border:1px solid var(--control); border-radius:var(--r-sm); background:transparent; color:var(--text); font:500 13px var(--sans); overflow-wrap:anywhere; text-align:start}
+.chip:hover {border-color:var(--gold-text)}
+.chip span {margin-inline-start:var(--unit); color:var(--gold-text); font-size:16px}
+.reset {min-block-size:44px; padding:0 var(--unit); border:0; border-radius:var(--r-sm); background:transparent; color:var(--gold-text); text-decoration:underline; text-underline-offset:.22em; font:600 13px var(--sans)}
+.group {margin-block-start:calc(var(--unit) * 4)}
+.group-head {display:flex; justify-content:space-between; align-items:baseline; gap:var(--unit); padding-block-end:var(--unit); border-block-end:1px solid var(--hair)}
+.group-head h2,.empty h2,dialog h2 {margin:0; font:600 28px/1.2 var(--sans); letter-spacing:-.01em}
+.group-count {flex:none; color:var(--subtle); font:500 12px/1.5 var(--mono)}
+.projects {padding:0; margin:0; list-style:none}
+.projects li+li {border-block-start:1px solid var(--hair)}
+.study {display:grid; grid-template-columns:88px minmax(0,1fr) 32px; align-items:center; gap:calc(var(--unit) * 2); padding:calc(var(--unit) * 2) var(--unit); border-radius:var(--r); color:var(--text); text-decoration:none}
+.study:is(:hover,:focus) {background:var(--raised)}
+.study:focus {outline:2px solid var(--gold-text); outline-offset:-2px}
+.repository {display:grid; place-items:center; align-content:center; align-self:stretch; padding-inline-end:var(--unit); border-inline-end:1px solid var(--hair); color:var(--subtle)}
+.repo-map {display:block; width:72px; max-width:100%; height:auto}
+.repo-count {font:500 11px/1.4 var(--mono); white-space:nowrap}
+#two path,#four path,#five path {fill:none; stroke:currentColor; stroke-width:1; stroke-dasharray:2 2}
+.node-web {fill:var(--cat-web)} .node-api {fill:var(--cat-api)} .node-cli {fill:var(--cat-mcp)} .node-infra {fill:var(--cat-infra)} .node-data {fill:var(--cat-data)}
+.project h3 {margin:0; font:650 18px/1.3 var(--sans); overflow-wrap:anywhere}
+.project p {margin:calc(var(--unit) / 2) 0 0; color:var(--subtle); font-size:14px; line-height:1.45}
+.project .meta {margin-block-start:var(--unit); font:500 12px/1.5 var(--mono); overflow-wrap:anywhere}
+.stack::before {content:'·'; margin-inline:calc(var(--unit) / 2)}
+.row-arrow {justify-self:center; color:var(--gold-text); font:500 20px/1 var(--sans)}
+.empty {margin-block-start:calc(var(--unit) * 3); padding-block:var(--unit) calc(var(--unit) * 5)}
+.empty p,dialog p {margin:var(--unit) 0 0; color:var(--subtle)}
+.site-foot {margin-block-start:calc(var(--unit) * 10); border-block-start:1px solid var(--hair); padding-block-start:calc(var(--unit) * 4); color:var(--subtle); font-size:14px}
+.foot {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; align-items:start; gap:calc(var(--unit) * 4); padding-block-end:calc(var(--unit) * 4)}
+.foot .brand {color:var(--text)}
+.foot p {margin:calc(var(--unit) / 2) 0 0}
+.foot h2 {margin:0 0 calc(var(--unit) / 2); color:var(--text); font:500 12px/1.5 var(--mono)}
+.foot ul {display:flex; flex-wrap:wrap; gap:0 calc(var(--unit) * 2); margin:0; padding:0; list-style:none}
+.foot a:not(.brand) {display:inline-flex; align-items:center; min-block-size:32px; gap:var(--unit); overflow-wrap:anywhere}
+.foot li:first-child {flex-basis:100%}
+.top-link {white-space:nowrap}
+.top-link span {color:var(--gold-text)}
+.horizon {display:block; width:100%; height:clamp(64px,8vw,104px); image-rendering:pixelated}
+dialog {width:min(calc(100% - var(--unit) * 4),32rem); padding:calc(var(--unit) * 3); border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text)}
+dialog::backdrop {background:color-mix(in srgb,var(--surface) 70%,transparent)}
+dialog form {margin-block-start:calc(var(--unit) * 2)}
+dialog label {font-weight:600; font-size:14px}
+dialog input {display:block; inline-size:100%; margin-block:calc(var(--unit) / 2) calc(var(--unit) * 2); min-block-size:44px; padding:var(--unit); border:1px solid var(--control); border-radius:var(--r); background:var(--surface)}
+.dialog-actions {display:flex; flex-wrap:wrap; gap:var(--unit)}
+@media (max-width:860px) {
+  .nav-inner {gap:var(--unit); flex-wrap:wrap}
+  .nav-inner > .brand {margin-inline-end:auto}
+  .nav-links {order:1; width:100%}
+  :root[data-js] .menu-toggle {display:inline-flex}
+  :root[data-js] .nav-links {position:absolute; inset:100% 0 auto; border-block-end:1px solid var(--hair); background:var(--surface)}
+  :root[data-js] .site-nav:not([data-menu-open]) .nav-links {display:none}
+  .nav-links ul {max-width:var(--container); margin-inline:auto; padding:var(--unit) calc(var(--unit) * 2.5)}
+  .nav-links a,.nav-links [aria-current] {min-height:44px}
+  .search-label {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+  .hero {padding-block:calc(var(--unit) * 4) calc(var(--unit) * 3)}
+  .atlas {grid-template-columns:minmax(0,1fr); gap:calc(var(--unit) * 2); margin-block-start:calc(var(--unit) * 2)}
+  .filter-heading {display:none}
+  .control.filter-toggle {display:inline-flex}
+  .filter-toggle[aria-expanded="true"] .chevron {transform:rotate(180deg)}
+  .filter-pane:not([data-open]) {display:none}
+  .facets {grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); margin-block-start:calc(var(--unit) * 2)}
+  .facet,.chip {min-block-size:44px}
+  .group-head h2 {font-size:22px}
+  .foot {gap:calc(var(--unit) * 3)}
+}
+@media (max-width:640px) {
+  .wrap {padding-inline:calc(var(--unit) * 2.5)}
+  .hero {grid-template-columns:1fr; gap:calc(var(--unit) * 2)}
+  .study {grid-template-columns:52px minmax(0,1fr) 24px; gap:var(--unit); padding-inline:calc(var(--unit) / 2)}
+  .repository {align-self:start; min-block-size:52px; padding-inline-end:calc(var(--unit) / 2)}
+  .project h3 {font-size:16px}
+  .foot {grid-template-columns:minmax(0,1fr); gap:calc(var(--unit) * 2)}
+  .foot a:not(.brand) {min-block-size:44px}
+}
+@media (max-width:400px) {
+  .nav-inner {padding-inline:calc(var(--unit) * 2)}
+}
+@media (prefers-reduced-motion:no-preference) {
+  .nav-control {transition:transform 160ms var(--ease-out)}
+  .nav-control:active,.control:active,.facet:active,.chip:active {transform:scale(.97)}
+  .row-arrow {transition:transform 160ms var(--ease-out)}
+  .study:focus-visible .row-arrow {transform:translateX(3px); transition:none}
+}
+@media (prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine) {
+  .study:hover .row-arrow {transform:translateX(3px)}
+}
+@media (forced-colors:active) {
+  circle {fill:CanvasText !important}
+  .facet[aria-pressed="true"] {border-color:Highlight; outline:1px solid Highlight; outline-offset:-3px}
+  .horizon {display:none}
+}
+@media print {.horizon {display:none}}
+</style>
+</head>
+<body id="top" tabindex="-1">
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <symbol id="single" viewBox="0 0 80 48"><circle cx="40" cy="24" r="4" fill="currentColor"/></symbol>
+    <symbol id="two" viewBox="0 0 80 48"><path d="M22 24H58"/><circle class="node-web" cx="22" cy="24" r="4"/><circle class="node-api" cx="58" cy="24" r="4"/></symbol>
+    <symbol id="four" viewBox="0 0 80 48"><path d="M16 12Q39 12 52 24M16 36Q39 36 52 24H70"/><circle class="node-web" cx="16" cy="12" r="4"/><circle class="node-web" cx="16" cy="36" r="4"/><circle class="node-api" cx="52" cy="24" r="4"/><circle class="node-cli" cx="70" cy="24" r="4"/></symbol>
+    <symbol id="five" viewBox="0 0 80 48"><path d="M14 24Q38 24 60 6M14 24Q38 24 60 18M14 24Q38 24 60 30M14 24Q38 24 60 42"/><circle class="node-web" cx="14" cy="24" r="4"/><circle class="node-api" cx="60" cy="6" r="4"/><circle class="node-api" cx="60" cy="18" r="4"/><circle class="node-api" cx="60" cy="30" r="4"/><circle class="node-api" cx="60" cy="42" r="4"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-nav" data-site-nav>
+  <div class="wrap nav-inner">
+    <a class="brand" href="/en/">diegnghtmr</a>
+    <nav id="primary-nav" class="nav-links" aria-label="Work navigation">
+      <ul>
+        <li><a href="/en/"><span aria-hidden="true">←</span> Home</a></li>
+        <li><span aria-current="page">Work</span></li>
+      </ul>
+    </nav>
+    <div class="nav-tools">
+      <button class="nav-control" type="button" data-search-trigger aria-haspopup="dialog" aria-controls="command-menu" aria-keyshortcuts="Control+K Meta+K" aria-label="Search" hidden>
+        <span class="search-label">Search</span> <kbd>Ctrl K</kbd>
+      </button>
+      <a class="nav-control desktop-language" href="/es/trabajo/" hreflang="es" lang="es" aria-label="Español">ES</a>
+      <button class="nav-control theme-toggle" type="button" data-theme-toggle aria-label="Dark / Light: Toggle light theme" aria-pressed="false" hidden>
+        <span class="theme-dark">Dark</span> <span class="theme-light">Light</span>
+      </button>
+      <button class="nav-control menu-toggle" type="button" data-menu-toggle aria-controls="primary-nav" aria-expanded="false">Menu</button>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="main" tabindex="-1">
+  <header class="hero">
+    <div>
+      <p class="kicker">Systems atlas</p>
+      <h1>Work</h1>
+      <p class="intro">Case studies grouped by their primary surface: apps, APIs, tools and infrastructure.</p>
+    </div>
+    <figure class="key">
+      <svg viewBox="0 0 80 48" aria-hidden="true"><use href="#two"/></svg>
+      <figcaption><strong>Repository maps</strong>Each dot is a repo. Lines connect related repos.</figcaption>
+    </figure>
+  </header>
+  <div class="atlas">
+    <aside class="filters" id="filters" aria-label="Project filters" hidden>
+      <div class="filter-top">
+        <h2 class="filter-heading">Filter projects</h2>
+        <button type="button" class="control filter-toggle" id="filter-toggle" aria-expanded="false" aria-controls="filter-pane"><span id="filter-label">Filters (0)</span><span class="chevron" aria-hidden="true">⌄</span></button>
+      </div>
+      <div class="filter-pane" id="filter-pane">
+        <div class="facets" id="facets">
+          <fieldset>
+            <legend>Includes surface</legend>
+            <div class="options">
+              <button type="button" class="facet" data-key="surface" value="web" aria-pressed="false"><span>Web apps</span> <span class="facet-count">9</span></button>
+              <button type="button" class="facet" data-key="surface" value="api" aria-pressed="false"><span>APIs &amp; services</span> <span class="facet-count">8</span></button>
+              <button type="button" class="facet" data-key="surface" value="cli" aria-pressed="false"><span>Tools &amp; CLIs</span> <span class="facet-count">3</span></button>
+              <button type="button" class="facet" data-key="surface" value="infra" aria-pressed="false"><span>Infrastructure</span> <span class="facet-count">1</span></button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Repositories</legend>
+            <div class="options">
+              <button type="button" class="facet" data-key="repos" value="single" aria-pressed="false"><span>Single repo</span> <span class="facet-count">7</span></button>
+              <button type="button" class="facet" data-key="repos" value="multi" aria-pressed="false"><span>Multi-repo</span> <span class="facet-count">7</span></button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Stack</legend>
+            <div class="options">
+              <button type="button" class="facet" data-key="stack" value="java" aria-pressed="false"><span>Java</span> <span class="facet-count">5</span></button>
+              <button type="button" class="facet" data-key="stack" value="typescript" aria-pressed="false"><span>TypeScript</span> <span class="facet-count">6</span></button>
+              <button type="button" class="facet" data-key="stack" value="go" aria-pressed="false"><span>Go</span> <span class="facet-count">1</span></button>
+              <button type="button" class="facet" data-key="stack" value="node" aria-pressed="false"><span>Node</span> <span class="facet-count">2</span></button>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </aside>
+    <div>
+      <div class="result-head">
+        <p class="count" id="result-count" role="status" aria-atomic="true" tabindex="-1">14 projects</p>
+        <ul class="breakdown" id="breakdown" role="list" aria-label="Projects by primary surface">
+          <li><strong>9</strong> Web apps</li>
+          <li><strong>1</strong> API &amp; services</li>
+          <li><strong>3</strong> Tools &amp; CLIs</li>
+          <li><strong>1</strong> Infrastructure</li>
+        </ul>
+        <div class="active-bar" id="active-bar" hidden>
+          <div class="active" id="active" role="group" aria-label="Active filters"></div>
+          <button type="button" class="reset" id="clear-filters" aria-label="Clear" title="Clear all filters">Clear</button>
+        </div>
+      </div>
+      <section id="empty" class="empty" aria-labelledby="empty-title" hidden>
+        <h2 id="empty-title">No matching projects</h2>
+        <p>Remove a filter or use Clear to show all 14 projects.</p>
+      </section>
+      <div id="results">
+        <section class="group" data-group aria-labelledby="group-products">
+          <header class="group-head"><h2 id="group-products">Products with a UI</h2><span class="group-count" data-group-count>9 projects</span></header>
+          <ul class="projects" role="list">
+            <li data-project data-surface="web api" data-repos="multi" data-stack="java">
+              <a class="study" href="/en/work/studydeck-ai/" aria-labelledby="studydeck-ai">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Frontend repository linked to backend repository" viewBox="0 0 80 48"><use href="#two"/></svg><span class="repo-count">2 repos</span></div>
+                <div class="project"><h3 id="studydeck-ai">StudyDeck AI</h3><p>Spaced-repetition decks with AI card generation, RAG and an MCP server.</p><p class="meta">Web + API <span class="stack">Java 25, Spring Boot, PostgreSQL/pgvector, React</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web api" data-repos="multi" data-stack="java typescript">
+              <a class="study" href="/en/work/food-court/" aria-labelledby="food-court">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="UI repository and four service repositories: identity, menu, orders and traceability" viewBox="0 0 80 48"><use href="#five"/></svg><span class="repo-count">5 repos</span></div>
+                <div class="project"><h3 id="food-court">Food Court</h3><p>Role-based ordering across menu, orders, identity and traceability.</p><p class="meta">Web + 4 services <span class="stack">Spring Boot, React, TypeScript</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web api" data-repos="multi" data-stack="java">
+              <a class="study" href="/en/work/brujula/" aria-labelledby="brujula">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Frontend repository linked to backend repository" viewBox="0 0 80 48"><use href="#two"/></svg><span class="repo-count">2 repos</span></div>
+                <div class="project"><h3 id="brujula">Brújula</h3><p>Academic planning for Universidad del Quindío students.</p><p class="meta">Web + API <span class="stack">Spring Modulith, Keycloak, OpenAPI</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web api" data-repos="multi" data-stack="java typescript">
+              <a class="study" href="/en/work/legajo/" aria-labelledby="legajo">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Frontend repository linked to backend repository" viewBox="0 0 80 48"><use href="#two"/></svg><span class="repo-count">2 repos</span></div>
+                <div class="project"><h3 id="legajo">Legajo</h3><p>Similarity analysis and clustering for research abstracts.</p><p class="meta">Web + API <span class="stack">React 19, Java 25, OpenAPI</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web api" data-repos="multi" data-stack="go">
+              <a class="study" href="/en/work/profundiza-uq/" aria-labelledby="profundiza-uq">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Frontend repository linked to backend repository" viewBox="0 0 80 48"><use href="#two"/></svg><span class="repo-count">2 repos</span></div>
+                <div class="project"><h3 id="profundiza-uq">Profundiza UQ</h3><p>Elective course enrollment.</p><p class="meta">Web + API <span class="stack">Go, chi, pgx, PostgreSQL, React</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web api" data-repos="multi" data-stack="typescript node">
+              <a class="study" href="/en/work/savia/" aria-labelledby="savia">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Four repositories: web, mobile, API and MCP" viewBox="0 0 80 48"><use href="#four"/></svg><span class="repo-count">4 repos</span></div>
+                <div class="project"><h3 id="savia">Savia</h3><p>Health and wellbeing system across web, mobile, API and MCP. In progress.</p><p class="meta"><span>Web + mobile + API + MCP</span> <span class="stack">NestJS/Fastify, Next.js, Expo</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web api" data-repos="multi" data-stack="java typescript">
+              <a class="study" href="/en/work/academic-triage/" aria-labelledby="academic-triage">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Frontend repository linked to backend repository" viewBox="0 0 80 48"><use href="#two"/></svg><span class="repo-count">2 repos</span></div>
+                <div class="project"><h3 id="academic-triage">Academic Triage</h3><p>Academic request triage over a Java backend contract.</p><p class="meta">Web + API <span class="stack">Angular 20, Java</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web" data-repos="single" data-stack="typescript">
+              <a class="study" href="/en/work/vale/" aria-labelledby="vale">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single web repository" viewBox="0 0 80 48"><use style="color:var(--cat-web)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="vale">Vale</h3><p>Academic schedule planner with calendar export.</p><p class="meta">Web app <span class="stack">TypeScript</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="web" data-repos="single" data-stack="typescript">
+              <a class="study" href="/en/work/saber-inverso/" aria-labelledby="saber-inverso">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single web repository" viewBox="0 0 80 48"><use style="color:var(--cat-data)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="saber-inverso">Saber Inverso</h3><p>Estimates Saber 11 scores from UQ admission weights, with uncertainty.</p><p class="meta">Web app <span class="stack">Astro, TypeScript</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section class="group" data-group aria-labelledby="group-services">
+          <header class="group-head"><h2 id="group-services">Services &amp; APIs</h2><span class="group-count" data-group-count>1 project</span></header>
+          <ul class="projects" role="list">
+            <li data-project data-surface="api" data-repos="single" data-stack="">
+              <a class="study" href="/en/work/nexride/" aria-labelledby="nexride">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single API repository" viewBox="0 0 80 48"><use style="color:var(--cat-api)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="nexride">NexRide</h3><p>Ride dispatch backend with pickup suggestions and composite scoring.</p><p class="meta">API</p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section class="group" data-group aria-labelledby="group-tools">
+          <header class="group-head"><h2 id="group-tools">Tools &amp; CLIs</h2><span class="group-count" data-group-count>3 projects</span></header>
+          <ul class="projects" role="list">
+            <li data-project data-surface="cli" data-repos="single" data-stack="node">
+              <a class="study" href="/en/work/writing-harness/" aria-labelledby="writing-harness">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single CLI repository" viewBox="0 0 80 48"><use style="color:var(--cat-mcp)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="writing-harness">writing-harness</h3><p>Spanish writing rules for AI agents, with checks for prose in code.</p><p class="meta">CLI / skills <span class="stack">Node</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="cli" data-repos="single" data-stack="">
+              <a class="study" href="/en/work/doc-sentinel/" aria-labelledby="doc-sentinel">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single CLI repository" viewBox="0 0 80 48"><use style="color:var(--cat-mcp)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="doc-sentinel">doc-sentinel</h3><p>CLI that strips document traces and detects prompt injection.</p><p class="meta">CLI</p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+            <li data-project data-surface="cli" data-repos="single" data-stack="">
+              <a class="study" href="/en/work/resume-maker/" aria-labelledby="resume-maker">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single pipeline repository" viewBox="0 0 80 48"><use style="color:var(--cat-mcp)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="resume-maker">resume-maker</h3><p>Build pipeline for publishing résumé PDFs.</p><p class="meta">Build pipeline <span class="stack">LaTeX</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section class="group" data-group aria-labelledby="group-infra">
+          <header class="group-head"><h2 id="group-infra">Infrastructure</h2><span class="group-count" data-group-count>1 project</span></header>
+          <ul class="projects" role="list">
+            <li data-project data-surface="infra" data-repos="single" data-stack="">
+              <a class="study" href="/en/work/enterprise-monitoring-stack/" aria-labelledby="enterprise-monitoring-stack">
+                <div class="repository"><svg class="repo-map" role="img" aria-label="Single infrastructure repository" viewBox="0 0 80 48"><use style="color:var(--cat-infra)" href="#single"/></svg><span class="repo-count">1 repo</span></div>
+                <div class="project"><h3 id="enterprise-monitoring-stack">Enterprise Monitoring Stack</h3><p>Team project for containerized monitoring with redundant storage.</p><p class="meta">Infrastructure <span class="stack">Docker, RAID 1, LVM, Netdata</span></p></div>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+<footer class="site-foot">
+  <div class="wrap foot">
+    <div><a class="brand" href="/en/">diegnghtmr</a><p>Software developer. Armenia, Colombia.</p></div>
+    <div>
+      <h2>Elsewhere</h2>
+      <ul role="list">
+        <li><a href="mailto:floresquintero.da@gmail.com">floresquintero.da@gmail.com</a></li>
+        <li><a href="https://github.com/diegnghtmr">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/diego-alejandro-flores-quintero">LinkedIn</a></li>
+      </ul>
+    </div>
+    <a class="top-link" href="#top">Back to top <span aria-hidden="true">↑</span></a>
+  </div>
+  <canvas class="horizon" id="horizon" aria-hidden="true"></canvas>
+</footer>
+<dialog id="command-menu" aria-labelledby="search-title">
+  <h2 id="search-title">Search work</h2><p id="search-hint">Search project names and stacks.</p>
+  <form id="search-form">
+    <label for="query">Search projects</label><input type="search" id="query" aria-describedby="search-hint" autocomplete="off" autofocus>
+    <div class="dialog-actions"><button type="submit" class="control primary">Search</button><button type="button" class="control" id="search-close">Cancel</button></div>
+  </form>
+</dialog>
+<script>
+(() => {
+  const byId = id => document.getElementById(id);
+  const rows = [...document.querySelectorAll('[data-project]')];
+  const groups = [...document.querySelectorAll('[data-group]')];
+  const options = [...byId('facets').querySelectorAll('button')];
+  const keys = [...new Set(options.map(option => option.dataset.key))];
+  const active = byId('active'), status = byId('result-count');
+  const filterToggle = byId('filter-toggle'), filterPane = byId('filter-pane'), clear = byId('clear-filters');
+  const header = document.querySelector('[data-site-nav]'), menuToggle = header.querySelector('[data-menu-toggle]');
+  const search = byId('command-menu'), searchOpen = header.querySelector('[data-search-trigger]'), queryInput = byId('query');
+  const mobile = matchMedia('(max-width: 860px)');
+  const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  const searchText = new Map(rows.map(row => {
+    const labels = [...row.querySelectorAll('h3, .stack')].map(el => el.textContent);
+    return [row, normalize([...labels, row.dataset.stack].join(' '))];
+  }));
+  const selected = new Set();
+  let query = '', searchOrigin = null;
+
+  function restore() {
+    const params = new URLSearchParams(location.search);
+    selected.clear();
+    for (const option of options) if (params.getAll(option.dataset.key).includes(option.value)) selected.add(option);
+    query = (params.get('q') || '').trim();
+  }
+  function syncUrl() {
+    const url = new URL(location.href);
+    [...keys, 'q'].forEach(key => url.searchParams.delete(key));
+    for (const option of options) if (selected.has(option)) url.searchParams.append(option.dataset.key, option.value);
+    if (query) url.searchParams.set('q', query);
+    // Browsers may block changing the query on a file: URL.
+    try { history.replaceState(history.state, '', url); } catch (error) { if (error.name !== 'SecurityError') throw error; }
+  }
+  const projectCount = count => `${count} ${count === 1 ? 'project' : 'projects'}`;
+  const hasValue = (row, key, value) => row.dataset[key].split(' ').includes(value);
+  function render(sync = true) {
+    const terms = normalize(query).split(/\s+/).filter(Boolean);
+    const selections = keys.map(key => [key, options.filter(option => selected.has(option) && option.dataset.key === key)]);
+    const matchingQuery = rows.filter(row => terms.every(term => searchText.get(row).includes(term)));
+    const matchesFacets = (row, except) => selections.every(([key, checked]) => key === except || !checked.length || checked.some(option => hasValue(row, key, option.value)));
+    const visible = new Set(matchingQuery.filter(row => matchesFacets(row)));
+    for (const row of rows) row.hidden = !visible.has(row);
+    for (const option of options) {
+      const { key } = option.dataset;
+      const count = matchingQuery.filter(row => matchesFacets(row, key) && hasValue(row, key, option.value)).length;
+      option.setAttribute('aria-pressed', String(selected.has(option)));
+      option.querySelector('.facet-count').textContent = count;
+    }
+    for (const group of groups) {
+      const count = group.querySelectorAll('[data-project]:not([hidden])').length;
+      group.hidden = count === 0;
+      group.querySelector('[data-group-count]').textContent = projectCount(count);
+    }
+    const count = visible.size;
+    const message = count === rows.length ? projectCount(count) : `${count} of ${rows.length} projects`;
+    if (status.textContent !== message) status.textContent = message;
+    byId('empty').hidden = count !== 0;
+    byId('results').hidden = count === 0;
+    const activeCount = selected.size + Number(Boolean(query));
+    byId('filter-label').textContent = `Filters (${activeCount})`;
+    byId('active-bar').hidden = !activeCount;
+    byId('breakdown').hidden = Boolean(activeCount);
+    active.replaceChildren();
+    const addChip = (label, remove) => {
+      const chip = document.createElement('button'), cross = document.createElement('span');
+      chip.type = 'button'; chip.className = 'chip'; chip.textContent = label;
+      chip.setAttribute('aria-label', `Remove filter: ${label}`);
+      cross.setAttribute('aria-hidden', 'true'); cross.textContent = '×'; chip.append(cross);
+      chip.addEventListener('click', () => {
+        const index = [...active.children].indexOf(chip);
+        remove(); render();
+        (active.children[Math.min(index, active.children.length - 1)] || status).focus();
+      });
+      active.append(chip);
+    };
+    for (const option of options) if (selected.has(option)) addChip(option.firstElementChild.textContent, () => selected.delete(option));
+    if (query) addChip(`Search: ${query}`, () => { query = ''; });
+    if (sync) syncUrl();
+  }
+  byId('facets').addEventListener('click', event => {
+    const option = event.target.closest('.facet');
+    if (!option) return;
+    if (!selected.delete(option)) selected.add(option);
+    render();
+  });
+  clear.addEventListener('click', () => {
+    selected.clear(); query = ''; render(); status.focus();
+  });
+  filterToggle.addEventListener('click', () => {
+    const expanded = filterPane.toggleAttribute('data-open');
+    filterToggle.setAttribute('aria-expanded', String(expanded));
+  });
+
+  function setMenu(open) {
+    header.toggleAttribute('data-menu-open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+  }
+  menuToggle.addEventListener('click', () => {
+    const open = !header.hasAttribute('data-menu-open');
+    setMenu(open);
+    if (open) byId('primary-nav').querySelector('a').focus();
+  });
+  document.addEventListener('click', event => { if (!header.contains(event.target)) setMenu(false); });
+  header.addEventListener('focusout', event => {
+    if (event.relatedTarget && !header.contains(event.relatedTarget)) setMenu(false);
+  });
+  mobile.addEventListener('change', () => {
+    setMenu(false);
+    if (mobile.matches && filterPane.contains(document.activeElement) && !filterPane.hasAttribute('data-open')) filterToggle.focus();
+  });
+  function openSearch() {
+    if (search.open) return;
+    searchOrigin = byId('primary-nav').contains(document.activeElement) && mobile.matches ? searchOpen : document.activeElement;
+    setMenu(false);
+    queryInput.value = query;
+    search.showModal();
+    queryInput.select();
+  }
+  searchOpen.addEventListener('click', openSearch);
+  byId('search-close').addEventListener('click', () => search.close());
+  search.addEventListener('close', () => { searchOrigin?.focus(); searchOrigin = null; });
+  byId('search-form').addEventListener('submit', event => {
+    event.preventDefault(); query = queryInput.value.trim(); render();
+    searchOrigin = null; search.close(); status.focus();
+  });
+  document.addEventListener('keydown', event => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openSearch(); }
+    if (event.key === 'Escape' && !search.open && header.hasAttribute('data-menu-open')) { setMenu(false); menuToggle.focus(); }
+  });
+  addEventListener('popstate', () => { restore(); render(false); });
+
+  const horizon = byId('horizon');
+  const bayer = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+  function drawHorizon() {
+    const ctx = horizon.getContext('2d');
+    if (!ctx || !horizon.clientWidth) return;
+    const width = horizon.width = Math.ceil(horizon.clientWidth / 3);
+    const height = horizon.height = Math.ceil(horizon.clientHeight / 3);
+    const tokens = getComputedStyle(document.documentElement);
+    const palette = ['--surface', '--whisper', '--control', '--gold-text'].map(key => tokens.getPropertyValue(key).trim());
+    for (let x = 0; x < width; x++) {
+      const u = x / width;
+      const ridge = .56 - .20 * Math.sin(u * 8.2) - .11 * Math.sin(u * 17 + .7) - .035 * Math.sin(u * 41);
+      const near = .91 - .17 * Math.sin(u * 9.5 + 1.1) - .06 * Math.sin(u * 27);
+      for (let y = 0; y < height; y++) {
+        const v = y / height, threshold = bayer[(y % 4) * 4 + x % 4] / 16;
+        const crest = Math.max(0, 1 - Math.abs(v - ridge) * 11);
+        const density = v > near ? 1.03 + .3 * crest : (v > ridge ? 1.03 : .21) + 1.65 * crest;
+        ctx.fillStyle = palette[Math.min(3, Math.floor(density + threshold))];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  const theme = header.querySelector('[data-theme-toggle]');
+  theme.addEventListener('click', () => {
+    const light = document.documentElement.dataset.theme !== 'light';
+    document.documentElement.dataset.theme = light ? 'light' : 'dark';
+    theme.setAttribute('aria-pressed', String(light));
+    drawHorizon();
+  });
+  drawHorizon();
+  new ResizeObserver(drawHorizon).observe(horizon);
+  restore(); render(false);
+  [byId('filters'), searchOpen, theme].forEach(el => { el.hidden = false; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "title": "Work index and case studies",
+  "brief": "Work index for all 14 projects with accessible filters, and case-study pages for multi-repo (Food Court) and no-UI (writing-harness) projects, in the Dither Layer system",
+  "feature": "odd/tasks/portfolio-prd-trd.md",
+  "artboards": [
+    {
+      "file": "01-ledger-index.html",
+      "title": "Index: Ledger",
+      "tradeoff": "Densest and fastest to scan for tech leads; least visual, the brand lives only in small glyphs",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-systems-atlas-index.html",
+      "title": "Index: Systems atlas",
+      "tradeoff": "Shows each system's repo shape at a glance and groups by surface; longer page, less dense",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-dossier-food-court.html",
+      "title": "Case study: Dossier (Food Court)",
+      "tradeoff": "Editorial depth with a sticky table of contents and the architecture map as centerpiece; the demo comes later in the page",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "04-terminal-writing-harness.html",
+      "title": "Case study: Terminal-first (writing-harness)",
+      "tradeoff": "Proof first: the demonstration leads, so no-UI projects weigh the same as apps; less room for narrative above the fold",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

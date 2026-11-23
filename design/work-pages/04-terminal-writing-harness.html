@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>writing-harness — Case study · diegnghtmr</title>
+<meta name="description" content="A case study of writing-harness: 16 Spanish-writing skills for AI agents, 93 rules, explicit precedence, and a check against the code being described.">
+<style>
+:root {
+  --surface:#06080f; --raised:#1c212c; --text:#f3f6f9; --subtle:#a3b5c1; --ink:#7fb4ca;
+  --mid:#27345c; --gold:#e0c15a; --gold-text:#e0c15a; --on-gold:#06080f;
+  --selection:#263356; --hair:#1c212c; --control:#5c6170; --cat-mcp:#b99bf2;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --unit:8px; --container:1200px; --r:6px; --ease-out:cubic-bezier(0.23,1,0.32,1);
+  color-scheme:dark;
+}
+:root[data-theme="light"] {
+  --surface:#f3f6f9; --raised:#ffffff; --text:#06080f; --subtle:#4e5362; --ink:#24596c;
+  --mid:#91c7dd; --gold-text:#866d01; --selection:#c9dce6;
+  --hair:#dce1ea; --control:#6a6e82; --cat-mcp:#7f61b3;
+  color-scheme:light;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--surface); color:var(--text); font:400 16px/1.55 var(--sans); }
+[hidden] { display:none !important; }
+::selection { background:var(--selection); color:var(--text); }
+:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:var(--r); }
+[data-theme="light"] :focus-visible { outline-color:var(--gold-text); }
+a { color:inherit; text-underline-offset:.24em; text-decoration-thickness:1px; }
+a:hover { color:var(--ink); }
+button, summary { cursor:pointer; }
+button, input { font:inherit; }
+h1, h2, h3, p, dl, dd, figure { margin:0; }
+h1 { font:600 clamp(2rem,5vw,3.5rem)/1.05 var(--sans); letter-spacing:-.02em; overflow-wrap:anywhere; }
+h2 { font:600 28px/1.2 var(--sans); letter-spacing:-.01em; }
+h3 { font:600 18px/1.35 var(--sans); }
+main, main [id] { scroll-margin-top:84px; }
+.wrap { max-width:var(--container); margin-inline:auto; padding-inline:calc(var(--unit) * 4); }
+.column { max-width:calc(var(--unit) * 104); margin-inline:auto; }
+.list { list-style:none; margin:0; padding:0; }
+.mono, kbd, code, .facts dt { font:500 12px/1.4 var(--mono); }
+.overline { letter-spacing:.08em; text-transform:uppercase; }
+.subtle { color:var(--subtle); }
+.skip { position:absolute; inset:8px auto auto 8px; z-index:10; padding:8px 16px; background:var(--gold); color:var(--on-gold); border-radius:var(--r); transform:translateY(-200%); }
+.skip:focus { transform:none; }
+.site-header { position:sticky; top:0; z-index:5; background:var(--surface); border-bottom:1px solid var(--hair); }
+.site-header .wrap { display:flex; align-items:center; min-height:64px; gap:8px; }
+.brand { margin-inline-end:auto; font:600 15px/1.4 var(--mono); text-decoration:none; }
+.primary ul { display:flex; }
+.primary a { display:flex; align-items:center; min-height:44px; padding:8px; border-bottom:2px solid transparent; color:var(--subtle); font-size:14px; text-decoration:none; }
+.primary a[aria-current] { color:var(--text); border-bottom-color:var(--gold-text); font-weight:600; }
+.primary a:hover { color:var(--ink); }
+.control { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; gap:8px; padding:4px 8px; border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text); font:600 14px/1.3 var(--sans); }
+.control:hover { color:var(--ink); border-color:var(--ink); }
+.locale { position:relative; flex:none; }
+.locale > summary { list-style:none; }
+.locale > summary::-webkit-details-marker { display:none; }
+.locale-panel { position:absolute; z-index:1; top:calc(100% + 8px); right:0; width:min(224px,65vw); padding:16px; border:1px solid var(--control); border-radius:var(--r); background:var(--raised); font-size:14px; }
+.locale-panel strong { display:block; margin-bottom:4px; }
+#menu-toggle { display:none; }
+.crumbs { margin-top:24px; color:var(--subtle); }
+.crumbs ol { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.crumbs li + li::before { content:"/" / ""; margin-right:8px; }
+.crumbs [aria-current] { color:var(--text); }
+.back { display:inline-flex; align-items:center; min-height:44px; gap:8px; color:var(--subtle); font-size:14px; }
+.hero { margin:16px 0 24px; }
+.hero .overline { display:flex; align-items:center; gap:8px; margin-bottom:8px; color:var(--subtle); }
+.dot { width:8px; height:8px; background:var(--cat-mcp); }
+.hero p:last-child { max-width:63ch; margin-top:16px; color:var(--subtle); font-size:18px; }
+.terminal { overflow:hidden; border:1px solid var(--control); border-radius:var(--r); background:var(--surface); }
+.cover { display:block; width:100%; height:16px; background:var(--surface); image-rendering:pixelated; }
+.term-head, .term-foot { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; padding:8px 16px; background:var(--raised); }
+.term-head { border-bottom:1px solid var(--hair); }
+.term-head h2 { font:600 14px/1.4 var(--mono); letter-spacing:0; }
+.label { color:var(--subtle); }
+.transcript { margin:0; padding:0; list-style:none; }
+.transcript li { display:grid; grid-template-columns:104px minmax(0,1fr); gap:16px; padding:12px 16px; }
+.transcript li + li { border-top:1px solid var(--hair); }
+.step { color:var(--subtle); }
+.step b { color:var(--gold-text); }
+.transcript h3 { font:500 12px/1.6 var(--mono); }
+pre { margin:0; font:400 14px/1.55 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; }
+pre code { font:inherit; }
+.prompt, .pass { color:var(--gold-text); }
+.term-foot { min-height:62px; border-top:1px solid var(--hair); }
+.replay-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.replay { padding-inline:16px; }
+#replay-reset:not(:hover) { border-color:var(--subtle); }
+.replay-main { background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
+.replay-main:hover { background:var(--text); color:var(--surface); border-color:var(--text); }
+.facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:16px; border-bottom:1px solid var(--hair); }
+.facts > div { min-width:0; padding:8px 8px 8px 0; border-top:1px solid var(--hair); }
+.facts dt { color:var(--subtle); text-transform:uppercase; letter-spacing:.05em; }
+.facts dd { margin-top:4px; font-size:14px; }
+.facts a { display:inline-flex; align-items:center; min-height:24px; color:var(--gold-text); font-weight:600; }
+.facts a:hover { color:var(--ink); }
+.toc { margin-top:32px; padding-block:8px; border-block:1px solid var(--hair); }
+.toc h2 { color:var(--subtle); }
+.toc ol { display:flex; flex-wrap:wrap; gap:0 16px; }
+.toc a { display:flex; align-items:center; min-height:44px; font-size:14px; }
+.story { margin-top:48px; }
+.story section + section { margin-top:96px; }
+.section-head { margin-bottom:24px; }
+.section-head .overline { margin-bottom:8px; color:var(--gold-text); }
+.lede { max-width:66ch; color:var(--subtle); }
+.lede + .lede { margin-top:16px; }
+.precedence { max-width:560px; margin-top:24px; padding:16px; background:var(--raised); border:1px solid var(--hair); border-radius:var(--r); }
+.precedence svg { display:block; width:100%; height:auto; max-width:448px; margin-inline:auto; }
+.precedence rect { fill:var(--surface); stroke:var(--control); }
+.precedence path { fill:none; stroke:var(--subtle); stroke-width:1.5; }
+.precedence text { fill:var(--text); font:600 14px var(--sans); text-anchor:middle; }
+.precedence figcaption { margin-top:8px; color:var(--subtle); font-size:14px; }
+.decision { padding-block:16px; border-top:1px solid var(--hair); }
+.decision h3 { margin-bottom:8px; }
+.decision dl > div { display:grid; grid-template-columns:144px 1fr; gap:8px 16px; margin-top:8px; }
+.decision dd, .result dd { color:var(--subtle); }
+.result { display:grid; gap:16px; }
+.result dt { font-weight:600; }
+.next { display:grid; gap:16px; margin-top:64px; }
+.next > a:first-child { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px; border:1px solid var(--control); border-radius:var(--r); background:var(--raised); text-decoration:none; }
+.next > a:first-child:hover { border-color:var(--gold-text); color:var(--text); }
+.next .mono { display:block; color:var(--subtle); }
+.next strong { display:block; margin-top:8px; font-size:22px; font-weight:600; }
+.arrow { color:var(--gold-text); transition:transform 180ms var(--ease-out); }
+.next > a:first-child:is(:hover,:focus-visible) .arrow { transform:translateX(4px); }
+.next .back { justify-self:start; }
+.site-footer { border-top:1px solid var(--hair); margin-top:80px; padding:32px 0 48px; font-size:14px; }
+.site-footer .wrap, .site-footer nav { display:flex; flex-wrap:wrap; justify-content:space-between; gap:16px; }
+.site-footer strong { color:var(--text); }
+.search { width:min(560px,calc(100% - 40px)); max-height:80vh; padding:24px; border:1px solid var(--control); border-radius:var(--r); background:var(--raised); color:var(--text); }
+.search::backdrop { background:var(--surface); opacity:.84; }
+.search header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:16px; }
+.search .control:not(:hover) { border-color:var(--subtle); }
+.search input { width:100%; min-height:44px; margin:4px 0 8px; padding:8px; border:1px solid var(--subtle); border-radius:var(--r); background:var(--surface); color:var(--text); }
+.search li a { display:flex; align-items:center; min-height:44px; border-bottom:1px solid var(--hair); }
+@media (max-width:900px) { .story section + section { margin-top:72px; } }
+@media (max-width:860px) {
+  #menu-toggle:not([hidden]) { display:inline-flex; }
+  .primary { position:absolute; top:100%; left:0; right:0; display:none; padding:8px 20px; background:var(--surface); border-bottom:1px solid var(--control); }
+  .primary[data-open="true"] { display:block; }
+  .primary ul { display:flex; flex-direction:column; }
+  .primary a[aria-current] { border-bottom-color:transparent; border-left:2px solid var(--gold-text); }
+}
+@media (max-width:640px) {
+  .wrap { padding-inline:calc(var(--unit) * 2.5); }
+  .site-header .wrap { gap:4px; }
+  .site-header .control { padding-inline:6px; }
+  .search-word { display:none; }
+  .hero { margin-block:8px 16px; }
+  .facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .transcript li { grid-template-columns:1fr; gap:4px; }
+  .decision dl > div { grid-template-columns:1fr; gap:0; }
+  .precedence { padding:8px; }
+}
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } .next > a:first-child:is(:hover,:focus-visible) .arrow { transform:none; } }
+@media (forced-colors:active) { .cover { display:none; } :focus-visible { outline-color:Highlight !important; } .precedence text { fill:CanvasText; } .precedence rect { fill:Canvas; stroke:CanvasText; } .precedence path { stroke:CanvasText; } }
+@media print { .cover, .site-header, .term-foot { display:none; } .transcript li[hidden] { display:grid !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../portfolio-home/01-split-statement.html">diegnghtmr</a>
+    <nav class="primary" id="primary-nav" aria-label="Primary"><ul class="list">
+      <li><a href="01-ledger-index.html" aria-current="location">Work</a></li>
+      <li><a href="../portfolio-home/01-split-statement.html#oss">Open source</a></li>
+      <li><a href="../portfolio-home/01-split-statement.html#about">About</a></li>
+      <li><a href="../portfolio-home/01-split-statement.html#contact">Contact</a></li>
+    </ul></nav>
+    <button class="control" id="search-toggle" type="button" aria-label="Search (Command or Control K)" aria-keyshortcuts="Meta+K Control+K" aria-haspopup="dialog" hidden><span class="search-word">Search</span><kbd aria-hidden="true">⌘K</kbd></button>
+    <details class="locale"><summary class="control">EN / ES</summary><div class="locale-panel"><strong>English · current</strong><span class="subtle">Spanish case study unavailable in this preview.</span></div></details>
+    <button class="control" id="theme-toggle" type="button" aria-label="Dark theme. Switch to light" hidden>Dark</button>
+    <button class="control" id="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" hidden>Menu</button>
+  </div>
+</header>
+<main id="main" class="wrap" tabindex="-1">
+  <div class="column">
+    <nav class="crumbs mono" aria-label="Breadcrumb"><ol class="list"><li><a href="../portfolio-home/01-split-statement.html">Home</a></li><li><a href="01-ledger-index.html">Work</a></li><li aria-current="page">writing-harness</li></ol></nav>
+    <a class="back" href="01-ledger-index.html"><span aria-hidden="true">←</span> All projects</a>
+    <article aria-labelledby="title">
+      <header class="hero">
+        <p class="mono overline"><i class="dot" aria-hidden="true"></i>Case study / Agent tooling</p>
+        <h1 id="title">writing-harness</h1>
+        <p>Spanish-writing skills for AI agents, with explicit precedence and a gate that checks prose against the code it describes.</p>
+      </header>
+      <section class="terminal" aria-labelledby="demo">
+        <canvas class="cover" id="cover" width="208" height="4" aria-hidden="true"></canvas>
+        <header class="term-head"><h2 id="demo" tabindex="-1">Terminal session</h2><p class="mono label">Illustrative output</p></header>
+        <ol class="transcript" id="transcript">
+          <li><h3 class="step"><b>01</b> Check</h3><pre><code><span class="prompt">$</span> node verify.mjs draft.md</code></pre></li>
+          <li><h3 class="step"><b>02</b> Inspect</h3><pre><code><span class="subtle">[ALIGN-01]  Claimed option not found in code.
+[PROSE-02]  Replace the filler opening.</span></code></pre></li>
+          <li><h3 class="step"><b>03</b> Recheck</h3><pre><code><span class="prompt">$</span> node verify.mjs draft-fixed.md
+<span class="pass">PASS</span>  No violations found.</code></pre></li>
+        </ol>
+        <div class="term-foot" id="replay-controls" hidden>
+          <p class="mono subtle" id="replay-status" role="status">Full transcript</p>
+          <div class="replay-row">
+            <button class="control replay" type="button" id="replay-reset" aria-controls="transcript" hidden>Show full transcript</button>
+            <button class="control replay replay-main" type="button" id="replay" aria-controls="transcript">Step through replay</button>
+          </div>
+        </div>
+      </section>
+      <dl class="facts" aria-label="Project facts">
+        <div><dt>Role</dt><dd>Contribution scope to confirm</dd></div>
+        <div><dt>Timeframe</dt><dd>Dates to confirm</dd></div>
+        <div><dt>Surface</dt><dd>CLI &amp; agent skills</dd></div>
+        <div><dt>Stack</dt><dd>Node · zero dependencies</dd></div>
+        <div><dt>Repository</dt><dd><a href="https://github.com/diegnghtmr/writing-harness">1 repository <span aria-hidden="true">&nbsp;↗</span></a></dd></div>
+        <div><dt>Demo</dt><dd><a href="#demo">Terminal replay <span aria-hidden="true">&nbsp;↑</span></a></dd></div>
+      </dl>
+      <nav class="toc" aria-labelledby="toc-title">
+        <h2 id="toc-title" class="mono overline">On this page</h2>
+        <ol class="list">
+          <li><a href="#demo">Demonstration</a></li><li><a href="#problem">Problem</a></li><li><a href="#precedence">Skill precedence</a></li><li><a href="#decisions">Decisions</a></li><li><a href="#result">Result &amp; next steps</a></li>
+        </ol>
+      </nav>
+      <div class="story">
+        <section aria-labelledby="problem">
+          <header class="section-head"><p class="mono overline">01 / Problem</p><h2 id="problem" tabindex="-1">Good writing can still describe the wrong code</h2></header>
+          <p class="lede">An AI agent can write fluent Spanish and still describe a command-line option that doesn’t exist. Style guidance alone won’t catch that mismatch. A separate constraint is deciding which rule applies when multiple skills give different directions.</p>
+          <p class="lede">The harness organizes <strong>16 skills and 93 rules</strong> with explicit precedence, and adds a gate for claims about the code.</p>
+        </section>
+        <section aria-labelledby="precedence">
+          <header class="section-head"><p class="mono overline">02 / Architecture</p><h2 id="precedence" tabindex="-1">Skill precedence</h2></header>
+          <p class="lede">The entry skill sets the writing task. Base norms establish the shared rules. The tone skill adapts the voice without replacing those norms.</p>
+          <figure class="precedence">
+            <svg viewBox="0 0 320 68" role="img" aria-labelledby="precedence-title precedence-desc">
+              <title id="precedence-title">Skill layers</title><desc id="precedence-desc">Start at the entry skill, apply base norms, then adapt tone.</desc>
+              <g><rect x="2" y="12" width="91" height="44" rx="6"/><text x="47.5" y="39">Entry skill</text></g>
+              <path d="M97 34h12m-4-4 4 4-4 4"/>
+              <g><rect x="114" y="12" width="92" height="44" rx="6"/><text x="160" y="39">Base norms</text></g>
+              <path d="M210 34h12m-4-4 4 4-4 4"/>
+              <g><rect x="227" y="12" width="91" height="44" rx="6"/><text x="272.5" y="39">Tone skill</text></g>
+            </svg>
+            <figcaption>The arrows show how the layers are applied.</figcaption>
+          </figure>
+        </section>
+        <section aria-labelledby="decisions">
+          <header class="section-head"><p class="mono overline">03 / Rationale</p><h2 id="decisions" tabindex="-1">Decisions &amp; trade-offs</h2></header>
+          <p class="lede">These comparisons explain the visible design, not the original decision process.</p>
+          <div class="decision">
+            <h3>Precedence rather than a flat rule list</h3>
+            <dl>
+              <div><dt>Options considered</dt><dd>A flat list of writing rules, or named layers with explicit precedence.</dd></div>
+              <div><dt>Choice</dt><dd>Give the skills an explicit order.</dd></div>
+              <div><dt>Consequence</dt><dd>A conflict has a rule for resolution, but each new skill has to fit that order.</dd></div>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>Check the code as well as the prose</h3>
+            <dl>
+              <div><dt>Options considered</dt><dd>Check writing alone, or also compare claims with the code being described.</dd></div>
+              <div><dt>Choice</dt><dd>Add a gate for prose that describes code.</dd></div>
+              <div><dt>Consequence</dt><dd>The check needs the relevant code as context. Passing it is not a substitute for reviewing the explanation.</dd></div>
+            </dl>
+          </div>
+        </section>
+        <section aria-labelledby="result">
+          <header class="section-head"><p class="mono overline">04 / Verification</p><h2 id="result" tabindex="-1">Result &amp; next steps</h2></header>
+          <dl class="result">
+            <div><dt>What you can verify</dt><dd>The <a href="https://github.com/diegnghtmr/writing-harness">source repository</a> is the place to inspect the skills, rule set, precedence, and Node gate.</dd></div>
+            <div><dt>What the replay doesn’t verify</dt><dd>The commands, rule IDs, and pass shown above are an example, not a recorded run. They don’t establish how often the harness catches a mismatch.</dd></div>
+            <div><dt>What I’d do next</dt><dd>Link a reproducible before-and-after example where a draft names an option that the code doesn’t expose.</dd></div>
+          </dl>
+        </section>
+      </div>
+      <nav class="next" aria-label="More projects">
+        <a href="../portfolio-home/01-split-statement.html#p1"><span><span class="mono overline">Next project</span><strong>StudyDeck AI</strong></span><span class="arrow" aria-hidden="true">→</span></a>
+        <a class="back" href="01-ledger-index.html"><span aria-hidden="true">←</span> All projects</a>
+      </nav>
+    </article>
+  </div>
+</main>
+<footer class="site-footer"><div class="wrap"><span><strong>Diego Alejandro Flores Quintero</strong><br><span class="subtle">Software developer</span></span><nav aria-label="Footer"><a href="01-ledger-index.html">Work</a><a href="https://github.com/diegnghtmr">GitHub</a><a href="../portfolio-home/01-split-statement.html#contact">Contact</a></nav></div></footer>
+<dialog class="search" id="search" aria-labelledby="search-title">
+  <header><h2 id="search-title">Search this preview</h2><form method="dialog"><button class="control" type="submit">Close</button></form></header>
+  <label for="query">Sections and site links</label><input id="query" type="search" autocomplete="off" autofocus>
+  <p class="subtle" id="search-status" role="status"></p><ul class="list" id="search-results"></ul>
+</dialog>
+<script>
+const root = document.documentElement;
+const cover = document.getElementById('cover');
+const context = cover.getContext('2d');
+const bayer = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+function drawCover() {
+  if (!context || !cover.clientWidth) return;
+  const palette = getComputedStyle(root);
+  const width = cover.width = Math.ceil(cover.clientWidth / 4);
+  const height = cover.height = Math.ceil(cover.clientHeight / 4);
+  context.fillStyle = palette.getPropertyValue('--surface').trim();
+  context.fillRect(0, 0, width, height);
+  const mid = palette.getPropertyValue('--mid').trim();
+  const ink = palette.getPropertyValue('--ink').trim();
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const u = x / width;
+      const signal = (.5 + .5 * Math.sin(u * 26)) ** 2;
+      const tone = .12 + u * .38 + signal * (y + 1) / height * .47;
+      if (tone <= (bayer[y % 4][x % 4] + .5) / 16) continue;
+      context.fillStyle = tone > .68 ? ink : mid;
+      context.fillRect(x, y, 1, 1);
+    }
+  }
+}
+new ResizeObserver(drawCover).observe(cover);
+const theme = document.getElementById('theme-toggle');
+theme.hidden = false;
+theme.addEventListener('click', () => {
+  const light = root.dataset.theme !== 'light';
+  root.dataset.theme = light ? 'light' : 'dark';
+  theme.setAttribute('aria-label', light ? 'Light theme. Switch to dark' : 'Dark theme. Switch to light');
+  theme.textContent = light ? 'Light' : 'Dark';
+  drawCover();
+});
+const menu = document.getElementById('menu-toggle');
+const primary = document.getElementById('primary-nav');
+menu.hidden = false;
+function setMenu(open) {
+  menu.setAttribute('aria-expanded', String(open));
+  primary.dataset.open = String(open);
+}
+menu.addEventListener('click', () => setMenu(menu.getAttribute('aria-expanded') !== 'true'));
+const narrow = matchMedia('(max-width:860px)');
+function syncNav() {
+  if (narrow.matches && primary.contains(document.activeElement)) menu.focus();
+  if (!narrow.matches && document.activeElement === menu) primary.querySelector('a').focus();
+  setMenu(false);
+}
+narrow.addEventListener('change', syncNav);
+
+const dialog = document.getElementById('search');
+const search = document.getElementById('search-toggle');
+const query = document.getElementById('query');
+const matches = document.getElementById('search-results');
+const status = document.getElementById('search-status');
+const searchLinks = [...document.querySelectorAll('.toc a'), ...primary.querySelectorAll('a')];
+let returnFocus;
+function showMatches() {
+  matches.replaceChildren();
+  const filter = query.value.trim().toLowerCase();
+  for (const link of searchLinks) {
+    const label = link.textContent.trim();
+    const heading = link.getAttribute('href').startsWith('#') ? document.querySelector(link.hash).textContent : '';
+    if (!`${label} ${heading}`.toLowerCase().includes(filter)) continue;
+    const item = document.createElement('li');
+    const result = document.createElement('a');
+    result.href = link.getAttribute('href');
+    result.textContent = label;
+    item.append(result);
+    matches.append(item);
+  }
+  const count = matches.childElementCount;
+  status.textContent = count ? `${count} ${count === 1 ? 'result' : 'results'}` : 'No matches. Try a different section name.';
+}
+function openSearch() {
+  if (dialog.open) return;
+  returnFocus = document.activeElement;
+  query.value = '';
+  showMatches();
+  dialog.showModal();
+}
+search.hidden = false;
+search.addEventListener('click', openSearch);
+query.addEventListener('input', showMatches);
+dialog.addEventListener('close', () => {
+  if (returnFocus?.matches('body') || !returnFocus?.getClientRects().length) search.focus();
+  else returnFocus.focus({preventScroll:true});
+});
+matches.addEventListener('click', event => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) return;
+  returnFocus = document.querySelector(link.hash);
+  dialog.close();
+});
+document.addEventListener('keydown', event => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    openSearch();
+  }
+  if (event.key === 'Escape' && !dialog.open && menu.getAttribute('aria-expanded') === 'true') {
+    setMenu(false);
+    menu.focus();
+  }
+});
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const controls = document.getElementById('replay-controls');
+const replayStatus = document.getElementById('replay-status');
+const replay = document.getElementById('replay');
+const reset = document.getElementById('replay-reset');
+const steps = [...document.querySelectorAll('#transcript li')];
+let step = 0;
+function showReplay() {
+  steps.forEach((row, index) => { row.hidden = step > 0 && index >= step; });
+  replayStatus.textContent = step ? `${step} of ${steps.length} · ${['Check', 'Inspect', 'Recheck'][step - 1]}` : 'Full transcript';
+  replay.textContent = ['Step through replay', 'Next: inspect', 'Next: recheck', 'Replay from start'][step];
+  reset.hidden = step === 0;
+}
+function syncMotion() {
+  if (reducedMotion.matches && controls.contains(document.activeElement)) document.getElementById('demo').focus();
+  step = 0;
+  showReplay();
+  controls.hidden = reducedMotion.matches;
+}
+replay.addEventListener('click', () => {
+  if (reducedMotion.matches) return;
+  step = step === steps.length ? 1 : step + 1;
+  showReplay();
+});
+reset.addEventListener('click', () => {
+  step = 0;
+  replay.focus();
+  showReplay();
+});
+reducedMotion.addEventListener('change', syncMotion);
+syncMotion();
+</script>
+</body>
+</html>

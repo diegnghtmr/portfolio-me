@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "chosen": "02-systems-atlas-index.html",
+  "handoffs": {
+    "02-systems-atlas-index.html": {
+      "status": "in_progress",
+      "queued": false,
+      "sentAt": "2026-11-23T05:51:45.281Z",
+      "startedAt": "2026-11-23T05:52:03.097Z",
+      "implementedAt": null,
+      "feature": "odd/tasks/portfolio-prd-trd.md",
+      "note": "Planning the Astro implementation on branch feat/work-index"
+    }
+  }
+}

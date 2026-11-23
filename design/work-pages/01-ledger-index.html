@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work — diegnghtmr · Ledger</title>
+<style>
+:root {
+  --surface:#06080f; --raised:#1c212c; --text:#f3f6f9; --subtle:#a3b5c1; --muted:#8a8fa3;
+  --ink:#7fb4ca; --mid:#27345c; --whisper:#191e28; --gold:#e0c15a; --gold-text:#e0c15a;
+  --on-gold:#06080f; --selection:#263356; --hair:#1c212c; --control:#5c6170;
+  --cat-web:#7fb4ca; --cat-api:#b7cc85; --cat-mcp:#b99bf2; --cat-infra:#deba87; --cat-data:#cb7c94;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --unit:8px; --container:1200px; --r:6px; --r-sm:6px; --ease-out:cubic-bezier(0.23,1,0.32,1);
+  color-scheme:dark;
+}
+:root[data-theme="light"] {
+  --surface:#f3f6f9; --raised:#fff; --text:#06080f; --subtle:#4e5362; --muted:#6a6e82;
+  --ink:#24596c; --mid:#91c7dd; --whisper:#e2e6f2; --gold-text:#866d01;
+  --selection:#c9dce6; --hair:#dce1ea; --control:#6a6e82;
+  --cat-web:#43778b; --cat-api:#667833; --cat-mcp:#7f61b3; --cat-infra:#8c6b39; --cat-data:#a45870;
+  color-scheme:light;
+}
+*,*::before,*::after {box-sizing:border-box}
+[hidden] {display:none !important}
+html {scroll-padding-block-start:calc(var(--unit) * 30)}
+body {margin:0; background:var(--surface); color:var(--text); font:400 16px/1.55 var(--sans)}
+a {color:inherit; text-underline-offset:.22em}
+a:hover {color:var(--ink)}
+button,input {font:inherit; color:inherit}
+button {cursor:pointer}
+button:disabled {cursor:default}
+::selection {background:var(--selection)}
+:focus-visible {outline:2px solid var(--gold-text); outline-offset:2px; border-radius:var(--r-sm)}
+.wrap {max-width:var(--container); margin-inline:auto; padding-inline:calc(var(--unit) * 4)}
+.sr {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+.skip {position:absolute; inset:var(--unit) auto auto calc(var(--unit) * 2); z-index:5; padding:var(--unit) calc(var(--unit) * 2); background:var(--gold); color:var(--on-gold); border-radius:var(--r); transform:translateY(-200%)}
+.skip:focus {transform:none}
+.site-nav {position:sticky; inset-block-start:0; z-index:3; background:var(--surface); border-block-end:1px solid var(--hair)}
+.nav-inner,.nav-tools,.nav-links,.crumb ol,.foot {display:flex; align-items:center; gap:var(--unit)}
+.nav-inner {min-height:calc(var(--unit) * 7.5); gap:calc(var(--unit) * 2)}
+.brand {margin-inline-end:auto; font:600 15px var(--mono); text-decoration:none}
+.nav-links,.crumb ol {padding:0; margin:0; list-style:none}
+.nav-links a {display:block; border-block-end:2px solid transparent; padding:calc(var(--unit) * 1.25) var(--unit); color:var(--subtle); font-size:14px; text-decoration:none}
+.nav-links a:hover,.nav-links [aria-current] {color:var(--text)}
+.nav-links [aria-current] {border-block-end-color:var(--gold-text); font-weight:600}
+.control {display:inline-flex; justify-content:center; align-items:center; gap:var(--unit); min-block-size:44px; padding:var(--unit) calc(var(--unit) * 1.5); border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text); font:600 14px var(--sans); text-decoration:none; transition:color 160ms var(--ease-out),border-color 160ms var(--ease-out)}
+.control:hover {border-color:var(--ink); color:var(--ink)}
+.primary {background:var(--gold); border-color:var(--gold); color:var(--on-gold)}
+.primary:hover {background:var(--text); border-color:var(--text); color:var(--surface)}
+.nav-tools {gap:calc(var(--unit) / 2)}
+.lang {font:600 12px var(--mono)}
+.lang small {font-size:inherit; color:var(--gold-text)}
+kbd {font:500 12px var(--mono); white-space:nowrap}
+.crumb {margin-block:calc(var(--unit) * 3) 0; color:var(--subtle); font:500 13px var(--mono)}
+.crumb [aria-current] {color:var(--text)}
+.hero {display:grid; grid-template-columns:1fr auto; align-items:end; gap:calc(var(--unit) * 4); padding-block:calc(var(--unit) * 5) calc(var(--unit) * 4)}
+.kicker {margin:0 0 var(--unit); color:var(--gold-text); font:600 12px/1.5 var(--mono); letter-spacing:.09em; text-transform:uppercase}
+h1 {margin:0; font:600 clamp(2rem,5vw,3.5rem)/1.05 var(--sans); letter-spacing:-.02em}
+.intro {color:var(--subtle); margin:calc(var(--unit) * 1.5) 0 0}
+.tally {min-width:calc(var(--unit) * 26); border-inline-start:1px solid var(--hair); padding-inline-start:calc(var(--unit) * 3)}
+.tally p {margin:0}
+.count {color:var(--text); font:600 18px/1.4 var(--mono); font-variant-numeric:tabular-nums}
+.tally .depth {margin-block-start:calc(var(--unit) / 2); color:var(--subtle); font-size:14px}
+.filters {position:sticky; inset-block-start:calc(var(--unit) * 7.5 + 1px); z-index:2; padding-block:var(--unit); border-block:1px solid var(--hair); background:var(--surface)}
+.filter-top,.active {display:flex; align-items:center; flex-wrap:wrap; gap:var(--unit)}
+.filter-top {justify-content:space-between; min-block-size:44px}
+.filter-heading {margin:0; font:600 14px var(--sans)}
+.filter-toggle {display:none}
+.reset {min-block-size:44px; padding:0 var(--unit); border:0; border-radius:var(--r); background:transparent; color:var(--gold-text); text-decoration:underline; text-underline-offset:.22em; font:600 13px var(--sans)}
+.reset:disabled {color:var(--subtle); text-decoration:none}
+.facets {display:flex; flex-wrap:wrap; align-items:start; gap:var(--unit) calc(var(--unit) * 2)}
+fieldset {min-inline-size:0; margin:0; padding:0; border:0}
+legend {margin-block-end:calc(var(--unit) / 2); padding:0; color:var(--subtle); font:500 12px var(--mono)}
+.options {display:flex; flex-wrap:wrap; gap:calc(var(--unit) / 2)}
+.options label,.chip {display:inline-flex; align-items:center; gap:calc(var(--unit) / 2); min-block-size:40px; padding:calc(var(--unit) / 2) var(--unit); border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text); font:500 13px var(--sans); cursor:pointer}
+.options input {margin:0; accent-color:var(--gold-text); inline-size:14px; block-size:14px; flex:none}
+.options label:hover,.chip:hover {border-color:var(--ink)}
+.options label:has(:checked),.chip {color:var(--gold-text); border-color:var(--gold-text)}
+.active {margin-block-start:var(--unit)}
+.chip {display:inline-block; max-inline-size:100%; overflow-wrap:anywhere; min-block-size:32px}
+.chip span {margin-inline-start:calc(var(--unit) / 2); font-size:16px}
+.ledger {display:block; width:100%; border-collapse:collapse; margin-block-start:calc(var(--unit) * 2)}
+.ledger thead,.ledger tbody {display:block}
+.ledger tr {display:grid; grid-template-columns:56px minmax(0,1.95fr) minmax(0,.85fr) minmax(0,1.05fr) 64px 48px 104px; column-gap:var(--unit); align-items:center; padding:0 var(--unit)}
+.ledger th,.ledger td {min-width:0; padding:0; text-align:start}
+.ledger thead tr {min-height:calc(var(--unit) * 5); border-block-end:1px solid var(--control)}
+.ledger thead th {color:var(--subtle); font:500 12px var(--mono)}
+.ledger tbody tr {min-height:calc(var(--unit) * 10); padding-block:var(--unit); border-block-end:1px solid var(--hair)}
+.ledger tbody tr:is(:hover,:focus-within) {background:var(--raised)}
+.ledger .num {display:flex; align-items:center; gap:var(--unit); color:var(--muted); font:500 12px var(--mono); font-variant-numeric:tabular-nums}
+.glyph {display:block; width:24px; height:24px; overflow:hidden; border-radius:var(--r); background:var(--whisper)}
+.glyph canvas {display:block; width:100%; height:100%; image-rendering:pixelated}
+.ledger tr:has(a:focus-visible) canvas {animation:scan 780ms steps(3,end)}
+@media (hover:hover) {.ledger tbody tr:hover canvas {animation:scan 780ms steps(3,end)}}
+@keyframes scan {0%,100%{transform:none} 50%{transform:scale(1.5)}}
+.project strong {font-size:16px; font-weight:650; overflow-wrap:anywhere}
+.project p {margin:0; color:var(--subtle); font-size:14px; line-height:1.4}
+.progress {display:inline-block; margin-inline-start:var(--unit); color:var(--subtle); font:500 11px var(--mono)}
+.surface,.stack,.repos,.year {font:500 12px/1.45 var(--mono); color:var(--subtle); overflow-wrap:anywhere}
+.marker {display:inline-block; margin-inline-end:calc(var(--unit) / 2); inline-size:var(--unit); block-size:var(--unit); background:var(--cat-web)}
+[data-cat="api"] .marker {background:var(--cat-api)}
+[data-cat="mcp"] .marker {background:var(--cat-mcp)}
+[data-cat="infra"] .marker {background:var(--cat-infra)}
+[data-cat="data"] .marker {background:var(--cat-data)}
+.ledger .action {text-align:end}
+.action a {display:inline-flex; align-items:center; justify-content:flex-end; gap:var(--unit); min-block-size:44px; padding-inline:var(--unit); font:600 13px var(--sans)}
+.action a.featured {color:var(--gold-text)}
+.action a:hover {color:var(--ink)}
+.action a span {font-size:16px}
+.empty {padding:calc(var(--unit) * 4) calc(var(--unit) * 3); border:1px solid var(--hair); border-radius:var(--r); margin-block-start:calc(var(--unit) * 2)}
+.empty h2,dialog h2 {margin:0; font:600 28px/1.2 var(--sans); letter-spacing:-.01em}
+.empty p,dialog p {margin:var(--unit) 0 calc(var(--unit) * 2); color:var(--subtle)}
+.site-foot {margin-block-start:calc(var(--unit) * 7); border-block-start:1px solid var(--hair); padding-block:calc(var(--unit) * 3); color:var(--subtle); font-size:14px}
+.foot {justify-content:space-between; flex-wrap:wrap}
+dialog {max-inline-size:min(100% - var(--unit) * 4, 32rem); padding:calc(var(--unit) * 3); border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text)}
+dialog::backdrop {background:color-mix(in srgb,var(--text) 25%,transparent)}
+dialog input {display:block; inline-size:100%; margin-block:calc(var(--unit) / 2) calc(var(--unit) * 2); min-block-size:44px; padding:var(--unit); border:1px solid var(--control); border-radius:var(--r); background:var(--surface)}
+.dialog-actions {display:flex; flex-wrap:wrap; gap:var(--unit)}
+@media (max-height:680px) { .site-nav,.filters {position:static} html {scroll-padding-block-start:var(--unit)} }
+@media (max-width:860px) {
+  html {scroll-padding-block-start:var(--unit)}
+  .site-nav,.filters {position:static}
+  .nav-inner {display:grid; reading-flow:grid-rows; grid-template-columns:minmax(0,1fr) auto; gap:0 var(--unit); padding-block-start:var(--unit)}
+  .nav-inner nav {grid-column:1/-1; grid-row:2}
+  .nav-links {flex-wrap:wrap; gap:0 calc(var(--unit) / 2)}
+  .nav-links a {padding:calc(var(--unit) * 1.25) var(--unit); min-block-size:44px}
+  .nav-links li:first-child a {padding-inline-start:0}
+  .search-label {display:none}
+  .hero {grid-template-columns:1fr; gap:calc(var(--unit) * 2); padding-block:calc(var(--unit) * 3)}
+  .tally {min-width:0; padding:0; border:0}
+  .tally .depth {font-size:13px}
+  .filter-heading {display:none}
+  .filter-toggle {display:inline-flex}
+  .filter-toggle[aria-expanded="true"] .chevron {transform:rotate(180deg)}
+  .filter-pane:not([data-open]) {display:none}
+  .facets {padding-block-start:var(--unit)}
+  .options label {min-block-size:44px}
+  .ledger thead {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+  .ledger tbody tr {grid-template-columns:24px minmax(0,max-content) minmax(0,1fr) auto; gap:calc(var(--unit) / 2) var(--unit); align-items:start; padding:calc(var(--unit) * 2) 0}
+  .ledger tbody tr:first-child {border-block-start:1px solid var(--hair)}
+  .num span:first-child {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%)}
+  .project {grid-area:1 / 2 / 2 / -1}
+  .surface,.stack {grid-column:2 / -1}
+  .ledger :is(.repos,.year) {align-self:end; padding-block-end:var(--unit)}
+  .repos,.year,.action {grid-row:4}
+  .repos {grid-column:2}
+  .year {grid-column:3}
+  .action {grid-column:4}
+  .action a {padding-inline-end:0}
+}
+@media (max-width:640px) {.wrap {padding-inline:calc(var(--unit) * 2.5)} .nav-tools .control {padding-inline:var(--unit)}}
+@media (prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none !important; transition:none !important; scroll-behavior:auto !important}}
+@media (forced-colors:active),print {.glyph canvas,.marker {visibility:hidden}}
+</style>
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/en/">diegnghtmr</a>
+    <nav aria-label="Primary"><ul class="nav-links">
+      <li><a href="/en/work/" aria-current="page">Work</a></li><li><a href="/en/#oss">Open source</a></li>
+      <li><a href="/en/#about">About</a></li><li><a href="/en/#contact">Contact</a></li>
+    </ul></nav>
+    <div class="nav-tools">
+      <a class="control lang" href="/es/trabajo/" hreflang="es" aria-label="Switch from English to Spanish"><small>EN</small><span aria-hidden="true">/</span><span lang="es">ES</span></a>
+      <button type="button" class="control" id="search-open" aria-label="Search work" aria-haspopup="dialog" aria-controls="search-dialog" aria-keyshortcuts="Meta+K Control+K" hidden><span class="search-label">Search</span><kbd aria-hidden="true">⌘K</kbd></button>
+      <button type="button" class="control" id="theme" aria-label="Light theme" aria-pressed="false" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="main" tabindex="-1">
+  <nav class="crumb" aria-label="Breadcrumb"><ol><li><a href="/en/">Home</a></li><li aria-hidden="true">/</li><li aria-current="page">Work</li></ol></nav>
+  <header class="hero">
+    <div><p class="kicker">Project index / 2025–2026</p><h1>Work</h1><p class="intro">An index of the applications, services, tools and infrastructure I’ve worked on.</p></div>
+    <div class="tally"><p class="count" id="result-count" role="status" aria-atomic="true" tabindex="-1">14 projects</p><p class="depth">6 case studies · 8 project notes</p></div>
+  </header>
+  <section class="filters" id="filters" aria-label="Project filters" hidden>
+    <div class="filter-top">
+      <h2 class="filter-heading">Filter projects</h2>
+      <button type="button" class="control filter-toggle" id="filter-toggle" aria-expanded="false" aria-controls="filter-pane"><span id="filter-label">Filters (0)</span><span class="chevron" aria-hidden="true">⌄</span></button>
+      <button type="button" class="reset" id="clear-filters" disabled>Clear filters</button>
+    </div>
+    <div class="filter-pane" id="filter-pane">
+      <div class="facets" id="facets">
+        <fieldset><legend>Surface</legend><div class="options">
+          <label><input type="checkbox" name="surface" value="web">Web app</label><label><input type="checkbox" name="surface" value="api">API &amp; services</label>
+          <label><input type="checkbox" name="surface" value="cli">CLI &amp; tooling</label><label><input type="checkbox" name="surface" value="infra">Infrastructure</label>
+        </div></fieldset>
+        <fieldset><legend>Repos</legend><div class="options">
+          <label><input type="checkbox" name="repos" value="single">Single repo</label><label><input type="checkbox" name="repos" value="multi">Multi-repo</label>
+        </div></fieldset>
+        <fieldset><legend>Stack</legend><div class="options">
+          <label><input type="checkbox" name="stack" value="java">Java</label><label><input type="checkbox" name="stack" value="typescript">TypeScript</label>
+          <label><input type="checkbox" name="stack" value="go">Go</label><label><input type="checkbox" name="stack" value="node">Node</label>
+        </div></fieldset>
+      </div>
+    </div>
+    <div class="active" id="active" role="group" aria-label="Active filters" hidden></div>
+  </section>
+  <section id="empty" class="empty" aria-labelledby="empty-title" hidden>
+    <h2 id="empty-title">No matching projects</h2><p>Try removing a filter or clear all filters to see every project.</p>
+    <button type="button" class="control primary" id="empty-clear">Clear filters</button>
+  </section>
+  <table class="ledger" id="results" role="table" aria-label="Work index">
+    <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">№</th><th scope="col" role="columnheader">Project</th><th scope="col" role="columnheader">Surface</th><th scope="col" role="columnheader">Stack</th><th scope="col" role="columnheader">Repos</th><th scope="col" role="columnheader">Year</th><th scope="col" role="columnheader" class="action"><span class="sr">Details</span><span aria-hidden="true">→</span></th></tr></thead>
+    <tbody role="rowgroup">
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="java" data-cat="web">
+        <td role="cell" class="num"><span>01</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>StudyDeck AI</strong><p>Spaced-repetition decks with AI card generation, RAG and an MCP server.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + API</td><td role="cell" class="stack">Java 25 · Spring Boot · PostgreSQL/pgvector · React</td><td role="cell" class="repos">2 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a class="featured" href="/en/work/studydeck-ai/" aria-label="Case study: StudyDeck AI">Case study <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="java typescript" data-cat="web">
+        <td role="cell" class="num"><span>02</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Food Court</strong><p>Role-based ordering across menu, orders, identity and traceability.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + 4 services</td><td role="cell" class="stack">Spring Boot · React · TypeScript</td><td role="cell" class="repos">5 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a class="featured" href="/en/work/food-court/" aria-label="Case study: Food Court">Case study <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="java" data-cat="web">
+        <td role="cell" class="num"><span>03</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Brújula</strong><p>Academic planning for Universidad del Quindío students.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + API</td><td role="cell" class="stack">Spring Modulith · Keycloak · OpenAPI</td><td role="cell" class="repos">2 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a class="featured" href="/en/work/brujula/" aria-label="Case study: Brújula">Case study <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="java typescript" data-cat="data">
+        <td role="cell" class="num"><span>04</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Legajo</strong><p>Similarity analysis and clustering for research abstracts.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + API</td><td role="cell" class="stack">React 19 · Java 25 · OpenAPI</td><td role="cell" class="repos">2 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a class="featured" href="/en/work/legajo/" aria-label="Case study: Legajo">Case study <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="go" data-cat="web">
+        <td role="cell" class="num"><span>05</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Profundiza UQ</strong><p>Elective course enrollment.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + API</td><td role="cell" class="stack">Go · chi · pgx · PostgreSQL · React</td><td role="cell" class="repos">2 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a class="featured" href="/en/work/profundiza-uq/" aria-label="Case study: Profundiza UQ">Case study <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="cli" data-repos="single" data-stack="node" data-cat="mcp">
+        <td role="cell" class="num"><span>06</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>writing-harness</strong><p>Spanish writing harness for AI agents with 16 skills, 93 rules and a prose-to-code gate.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>CLI / skills</td><td role="cell" class="stack">Node · zero dependencies</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a class="featured" href="/en/work/writing-harness/" aria-label="Case study: writing-harness">Case study <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="typescript node" data-cat="web">
+        <td role="cell" class="num"><span>07</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Savia</strong><span class="progress">In progress</span><p>Health and wellbeing system across web, mobile, API and MCP.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + mobile + API + MCP</td><td role="cell" class="stack">NestJS/Fastify · Next.js · Expo</td><td role="cell" class="repos">4 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/savia/" aria-label="Notes: Savia">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web api" data-repos="multi" data-stack="java typescript" data-cat="web">
+        <td role="cell" class="num"><span>08</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Academic Triage</strong><p>Academic request triage over a Java backend contract.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web + API</td><td role="cell" class="stack">Angular 20 · Java</td><td role="cell" class="repos">2 repos</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/academic-triage/" aria-label="Notes: Academic Triage">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web" data-repos="single" data-stack="typescript" data-cat="web">
+        <td role="cell" class="num"><span>09</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Vale</strong><p>Academic schedule planner with calendar export.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web app</td><td role="cell" class="stack">TypeScript</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/vale/" aria-label="Notes: Vale">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="web" data-repos="single" data-stack="typescript" data-cat="data">
+        <td role="cell" class="num"><span>10</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Saber Inverso</strong><p>Estimates Saber 11 scores from UQ admission weights, with uncertainty.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Web app</td><td role="cell" class="stack">Astro · TypeScript</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/saber-inverso/" aria-label="Notes: Saber Inverso">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="cli" data-repos="single" data-stack="" data-cat="mcp">
+        <td role="cell" class="num"><span>11</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>doc-sentinel</strong><p>CLI that strips document traces and detects prompt injection.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>CLI</td><td role="cell" class="stack">Not listed</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/doc-sentinel/" aria-label="Notes: doc-sentinel">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="cli" data-repos="single" data-stack="" data-cat="mcp">
+        <td role="cell" class="num"><span>12</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>resume-maker</strong><p>Résumé pipeline that publishes PDFs at permanent URLs.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Build pipeline</td><td role="cell" class="stack">LaTeX</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/resume-maker/" aria-label="Notes: resume-maker">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="infra" data-repos="single" data-stack="" data-cat="infra">
+        <td role="cell" class="num"><span>13</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>Enterprise Monitoring Stack</strong><p>Team project for containerized monitoring with redundant storage.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>Infrastructure</td><td role="cell" class="stack">Docker · RAID 1 · LVM · Netdata</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2025</td><td role="cell" class="action"><a href="/en/work/enterprise-monitoring-stack/" aria-label="Notes: Enterprise Monitoring Stack">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+      <tr role="row" data-project data-surface="api" data-repos="single" data-stack="" data-cat="api">
+        <td role="cell" class="num"><span>14</span><span class="glyph" aria-hidden="true"><canvas width="12" height="12"></canvas></span></td><th scope="row" role="rowheader" class="project"><strong>NexRide</strong><p>Ride dispatch backend with safe pickup suggestions and composite scoring.</p></th>
+        <td role="cell" class="surface"><i class="marker" aria-hidden="true"></i>API</td><td role="cell" class="stack">Not listed</td><td role="cell" class="repos">1 repo</td><td role="cell" class="year">2026</td><td role="cell" class="action"><a href="/en/work/nexride/" aria-label="Notes: NexRide">Notes <span aria-hidden="true">→</span></a></td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+<footer class="site-foot"><div class="wrap foot"><a class="brand" href="/en/">diegnghtmr</a><a href="#top">Back to top <span aria-hidden="true">↑</span></a></div></footer>
+<dialog id="search-dialog" aria-labelledby="search-title">
+  <h2 id="search-title">Search work</h2><p id="search-hint">Find projects by name, purpose or stack.</p>
+  <form id="search-form">
+    <label for="query">Search projects</label><input type="search" id="query" aria-describedby="search-hint" autocomplete="off" autofocus>
+    <div class="dialog-actions"><button type="submit" class="control primary">Search</button><button type="button" class="control" id="search-close">Cancel</button></div>
+  </form>
+</dialog>
+<script>
+(() => {
+  const byId = id => document.getElementById(id);
+  const rows = [...document.querySelectorAll('[data-project]')];
+  const inputs = [...byId('facets').querySelectorAll('input')];
+  const keys = [...new Set(inputs.map(input => input.name))];
+  const active = byId('active'), status = byId('result-count'), results = byId('results');
+  const filterToggle = byId('filter-toggle'), clear = byId('clear-filters');
+  const search = byId('search-dialog'), searchOpen = byId('search-open'), queryInput = byId('query');
+  const mobile = matchMedia('(max-width: 860px)');
+  const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  const searchText = new Map(rows.map(row => [row, normalize([...row.querySelectorAll('.project :is(strong,p), .stack')].map(el => el.textContent).join(' '))]));
+  let query = '', searchOrigin = null;
+
+  function restore() {
+    const params = new URLSearchParams(location.search);
+    inputs.forEach(input => { input.checked = params.getAll(input.name).includes(input.value); });
+    query = (params.get('q') || '').trim();
+  }
+  function render(sync = true) {
+    const checked = inputs.filter(input => input.checked);
+    const selected = keys.map(key => [key, checked.filter(input => input.name === key).map(input => input.value)]);
+    const term = normalize(query);
+    let count = 0;
+    for (const row of rows) {
+      row.hidden = !selected.every(([key, values]) => !values.length || values.some(value => row.dataset[key].split(' ').includes(value))) || !searchText.get(row).includes(term);
+      if (!row.hidden) count++;
+    }
+    const message = count === rows.length ? `${count} projects` : `${count} of ${rows.length} projects`;
+    if (status.textContent !== message) status.textContent = message;
+    results.hidden = count === 0;
+    byId('empty').hidden = count !== 0;
+    byId('filter-label').textContent = `Filters (${checked.length})`;
+    active.replaceChildren();
+    const addChip = (label, remove) => {
+      const chip = document.createElement('button'), cross = document.createElement('span');
+      chip.type = 'button'; chip.className = 'chip'; chip.textContent = label;
+      chip.setAttribute('aria-label', `Remove filter: ${label}`);
+      cross.setAttribute('aria-hidden', 'true'); cross.textContent = '×'; chip.append(cross);
+      chip.addEventListener('click', () => {
+        const index = [...active.children].indexOf(chip);
+        remove(); render();
+        (active.children[Math.min(index, active.children.length - 1)] || (mobile.matches ? filterToggle : status)).focus();
+      });
+      active.append(chip);
+    };
+    checked.forEach(input => addChip(input.labels[0].textContent.trim(), () => { input.checked = false; }));
+    if (query) addChip(`Search: ${query}`, () => { query = ''; });
+    active.hidden = clear.disabled = active.children.length === 0;
+    if (sync) {
+      const url = new URL(location.href);
+      [...keys, 'q'].forEach(key => url.searchParams.delete(key));
+      checked.forEach(input => url.searchParams.append(input.name, input.value));
+      if (query) url.searchParams.set('q', query);
+      // Some browsers disallow replacing a file: URL's query. The preview's filters still work.
+      try { history.replaceState(history.state, '', url); } catch (error) { if (error.name !== 'SecurityError') throw error; }
+    }
+  }
+  function reset() {
+    inputs.forEach(input => { input.checked = false; }); query = ''; render();
+    (mobile.matches ? filterToggle : status).focus();
+  }
+  byId('facets').addEventListener('change', () => render());
+  clear.addEventListener('click', reset);
+  byId('empty-clear').addEventListener('click', reset);
+  filterToggle.addEventListener('click', () => {
+    const expanded = filterToggle.getAttribute('aria-expanded') !== 'true';
+    filterToggle.setAttribute('aria-expanded', String(expanded));
+    byId('filter-pane').toggleAttribute('data-open', expanded);
+  });
+  const openSearch = () => {
+    if (search.open) return;
+    searchOrigin = document.activeElement;
+    queryInput.value = query;
+    search.showModal();
+    queryInput.select();
+  };
+  searchOpen.addEventListener('click', openSearch);
+  byId('search-close').addEventListener('click', () => search.close());
+  search.addEventListener('close', () => { if (searchOrigin) searchOrigin.focus(); searchOrigin = null; });
+  byId('search-form').addEventListener('submit', event => {
+    event.preventDefault(); query = queryInput.value.trim(); render();
+    searchOrigin = null; search.close(); status.focus();
+  });
+  document.addEventListener('keydown', event => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openSearch(); }
+  });
+  addEventListener('popstate', () => { restore(); render(false); });
+
+  const bayer = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+  function draw() {
+    const tokens = getComputedStyle(document.documentElement);
+    const palette = ['--surface', '--mid', '--ink'].map(key => tokens.getPropertyValue(key).trim());
+    document.querySelectorAll('canvas').forEach((canvas, index) => {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const {width, height} = canvas;
+      for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        const u = (x + .5) / width * 2 - 1, v = (y + .5) / height * 2 - 1;
+        const phase = index * .73;
+        const field = .99 - Math.hypot(u, v) + .26 * Math.sin(u * (index % 4 + 3) + v * 4 + phase);
+        const shade = Math.floor(field * 2 + bayer[(y % 4) * 4 + x % 4] / 16);
+        ctx.fillStyle = palette[Math.max(0, Math.min(2, shade))]; ctx.fillRect(x, y, 1, 1);
+      }
+    });
+  }
+  const theme = byId('theme');
+  theme.addEventListener('click', () => {
+    const light = document.documentElement.dataset.theme !== 'light';
+    document.documentElement.dataset.theme = light ? 'light' : 'dark';
+    theme.setAttribute('aria-pressed', String(light)); theme.textContent = light ? 'Light' : 'Dark'; draw();
+  });
+  restore(); render(false); draw();
+  [byId('filters'), searchOpen, theme].forEach(el => { el.hidden = false; });
+})();
+</script>
+</body>
+</html>
