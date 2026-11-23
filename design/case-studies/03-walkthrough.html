@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brújula | diegnghtmr</title>
+<style>
+:root {
+  --surface:#06080f; --raised:#1c212c; --text:#f3f6f9; --subtle:#a3b5c1; --muted:#8a8fa3;
+  --whisper:#191e28; --gold:#e0c15a; --gold-text:#e0c15a; --on-gold:#06080f;
+  --selection:#263356; --hair:#1c212c; --control:#5c6170; --cat-web:#7fb4ca; --cat-api:#b7cc85;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --unit:8px; --container:1200px; --r:6px; --r-sm:6px; --ease-out:cubic-bezier(0.23,1,0.32,1);
+  color-scheme:dark;
+}
+:root[data-theme="light"] {
+  --surface:#f3f6f9; --raised:#ffffff; --text:#06080f; --subtle:#4e5362; --muted:#6a6e82;
+  --whisper:#e2e6f2; --gold-text:#866d01; --selection:#c9dce6; --hair:#dce1ea; --control:#6a6e82;
+  --cat-web:#43778b; --cat-api:#667833;
+  color-scheme:light;
+}
+*,*::before,*::after {box-sizing:border-box}
+[hidden] {display:none !important}
+html {scroll-padding-block-start:84px}
+body {margin:0; background:var(--surface); color:var(--text); font:400 16px/1.55 var(--sans)}
+::selection {background:var(--selection)}
+a {color:inherit; text-underline-offset:.22em; overflow-wrap:anywhere}
+button,input {font:inherit; color:inherit}
+button {cursor:pointer}
+code,kbd {font-family:var(--mono)}
+:focus-visible {outline:2px solid var(--gold-text); outline-offset:2px; border-radius:var(--r-sm)}
+.wrap {max-width:var(--container); margin-inline:auto; padding-inline:calc(var(--unit) * 4)}
+.skip {position:absolute; inset:var(--unit) auto auto calc(var(--unit) * 2); z-index:3; padding:var(--unit) calc(var(--unit) * 2); background:var(--gold); color:var(--on-gold); border-radius:var(--r); transform:translateY(-200%)}
+.skip:focus {transform:none}
+.site-nav {position:sticky; inset-block-start:0; z-index:2; background:var(--surface); border-block-end:1px solid var(--hair)}
+.nav-inner,.nav-links ol,.nav-tools {display:flex; align-items:center; gap:calc(var(--unit) / 2)}
+.nav-inner {min-height:calc(var(--unit) * 8); gap:calc(var(--unit) * 2.5)}
+.brand {font:600 15px/1.55 var(--mono); text-decoration:none}
+.nav-links {margin-inline-end:auto}
+.nav-links ol {margin:0; padding:0; list-style:none}
+.nav-links li {display:flex; align-items:center}
+.nav-links .slash {color:var(--muted); padding-inline:calc(var(--unit) / 2)}
+.nav-links a,.nav-links [aria-current] {display:inline-flex; align-items:center; gap:calc(var(--unit) / 2); min-block-size:44px; padding-inline:var(--unit); color:var(--subtle); font-size:14px; text-decoration:none}
+.nav-links a:hover,.nav-links [aria-current] {color:var(--text)}
+.nav-links [aria-current] {font-weight:600}
+.nav-control,.control {display:inline-flex; align-items:center; justify-content:center; gap:calc(var(--unit) * .75); min-height:44px; border:1px solid var(--control); border-radius:var(--r-sm); background:transparent; text-decoration:none; white-space:nowrap}
+.nav-control {min-width:44px; padding:0 var(--unit); color:var(--subtle); font:500 13px var(--sans)}
+.nav-control:hover,.control:hover {border-color:var(--gold-text); color:var(--text)}
+kbd {padding:1px 5px; border:1px solid var(--hair); border-radius:var(--r-sm); color:var(--muted); font:500 11px var(--mono)}
+.theme-toggle {min-width:4.75em}
+.theme-light,[data-theme="light"] .theme-dark {display:none}
+[data-theme="light"] .theme-light {display:inline}
+.control {padding:var(--unit) calc(var(--unit) * 1.5); font:600 14px var(--sans)}
+.primary {background:var(--gold); border-color:var(--gold); color:var(--on-gold)}
+.primary:hover {background:var(--text); border-color:var(--text); color:var(--surface)}
+
+.hero {display:grid; grid-template-columns:minmax(0,1.32fr) minmax(0,1fr); gap:calc(var(--unit) * 8); align-items:end; padding-block:calc(var(--unit) * 5) calc(var(--unit) * 6); border-block-end:1px solid var(--hair)}
+.text-link {display:inline-flex; align-items:center; gap:var(--unit); min-block-size:44px; font-size:14px; font-weight:600}
+.text-link:hover {text-decoration-thickness:2px}
+.arrow {color:var(--gold-text); flex:none}
+.back {color:var(--subtle)}
+.kicker {margin:calc(var(--unit) * 3) 0 var(--unit); color:var(--gold-text); font:600 12px/1.5 var(--mono); letter-spacing:.09em; text-transform:uppercase}
+h1 {margin:0; font:600 clamp(2rem,5vw,3.5rem)/1.05 var(--sans); letter-spacing:-.02em}
+.intro {max-width:38ch; margin:calc(var(--unit) * 2) 0 0; color:var(--subtle); font-size:clamp(1rem,2vw,1.25rem); text-wrap:pretty}
+h2 {margin:0; font:600 28px/1.2 var(--sans); letter-spacing:-.01em}
+.facts {padding:calc(var(--unit) * 2) calc(var(--unit) * 3); border:1px solid var(--hair); border-radius:var(--r); background:var(--raised)}
+.facts h2,.map-head h3 {font:600 14px/1.4 var(--mono); margin:0}
+.facts dl {display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--unit) * 1.5) calc(var(--unit) * 2); margin:var(--unit) 0 0; padding-block-start:var(--unit); border-block-start:1px solid var(--hair)}
+.facts dt {color:var(--subtle); font:500 12px/1.5 var(--mono)}
+.facts dd {margin:calc(var(--unit) / 2) 0 0; font-size:14px; overflow-wrap:anywhere}
+.facts .wide {grid-column:1/-1}
+.repo-links {display:flex; flex-wrap:wrap; gap:0 calc(var(--unit) * 2)}
+.repo-links a {display:inline-flex; align-items:center; gap:var(--unit); min-block-size:32px; font-family:var(--mono)}
+.confirm {display:inline-block; width:fit-content; padding:calc(var(--unit) / 4) calc(var(--unit) * .75); border:1px solid var(--control); border-radius:var(--r-sm); color:var(--subtle); font:500 11px/1.5 var(--mono)}
+
+.walkthrough {padding-block-start:calc(var(--unit) * 5)}
+.walkthrough > h2 {margin-block-end:calc(var(--unit) * 3)}
+.walkthrough-grid {display:grid; grid-template-columns:minmax(0,1.14fr) minmax(0,1fr); align-items:start; gap:calc(var(--unit) * 7)}
+.system-view {margin:0; border:1px solid var(--control); border-radius:var(--r); background:var(--surface)}
+.system-view[data-tracking] {position:sticky; inset-block-start:88px; z-index:1}
+.map-head {display:flex; align-items:center; justify-content:space-between; gap:var(--unit); padding:calc(var(--unit) * 2) calc(var(--unit) * 3); border-block-end:1px solid var(--hair)}
+.progress {color:var(--subtle); font:500 12px/1.4 var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.map-body {display:grid; gap:calc(var(--unit) * 2); padding:calc(var(--unit) * 3)}
+.map-flow {display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:stretch; text-align:start}
+.map-item {position:relative; padding:calc(var(--unit) * 1.5); border:1px solid var(--hair); border-radius:var(--r); background:var(--raised)}
+.map-item::after {content:""; position:absolute; inset:-1px; border:2px solid var(--gold-text); border-radius:inherit; opacity:0; pointer-events:none}
+.map-item[data-active]::after {opacity:1}
+.map-repo-name,.map-connection strong {display:block; font:600 13px/1.4 var(--mono); overflow-wrap:anywhere}
+.map-repo-name {display:flex; align-items:center; gap:var(--unit)}
+.dot {width:8px; height:8px; flex:none; border-radius:50%}
+.api {background:var(--cat-api)}
+.web {background:var(--cat-web)}
+.map-caption {display:block; margin-block-start:var(--unit); color:var(--subtle); font-size:13px; line-height:1.45}
+.map-connection {display:grid; align-content:center; gap:calc(var(--unit) / 2); min-inline-size:88px; text-align:center}
+.map-connection svg {width:100%; height:12px; overflow:visible; color:var(--subtle)}
+.map-connection path,.repo-map path {fill:none; stroke:currentColor; stroke-dasharray:2 2}
+.map-connection .arrowhead {fill:currentColor; stroke:none}
+.map-connection[data-active] {color:var(--gold-text)}
+.map-connection[data-active] svg {color:inherit}
+.map-connection[data-active] path {stroke-dasharray:none; stroke-width:2}
+.map-connection[data-active] .arrowhead {stroke:none}
+.map-context {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--unit)}
+.map-context .map-item {background:var(--surface); color:var(--subtle); font:500 12px/1.4 var(--mono); overflow-wrap:anywhere}
+.map-context .map-item[data-active] {color:var(--text)}
+.map-separator {display:block; width:100%; height:32px; border-radius:0 0 var(--r) var(--r); color:var(--control); background:var(--whisper)}
+.steps {padding:0; margin:0; list-style:none; counter-reset:walkthrough}
+.step {position:relative; min-block-size:208px; padding:var(--unit) 0 calc(var(--unit) * 4) calc(var(--unit) * 6); counter-increment:walkthrough}
+.step::before {content:counter(walkthrough,decimal-leading-zero); position:absolute; z-index:1; inset:var(--unit) auto auto 0; width:32px; height:32px; display:grid; place-items:center; border:1px solid var(--control); border-radius:var(--r-sm); background:var(--surface); color:var(--subtle); font:600 12px/1 var(--mono)}
+.step:not(:last-child)::after {content:""; position:absolute; inset:40px auto 0 15px; border-inline-start:1px solid var(--control)}
+.step[aria-current]::before {background:var(--gold); color:var(--on-gold); border-color:var(--gold-text)}
+.step h3 {margin:0; font:600 22px/1.2 var(--sans); letter-spacing:-.01em}
+.step p,.section-copy {margin:var(--unit) 0 0; color:var(--subtle); max-width:59ch}
+.step .text-link {margin-block-start:calc(var(--unit) / 2)}
+.step .confirm,.section-copy .confirm {vertical-align:middle}
+
+.demo {margin-block-start:calc(var(--unit) * 4); padding-block-start:calc(var(--unit) * 5); border-block-start:1px solid var(--hair)}
+.shots {display:grid; grid-template-columns:1.32fr 1fr; gap:calc(var(--unit) * 3); margin-block-start:calc(var(--unit) * 3)}
+.shot {margin:0; min-width:0}
+.placeholder {display:grid; min-block-size:144px; aspect-ratio:16/7; place-items:center; padding:var(--unit); border:1px solid var(--hair); border-radius:var(--r); background:var(--raised); color:var(--subtle); text-align:center; font:500 12px/1.4 var(--mono)}
+.shot:nth-child(2n) .placeholder {aspect-ratio:12/7}
+.shot figcaption {margin-block-start:var(--unit); color:var(--subtle); font-size:14px}
+.demo-links {display:flex; flex-wrap:wrap; gap:0 calc(var(--unit) * 3); margin-block-start:var(--unit)}
+.limits {margin-block-start:calc(var(--unit) * 7); padding:calc(var(--unit) * 3); border-radius:var(--r); background:var(--raised)}
+.limits .section-copy {max-width:66ch}
+.next {margin-block-start:calc(var(--unit) * 7)}
+.next h2 {margin-block-end:var(--unit)}
+.study {display:grid; grid-template-columns:88px minmax(0,1fr) 32px; align-items:center; gap:calc(var(--unit) * 2); padding:calc(var(--unit) * 2) var(--unit); border:1px solid var(--hair); border-radius:var(--r); color:var(--text); text-decoration:none}
+.study:is(:hover,:focus-visible) {background:var(--raised)}
+.study:focus-visible {outline-offset:-2px}
+.repository {display:grid; place-items:center; align-content:center; align-self:stretch; padding-inline-end:var(--unit); border-inline-end:1px solid var(--hair); color:var(--subtle)}
+.repo-map {display:block; width:72px; max-width:100%; height:auto}
+.node-web {fill:var(--cat-web)}
+.node-api {fill:var(--cat-api)}
+.repo-count {font:500 11px/1.4 var(--mono); white-space:nowrap}
+.project h3 {margin:0; font:650 18px/1.3 var(--sans)}
+.project p {margin:calc(var(--unit) / 2) 0 0; color:var(--subtle); font-size:14px; line-height:1.45}
+.project .meta {margin-block-start:var(--unit); font:500 12px/1.5 var(--mono); overflow-wrap:anywhere}
+.row-arrow {justify-self:center; color:var(--gold-text); font:500 20px/1 var(--sans)}
+.next .back {margin-block-start:var(--unit)}
+.site-foot {margin-block-start:calc(var(--unit) * 8); border-block-start:1px solid var(--hair); padding-block-start:calc(var(--unit) * 4); color:var(--subtle); font-size:14px}
+.foot {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; align-items:start; gap:calc(var(--unit) * 4); padding-block-end:calc(var(--unit) * 4)}
+.foot .brand {color:var(--text)}
+.foot p {margin:calc(var(--unit) / 2) 0 0}
+.foot h2 {margin:0; color:var(--text); font:500 12px/1.5 var(--mono)}
+.foot a:not(.brand) {display:inline-flex; align-items:center; min-block-size:44px; gap:var(--unit)}
+.horizon {display:block; width:100%; height:clamp(64px,8vw,104px); color:var(--control)}
+
+.dialog {width:min(calc(100% - var(--unit) * 4),32rem); max-height:calc(100% - var(--unit) * 4); padding:calc(var(--unit) * 3); border:1px solid var(--control); border-radius:var(--r); background:var(--surface); color:var(--text)}
+.dialog::backdrop {background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.dialog-head {display:flex; justify-content:space-between; gap:var(--unit); align-items:center}
+.dialog label {display:block; margin-block-start:calc(var(--unit) * 2); font-weight:600; font-size:14px}
+.dialog input {display:block; inline-size:100%; margin-block:calc(var(--unit) / 2) var(--unit); min-block-size:44px; padding:var(--unit); border:1px solid var(--control); border-radius:var(--r); background:var(--surface)}
+.dialog-status {margin:0; color:var(--subtle); font-size:14px}
+.dialog ul {padding:0; margin:var(--unit) 0; list-style:none}
+.dialog li {border-block-start:1px solid var(--hair)}
+.dialog li a {display:flex; padding-inline:var(--unit)}
+.dialog li a:hover {background:var(--raised)}
+
+@media (max-width:860px) {
+  html:has(.system-view[data-tracking]) {scroll-padding-block-start:216px}
+  .nav-inner {gap:var(--unit); flex-wrap:wrap}
+  .nav-inner > .brand {margin-inline-end:auto}
+  .nav-links {order:1; width:100%}
+  .site-nav[data-menu-ready] .nav-links {position:absolute; inset:100% 0 auto; border-block-end:1px solid var(--hair); background:var(--surface)}
+  .site-nav[data-menu-ready]:not([data-menu-open]) .nav-links {display:none}
+  .nav-links ol {max-width:var(--container); margin-inline:auto; padding:var(--unit) calc(var(--unit) * 2.5)}
+  .search-label {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+  .hero {gap:calc(var(--unit) * 3); padding-block:calc(var(--unit) * 3) calc(var(--unit) * 4)}
+  .walkthrough {padding-block-start:calc(var(--unit) * 4)}
+  .walkthrough-grid {display:block}
+  .system-view[data-tracking] {inset-block-start:72px}
+  .steps {margin-block-start:calc(var(--unit) * 2)}
+  .map-head {padding:var(--unit) calc(var(--unit) * 1.5)}
+  .map-body {gap:var(--unit); padding:var(--unit) calc(var(--unit) * 1.5)}
+  .map-item {padding:var(--unit)}
+  .map-caption,.map-separator {display:none}
+  .map-context .map-item {padding:calc(var(--unit) / 2) var(--unit)}
+  .step {min-block-size:0; padding-block-end:calc(var(--unit) * 4)}
+  .foot {gap:calc(var(--unit) * 3)}
+}
+@media (max-width:640px) {
+  .wrap {padding-inline:calc(var(--unit) * 2.5)}
+  .hero {grid-template-columns:minmax(0,1fr)}
+  .kicker {margin-block-start:var(--unit)}
+  .facts {padding-inline:calc(var(--unit) * 2)}
+  .shots {grid-template-columns:minmax(0,1fr); gap:calc(var(--unit) * 2)}
+  .shot:nth-child(n) .placeholder {aspect-ratio:16/8}
+  .study {grid-template-columns:52px minmax(0,1fr) 24px; gap:var(--unit); padding-inline:calc(var(--unit) / 2)}
+  .repository {padding-inline-end:calc(var(--unit) / 2)}
+  .foot {grid-template-columns:minmax(0,1fr); gap:calc(var(--unit) * 2)}
+}
+@media (max-width:400px) {.nav-inner {padding-inline:calc(var(--unit) * 2)}}
+@media (max-width:350px),(max-height:480px) {
+  .system-view[data-tracking] {position:static}
+  html:has(.system-view[data-tracking]) {scroll-padding-block-start:112px}
+}
+@media (min-width:861px) {.menu-toggle {display:none}}
+@media (prefers-reduced-motion:no-preference) {
+  .system-view[data-tracking] .map-item::after {transition:opacity 180ms var(--ease-out)}
+}
+@media (prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine) {
+  .study .row-arrow {transition:transform 160ms var(--ease-out)}
+  .study:hover .row-arrow {transform:translateX(3px)}
+}
+@media (forced-colors:active) {
+  .map-separator,.horizon {display:none}
+  .map-item[data-active]::after,.step[aria-current]::before {border:2px solid Highlight}
+}
+@media print {.site-nav,.map-separator,.horizon {display:none} .system-view[data-tracking] {position:static}}
+</style>
+</head>
+<body id="top">
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <!-- Bayer 4x4 masks: the four and eight lowest thresholds, at 2px per cell. -->
+    <pattern id="bayer-low" width="8" height="8" patternUnits="userSpaceOnUse"><path fill="var(--control)" d="M0 0h2v2H0zM4 0h2v2H4zM0 4h2v2H0zM4 4h2v2H4z"/></pattern>
+    <pattern id="bayer-mid" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="url(#bayer-low)"/><path fill="var(--control)" d="M2 2h2v2H2zM6 2h2v2H6zM2 6h2v2H2zM6 6h2v2H6z"/></pattern>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-nav" id="site-nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/en/">diegnghtmr</a>
+    <nav id="primary-nav" class="nav-links" aria-label="Breadcrumb">
+      <ol role="list">
+        <li><a href="/en/"><span aria-hidden="true">←</span> Home</a></li>
+        <li><span class="slash" aria-hidden="true">/</span><a href="/en/work/">Work</a></li>
+        <li><span class="slash" aria-hidden="true">/</span><span aria-current="page">Brújula</span></li>
+      </ol>
+    </nav>
+    <div class="nav-tools">
+      <button class="nav-control" type="button" id="search-open" aria-haspopup="dialog" aria-controls="command-menu" aria-keyshortcuts="Control+K Meta+K" aria-label="Search" hidden><span class="search-label">Search</span><kbd>Ctrl K</kbd></button>
+      <a class="nav-control" href="/es/trabajo/brujula/" hreflang="es" lang="es" aria-label="Español">ES</a>
+      <button class="nav-control theme-toggle" type="button" id="theme-toggle" aria-label="Light theme" aria-pressed="false" hidden><span class="theme-dark">Dark</span><span class="theme-light">Light</span></button>
+      <button class="nav-control menu-toggle" type="button" id="menu-toggle" aria-controls="primary-nav" aria-expanded="false" hidden>Menu</button>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="main" tabindex="-1">
+  <header class="hero">
+    <div>
+      <a class="text-link back" href="/en/work/"><span class="arrow" aria-hidden="true">←</span> All projects</a>
+      <p class="kicker">Case study</p>
+      <h1>Brújula</h1>
+      <p class="intro">An academic planning platform for Universidad del Quindío students to explore curricula, declare progress, and simulate schedules.</p>
+    </div>
+    <section class="facts" aria-labelledby="facts-title">
+      <h2 id="facts-title">Project facts</h2>
+      <dl>
+        <div><dt>Role</dt><dd><span class="confirm">To confirm</span></dd></div>
+        <div><dt>Live demo</dt><dd><span class="confirm">To confirm</span></dd></div>
+        <div><dt>Surfaces</dt><dd>Web app + API</dd></div>
+        <div><dt>Stack</dt><dd>Spring Modulith, OpenAPI, React, TypeScript, Vite</dd></div>
+        <div class="wide"><dt>2 repositories</dt><dd class="repo-links">
+          <a href="https://github.com/diegnghtmr/brujula-backend"><span class="dot api" aria-hidden="true"></span>brujula-backend</a>
+          <a href="https://github.com/diegnghtmr/brujula-frontend"><span class="dot web" aria-hidden="true"></span>brujula-frontend</a>
+        </dd></div>
+      </dl>
+    </section>
+  </header>
+
+  <section class="walkthrough" aria-labelledby="walkthrough-title">
+    <h2 id="walkthrough-title">System walkthrough</h2>
+    <div class="walkthrough-grid">
+      <figure class="system-view" id="system-view" aria-labelledby="map-title">
+        <figcaption class="map-head"><h3 id="map-title">Repository map</h3><span class="progress" id="progress" aria-hidden="true" hidden></span></figcaption>
+        <div class="map-body">
+          <div class="map-flow">
+            <div class="map-item" data-region="backend">
+              <strong class="map-repo-name"><span class="dot api" aria-hidden="true"></span>Backend</strong>
+              <span class="map-caption">Spring Boot modules<br>Owns the contract</span>
+            </div>
+            <div class="map-connection" data-region="contract">
+              <strong>OpenAPI</strong>
+              <svg viewBox="0 0 88 12" aria-hidden="true"><path d="M0 6H80"/><path class="arrowhead" d="M80 2l8 4-8 4z"/></svg>
+            </div>
+            <div class="map-item" data-region="frontend">
+              <strong class="map-repo-name"><span class="dot web" aria-hidden="true"></span>Frontend</strong>
+              <span class="map-caption">React app<br>Tracked copy + Axios client</span>
+            </div>
+          </div>
+          <div class="map-context">
+            <span class="map-item" data-region="scope">Student planning</span>
+            <span class="map-item" data-region="privacy">Staff aggregates</span>
+            <span class="map-item" data-region="checks">Local CI</span>
+          </div>
+        </div>
+        <svg class="map-separator" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 600 32">
+          <rect width="600" height="32" fill="url(#bayer-low)"/><path d="M0 32V24h56v-8h96V8h88V0h360v32Z" fill="url(#bayer-mid)"/>
+        </svg>
+      </figure>
+      <ol class="steps" role="list">
+        <li class="step" id="problem" data-map="scope">
+          <h3>Planning without official records</h3>
+          <p>Brújula was scoped to one institution while the boundaries between curriculum, progress and simulation were still being defined. Students declare their own academic data; these declarations are not official records.</p>
+        </li>
+        <li class="step" id="repositories" data-map="backend frontend">
+          <h3>Two repositories, two responsibilities</h3>
+          <p>The Spring Boot backend houses the modules, API contract and local infrastructure configuration. The browser app handles catalog, curriculum, progress, import and simulation.</p>
+        </li>
+        <li class="step" id="contract-link" data-map="contract">
+          <h3>How the contract crosses the boundary</h3>
+          <p>The backend owns the OpenAPI contract. The frontend tracks a copy of that contract and calls the API through a generated Axios client.</p>
+        </li>
+        <li class="step" id="modular-monolith" data-map="backend">
+          <h3>One process instead of microservices</h3>
+          <p>Spring Modulith keeps the modules in one Spring Boot process. That avoids the overhead of a distributed system, but all modules share one JVM and deployment lifecycle.</p>
+          <a class="text-link" href="https://github.com/diegnghtmr/brujula-backend/blob/main/docs/architecture/adr/ADR-001-modular-monolith-vs-microservices.md">ADR-001: Modular monolith <span class="arrow" aria-hidden="true">↗</span></a>
+        </li>
+        <li class="step" id="contract-decision" data-map="contract frontend">
+          <h3>Contract-first over validation alone</h3>
+          <p>The ADR weighs a hand-written contract, validation only, and server and client generation. It makes the backend contract authoritative. Generation reduces drift, but contract changes require syncing the copy and regenerating the client.</p>
+          <a class="text-link" href="https://github.com/diegnghtmr/brujula-backend/blob/main/docs/architecture/adr/ADR-006-openapi-contract-first-axios.md">ADR-006: OpenAPI contract-first <span class="arrow" aria-hidden="true">↗</span></a>
+        </li>
+        <li class="step" id="privacy" data-map="privacy">
+          <h3>Staff see aggregates, not individual grades</h3>
+          <p>The MVP gives staff aggregates only. Helping an individual student would require a delegated access feature later.</p>
+          <a class="text-link" href="https://github.com/diegnghtmr/brujula-backend/blob/main/docs/architecture/adr/ADR-012-staff-no-individual-grades-mvp.md">ADR-012: Staff access <span class="arrow" aria-hidden="true">↗</span></a>
+        </li>
+        <li class="step" id="result" data-map="checks">
+          <h3>What the CI workflow defines</h3>
+          <p>The CI workflow defines formatting, test and coverage gates. It runs locally or by hand; no remote runner is configured.</p>
+          <p>Whether the gates pass <span class="confirm">To confirm</span></p>
+          <a class="text-link" href="https://github.com/diegnghtmr/brujula-backend/blob/main/.github/workflows/ci.yml">Backend CI configuration <span class="arrow" aria-hidden="true">↗</span></a>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="demo" aria-labelledby="demo-title">
+    <h2 id="demo-title" tabindex="-1">Demonstration</h2>
+    <p class="section-copy">The frontend has components and real-stack end-to-end specs for these flows. Screenshots and current flow behavior <span class="confirm">To confirm</span></p>
+    <div class="shots">
+      <figure class="shot"><div class="placeholder" aria-hidden="true">Screenshot to capture</div><figcaption>Program catalog</figcaption></figure>
+      <figure class="shot"><div class="placeholder" aria-hidden="true">Screenshot to capture</div><figcaption>Curriculum view</figcaption></figure>
+      <figure class="shot"><div class="placeholder" aria-hidden="true">Screenshot to capture</div><figcaption>Progress declaration</figcaption></figure>
+      <figure class="shot"><div class="placeholder" aria-hidden="true">Screenshot to capture</div><figcaption>Simulation schedule</figcaption></figure>
+    </div>
+    <div class="demo-links">
+      <a class="text-link" href="https://github.com/diegnghtmr/brujula-frontend/tree/main/src/features">Frontend features <span class="arrow" aria-hidden="true">↗</span></a>
+      <a class="text-link" href="https://github.com/diegnghtmr/brujula-frontend/tree/main/e2e/real-stack">Real-stack E2E specs <span class="arrow" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+  <section class="limits" aria-labelledby="limits-title">
+    <h2 id="limits-title" tabindex="-1">Deployment limitation</h2>
+    <p class="section-copy">Production needs an <code>/api/v1</code> proxy rewrite or an equivalent backend context path. Without it, the frontend’s API calls return 404.</p>
+    <a class="text-link" href="https://github.com/diegnghtmr/brujula-frontend#production-deployment--api-proxy-requirement">Deployment notes <span class="arrow" aria-hidden="true">↗</span></a>
+  </section>
+  <section class="next" aria-labelledby="next-title">
+    <h2 id="next-title" tabindex="-1">Next project</h2>
+    <a class="study" href="/en/work/legajo/" aria-labelledby="legajo" aria-describedby="legajo-summary">
+      <div class="repository" aria-hidden="true"><svg class="repo-map" viewBox="0 0 80 48"><path d="M22 24H58"/><circle class="node-web" cx="22" cy="24" r="4"/><circle class="node-api" cx="58" cy="24" r="4"/></svg><span class="repo-count">2 repos</span></div>
+      <div class="project"><h3 id="legajo">Legajo</h3><p id="legajo-summary">Similarity analysis and clustering for research abstracts.</p><p class="meta">Web + API · React 19, Java 25, OpenAPI</p></div>
+      <span class="row-arrow" aria-hidden="true">→</span>
+    </a>
+    <a class="text-link back" href="/en/work/"><span class="arrow" aria-hidden="true">←</span> All projects</a>
+  </section>
+</main>
+<footer class="site-foot">
+  <div class="wrap foot">
+    <div><a class="brand" href="/en/">diegnghtmr</a><p>Software developer. Armenia, Colombia.</p></div>
+    <div><h2>Elsewhere</h2><a href="https://github.com/diegnghtmr">GitHub</a></div>
+    <a href="#top">Back to top <span class="arrow" aria-hidden="true">↑</span></a>
+  </div>
+  <svg class="horizon" aria-hidden="true" viewBox="0 0 1440 104" preserveAspectRatio="none">
+    <path d="M0 82h64v-8h48v-8h40v-8h56v-8h48v-8h56v8h40v8h64v8h80v-8h48v-8h32v-8h48v-8h48v-8h56v8h48v8h56v8h40v8h56v8h72v-8h40v-8h40v-8h72v8h56v8h64v8h48v8h48v24H0z" fill="url(#bayer-low)"/>
+    <path d="M0 96h96v-8h136v-8h104v8h176v8h200v-8h64v-8h80v-8h120v8h96v8h104v8h240v8H0z" fill="url(#bayer-mid)"/>
+  </svg>
+</footer>
+<dialog class="dialog" id="command-menu" aria-labelledby="search-title">
+  <div class="dialog-head"><h2 id="search-title">Search this case study</h2><button class="control" id="search-close" type="button">Close</button></div>
+  <label for="query">Find a section</label><input type="search" id="query" autocomplete="off" autofocus>
+  <p class="dialog-status" id="search-status" role="status"></p>
+  <ul id="search-results" role="list"></ul>
+  <a class="text-link" href="/en/work/">Search all projects <span class="arrow" aria-hidden="true">→</span></a>
+</dialog>
+<script>
+(() => {
+  const byId = id => document.getElementById(id);
+  const root = document.documentElement;
+  const header = byId('site-nav'), menu = byId('menu-toggle'), breadcrumb = byId('primary-nav');
+  const search = byId('command-menu'), searchTrigger = byId('search-open'), query = byId('query');
+  const results = byId('search-results'), status = byId('search-status');
+  const theme = byId('theme-toggle');
+  const mobile = matchMedia('(max-width: 860px)');
+  const steps = [...document.querySelectorAll('.step')];
+  const searchable = [...steps, byId('demo-title'), byId('limits-title'), byId('next-title')];
+  const normalize = text => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  let searchOrigin, searchTarget;
+
+  theme.addEventListener('click', () => {
+    const light = root.dataset.theme !== 'light';
+    root.dataset.theme = light ? 'light' : 'dark';
+    theme.setAttribute('aria-pressed', String(light));
+  });
+
+  function setMenu(open) {
+    header.toggleAttribute('data-menu-open', open);
+    menu.setAttribute('aria-expanded', String(open));
+  }
+  menu.addEventListener('click', () => {
+    const open = !header.hasAttribute('data-menu-open');
+    setMenu(open);
+    if (open) breadcrumb.querySelector('a').focus();
+  });
+  document.addEventListener('click', event => { if (!header.contains(event.target)) setMenu(false); });
+  header.addEventListener('focusout', event => {
+    if (event.relatedTarget && !header.contains(event.relatedTarget)) setMenu(false);
+  });
+  mobile.addEventListener('change', () => {
+    const active = document.activeElement;
+    if (mobile.matches && breadcrumb.contains(active)) menu.focus();
+    if (!mobile.matches && active === menu) breadcrumb.querySelector('a').focus();
+    setMenu(false);
+  });
+
+  function renderResults() {
+    const terms = normalize(query.value).trim().split(/\s+/).filter(Boolean);
+    const matches = searchable.filter(target => {
+      const content = normalize((target.closest('.step') || target.closest('section')).textContent);
+      return terms.every(term => content.includes(term));
+    });
+    status.textContent = matches.length ? `${matches.length} ${matches.length === 1 ? 'section' : 'sections'}` : 'No matching sections. Try a different keyword.';
+    results.replaceChildren(...matches.map(target => {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'text-link';
+      link.href = `#${target.id}`;
+      link.textContent = (target.querySelector('h3') || target).textContent;
+      item.append(link);
+      return item;
+    }));
+  }
+  const canSearch = typeof search.showModal === 'function';
+  function openSearch() {
+    if (search.open) return;
+    const active = document.activeElement;
+    searchOrigin = active === document.body || (mobile.matches && breadcrumb.contains(active)) ? searchTrigger : active;
+    setMenu(false);
+    query.value = '';
+    renderResults();
+    search.showModal();
+  }
+  if (canSearch) {
+    searchTrigger.addEventListener('click', openSearch);
+    byId('search-close').addEventListener('click', () => search.close());
+    query.addEventListener('input', renderResults);
+    query.addEventListener('keydown', event => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      results.querySelector('a')?.click();
+    });
+    search.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      search.close();
+    });
+    results.addEventListener('click', event => {
+      const link = event.target.closest('a');
+      if (!link) return;
+      event.preventDefault();
+      searchTarget = byId(link.hash.slice(1));
+      search.close();
+    });
+    search.addEventListener('close', () => {
+      if (searchTarget) {
+        searchTarget.setAttribute('tabindex', '-1');
+        searchTarget.focus({ preventScroll: true });
+        searchTarget.scrollIntoView({ block: steps.includes(searchTarget) && !mobile.matches ? 'center' : 'start' });
+      } else searchOrigin?.focus();
+      searchTarget = searchOrigin = null;
+    });
+    searchTrigger.hidden = false;
+  }
+  document.addEventListener('keydown', event => {
+    if (canSearch && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      openSearch();
+    }
+    if (event.key === 'Escape' && !search.open && header.hasAttribute('data-menu-open')) {
+      setMenu(false);
+      menu.focus();
+    }
+  });
+  theme.hidden = menu.hidden = false;
+  header.setAttribute('data-menu-ready', '');
+
+  if (!('IntersectionObserver' in window)) return;
+  const system = byId('system-view'), progress = byId('progress');
+  const regions = [...system.querySelectorAll('[data-region]')];
+  const pad = number => String(number).padStart(2, '0');
+  let current, observer;
+  function activate(step) {
+    if (current === step) return;
+    current?.removeAttribute('aria-current');
+    step.setAttribute('aria-current', 'step');
+    current = step;
+    const active = step.dataset.map.split(' ');
+    for (const region of regions) region.toggleAttribute('data-active', active.includes(region.dataset.region));
+    progress.textContent = `${pad(steps.indexOf(step) + 1)} / ${pad(steps.length)}`;
+  }
+  function observe() {
+    observer?.disconnect();
+    // Use a narrow reading band, below the compact map on mobile.
+    const line = mobile.matches && getComputedStyle(system).position === 'sticky'
+      ? Math.min(Math.round(innerHeight * .55), Math.ceil(72 + system.offsetHeight + 40))
+      : Math.floor(innerHeight / 2);
+    function readBand() {
+      const step = steps.find(candidate => {
+        const { top, bottom } = candidate.getBoundingClientRect();
+        return top <= line && bottom > line;
+      });
+      if (step) activate(step);
+    }
+    observer = new IntersectionObserver(readBand, { rootMargin: `-${line}px 0px -${innerHeight - line - 1}px 0px` });
+    readBand();
+    steps.forEach(step => observer.observe(step));
+  }
+  activate(steps[0]);
+  progress.hidden = false;
+  system.setAttribute('data-tracking', '');
+  observe();
+  window.addEventListener('resize', observe);
+})();
+</script>
+</body>
+</html>

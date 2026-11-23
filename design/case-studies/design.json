@@ -1,0 +1,28 @@
+{
+  "title": "Case-study page options",
+  "brief": "Three structurally different case-study pages for the portfolio, all built on the real Brújula draft (docs/case-studies/brujula.md): two repositories, three ADR-backed decisions, screenshots still to capture",
+  "feature": "odd/tasks/portfolio-prd-trd.md",
+  "artboards": [
+    {
+      "file": "01-dossier.html",
+      "title": "Dossier",
+      "tradeoff": "Familiar editorial reading with a sticky table of contents and the repository map as centerpiece; the decisions read as prose, so they are less scannable",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-decision-record.html",
+      "title": "Decision record",
+      "tradeoff": "Built around the decisions: each one shows the options side by side with the evidence, which is the strongest signal for tech leads; less story, and it depends on projects having real decisions to show",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-walkthrough.html",
+      "title": "Walkthrough",
+      "tradeoff": "Most memorable: a sticky system view changes as the reader moves through the steps; it needs the most script and careful reduced-motion and mobile fallbacks",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}
