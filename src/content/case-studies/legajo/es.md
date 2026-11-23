@@ -11,17 +11,17 @@ demonstration:
   kind: screenshots
   screenshots:
     - src: ./shots/corpus-selection.png
-      alt: Lista de selección del corpus junto a una matriz de similitud MiniLM en escala de grises para doce resúmenes seleccionados
-      caption: Selecciona documentos del corpus de referencia y compara todos los pares en una sola matriz.
+      alt: Lista de selección del corpus junto a una matriz de similitud de 12 × 12 en escala de grises para los documentos d01 a d12, con embedding-local seleccionado
+      caption: Selecciona doce resúmenes para comparar todos los pares con embeddings locales de MiniLM. Las celdas más oscuras indican mayor similitud.
     - src: ./shots/similarity-trace.png
-      alt: Puntajes de los documentos d01 y d02 junto a una matriz de Needleman–Wunsch con el camino óptimo marcado en rojo
-      caption: Abre la traza de Needleman–Wunsch para ver qué alineación produjo el puntaje.
+      alt: Puntajes de similitud de d01 y d02 junto a la traza de Needleman–Wunsch, con las celdas del camino óptimo delineadas en rojo
+      caption: La traza muestra la alineación que produjo el puntaje de Needleman–Wunsch junto a la clasificación de los seis métodos.
     - src: ./shots/ward-dendrogram.png
-      alt: Dendrogramas de enlace promedio y de Ward lado a lado, con una línea de corte discontinua y tres grupos de distinto color en el árbol de Ward
-      caption: Corta el árbol de Ward en k = 3 sin perder de vista el árbol de enlace promedio.
+      alt: Dendrogramas de enlace promedio y de Ward lado a lado, con una línea de corte discontinua en k = 3 y tres grupos numerados y diferenciados por color en el árbol de Ward
+      caption: El corte de Ward divide los 20 documentos en tres grupos. El árbol de enlace promedio queda sin cortar para comparar.
     - src: ./shots/benchmark-curves.png
-      alt: Gráficos log–log de tiempos de ejecución para algoritmos por pares y agrupamiento jerárquico, con tablas de pendientes empíricas y teóricas
-      caption: Compara las curvas medidas por JMH con el crecimiento teórico en la ejecución de referencia.
+      alt: Gráficos log–log de tiempos de ejecución para algoritmos clásicos por pares y enlaces jerárquicos, cada uno sobre una tabla de pendientes empíricas y teóricas
+      caption: Las curvas de JMH muestran cómo cambia el tiempo de ejecución con la longitud de las secuencias a la izquierda y con el tamaño de la muestra a la derecha.
 decisions:
   - question: ¿Dónde deben implementarse los algoritmos?
     options:

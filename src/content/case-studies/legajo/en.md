@@ -11,17 +11,17 @@ demonstration:
   kind: screenshots
   screenshots:
     - src: ./shots/corpus-selection.png
-      alt: Corpus selection rail beside a grayscale MiniLM similarity matrix for twelve selected abstracts
-      caption: Select documents from the reference corpus and compare every pair in one matrix.
+      alt: Corpus checklist beside a grayscale 12 × 12 similarity matrix for documents d01 through d12, with embedding-local selected
+      caption: Select twelve abstracts to compare all pairs using local MiniLM embeddings. Darker cells indicate higher similarity.
     - src: ./shots/similarity-trace.png
-      alt: Scores for documents d01 and d02 beside a Needleman–Wunsch matrix with the optimal path outlined in red
-      caption: Open the Needleman–Wunsch trace to see which alignment produced the score.
+      alt: Similarity scores for d01 and d02 beside a Needleman–Wunsch trace with optimal-path cells outlined in red
+      caption: The trace shows the alignment behind the Needleman–Wunsch score alongside the ranking of all six methods.
     - src: ./shots/ward-dendrogram.png
-      alt: Average and Ward dendrograms side by side, with a dashed cut line and three colored groups on the Ward tree
-      caption: Cut the Ward tree at k = 3 while keeping the average-linkage tree visible for comparison.
+      alt: Average-linkage and Ward dendrograms side by side, with a dashed k = 3 cut line and three numbered, color-coded clusters on the Ward tree
+      caption: The Ward cut divides the 20 documents into three clusters. The average-linkage tree remains uncut for comparison.
     - src: ./shots/benchmark-curves.png
-      alt: Log–log runtime plots for pairwise algorithms and hierarchical clustering above tables of empirical and theoretical slopes
-      caption: Compare measured JMH curves with theoretical growth on the reference benchmark run.
+      alt: Log–log runtime plots for classic pairwise algorithms and hierarchical linkages, each above an empirical-versus-theoretical slope table
+      caption: The JMH curves show how runtime changes with sequence length on the left and sample size on the right.
 decisions:
   - question: Where should the algorithms live?
     options:
