@@ -6,18 +6,18 @@ timeframe: '2026'
 demonstration:
   kind: screenshots
   screenshots:
-    - src: ./shots/catalog.png
-      alt: Catalog listing Systems and Computing Engineering and Modern Languages, both active.
-      caption: Students start with the program catalog. The notice explains that the planner does not replace university records.
     - src: ./shots/curriculum.png
-      alt: Daytime curriculum organized by semester, with Programming I expanded to show its Programming Logic prerequisite.
-      caption: The curriculum shows the recommended sequence and lets students open a course to inspect its requirements.
+      alt: Daytime curriculum by semester, with Programación I expanded to show that Lógica de Programación must be passed first.
+      caption: Opening a course in the curriculum shows its credits and prerequisites.
     - src: ./shots/progress-declaration.png
-      alt: First-semester course list with an open form showing a fictional passing grade of 4.4 for period 2026-1.
-      caption: Students declare course attempts by recording the outcome, grade and academic period.
+      alt: First-semester course list with a declaration form set to Passed, a fictional grade of 4.4 and academic period 2026-1.
+      caption: The declaration form records the outcome, final grade and academic period for a course attempt.
+    - src: ./shots/progress-summary.png
+      alt: Progress summary for a fictional student showing five courses passed, 12 of 163 credits earned and an estimated average of 4.32.
+      caption: The five self-reported passes count toward an estimated 7.4% of the plan.
     - src: ./shots/simulation-schedule.png
-      alt: Weekly timetable with four color-coded courses and a summary showing 13 of 23 credits and 16 hours per week.
-      caption: A simulated second semester combines the repository's seeded course offerings with a fictional student history.
+      alt: Weekly timetable with four color-coded courses, an offering browser and a summary showing 13 of 23 credits and 16 hours per week.
+      caption: The daytime simulation for 2026-2 combines the project's seeded offerings with a fictional student's course history.
 decisions:
   - question: Should the backend deploy as microservices or as one process?
     options:

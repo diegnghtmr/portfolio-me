@@ -6,18 +6,18 @@ timeframe: '2026'
 demonstration:
   kind: screenshots
   screenshots:
-    - src: ./shots/catalog.png
-      alt: Catálogo con Ingeniería de Sistemas y Computación y Licenciatura en Lenguas Modernas, ambos programas activos.
-      caption: El punto de partida es el catálogo de programas. El aviso aclara que la herramienta no reemplaza los registros de la universidad.
     - src: ./shots/curriculum.png
-      alt: Malla de la jornada diurna organizada por semestres, con Programación I abierta para mostrar el prerrequisito de Lógica de Programación.
-      caption: La malla muestra el orden recomendado y permite abrir una materia para consultar sus requisitos.
+      alt: Malla diurna por semestres, con Programación I desplegada para mostrar que primero hay que aprobar Lógica de Programación.
+      caption: Al abrir una materia en la malla se muestran sus créditos y prerrequisitos.
     - src: ./shots/progress-declaration.png
-      alt: Lista de materias del primer semestre con un formulario que muestra una nota aprobatoria ficticia de 4.4 para el período 2026-1.
-      caption: El estudiante declara cada intento con el resultado, la nota y el período académico.
+      alt: Lista de materias del primer semestre con un formulario que muestra el estado Aprobada, una nota ficticia de 4.4 y el período 2026-1.
+      caption: En el formulario se registra el resultado, la nota definitiva y el período académico de un intento.
+    - src: ./shots/progress-summary.png
+      alt: Resumen de avance de un estudiante ficticio con cinco materias aprobadas, 12 de 163 créditos y un promedio estimado de 4.32.
+      caption: Las cinco materias declaradas como aprobadas representan un avance estimado del 7,4 % del plan.
     - src: ./shots/simulation-schedule.png
-      alt: Horario semanal con cuatro materias diferenciadas por color y un resumen de 13 de 23 créditos y 16 horas semanales.
-      caption: La simulación de segundo semestre combina horarios de la oferta incluida en el proyecto con un historial académico ficticio.
+      alt: Horario semanal con cuatro materias diferenciadas por color, un buscador de ofertas y un resumen de 13 de 23 créditos y 16 horas semanales.
+      caption: La simulación diurna de 2026-2 combina la oferta incluida en el proyecto con el historial académico de un estudiante ficticio.
 decisions:
   - question: ¿Conviene desplegar el backend como microservicios o como un solo proceso?
     options:
