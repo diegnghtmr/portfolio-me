@@ -28,13 +28,15 @@ if (header && menuToggle && menu && indicator) {
   const targets = [document.getElementById("intro"), ...links.map((link) => document.getElementById(link.hash.slice(1)))];
   let current: HTMLAnchorElement | null = null;
   let frame = 0;
-  // Scroll spy without layout reads: a section is "passed" while it overlaps the band from the
-  // top of the viewport to 48% of its height; the last overlapping one in page order is current.
-  const inBand = new Set<Element>();
+  // Scroll spy without layout reads: a section counts once it overlaps the band from the top of
+  // the viewport to 48% of its height, and keeps counting after it scrolls above the band, so
+  // sections without a nav link (between Work and Open source) keep the previous one current
+  // and the indicator slides instead of disappearing. The last counted one in page order wins.
+  const reached = new Set<Element>();
   const spy = new IntersectionObserver((entries) => {
     for (const entry of entries) {
-      if (entry.isIntersecting) inBand.add(entry.target);
-      else inBand.delete(entry.target);
+      if (entry.isIntersecting || entry.boundingClientRect.top < 0) reached.add(entry.target);
+      else reached.delete(entry.target);
     }
     schedule();
   }, { rootMargin: "0px 0px -52% 0px" });
@@ -77,7 +79,7 @@ if (header && menuToggle && menu && indicator) {
   const update = () => {
     frame = 0;
     let id = "intro";
-    for (const section of targets) if (section && inBand.has(section)) id = section.id;
+    for (const section of targets) if (section && reached.has(section)) id = section.id;
     const next = links.find((link) => link.hash === `#${id}`) ?? null;
     if (next !== current) {
       current?.removeAttribute("aria-current");
