@@ -1,0 +1,26 @@
+---
+import { stackLayerOrder, type Project } from "../data/projects";
+import type { Locale } from "../i18n";
+import { caseStudyMessages } from "../i18n/case-study";
+
+interface Props { project: Project; locale: Locale }
+const { project, locale } = Astro.props;
+const { stack, stackLayers } = project;
+const m = caseStudyMessages[locale];
+const groups = stackLayerOrder.flatMap((layer) => {
+  const items = stackLayers?.[layer];
+  return items?.length ? [{ layer, items }] : [];
+});
+---
+
+{stack.length > 0 && <div data-case-fact="stack">
+  <dt>{m.stack}</dt>
+  <dd>
+    {groups.length ? <dl class="fact-stack">
+      {groups.map(({ layer, items }) => <div data-stack-layer={layer}>
+        <dt>{m.stackLayers[layer]}</dt>
+        <dd><ul role="list" class="fact-tags">{items.map((item) => <li class="fact-tech">{item}</li>)}</ul></dd>
+      </div>)}
+    </dl> : <ul role="list" class="fact-tags">{stack.map((item) => <li class="fact-tech">{item}</li>)}</ul>}
+  </dd>
+</div>}

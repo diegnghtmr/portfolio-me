@@ -321,6 +321,11 @@ for (const locale of locales) {
     const mobile = locale === "en" ? "Mobile" : "Móvil";
     const foodRoles = locale === "en" ? ["Identity", "Menu", "Orders", "Traceability"] : ["Identidad", "Menú", "Pedidos", "Trazabilidad"];
     const check = (slug, description, connected, detached = []) => {
+      if (/^architecture:/m.test(caseSource(slug, locale))) {
+        assert.match(chapter(slug), /class="case-arch"/);
+        assert.equal(mapFor(slug), undefined);
+        return;
+      }
       const map = mapFor(slug);
       assert.ok(map, slug);
       assert.ok(map.includes(`<figcaption>${caption}</figcaption>`), slug);
@@ -444,7 +449,9 @@ test("production publishes exactly the 14 pinned dossiers in HTML and Markdown i
 
 const caseSource = (slug, locale) => readFileSync(join(caseDir, slug, `${locale}.md`), "utf8");
 
-function buildCaseFixture(t, english = caseSource("writing-harness", "en"), extra = {}) {
+const fixtureSource = (slug, locale) => caseSource(slug, locale).replace(/^architecture:[^\n]*\n(?:^[ \t][^\n]*\n|^\n)*/m, "");
+
+function buildCaseFixture(t, english = fixtureSource("writing-harness", "en"), extra = {}) {
   const fixture = mkdtempSync(join(tmpdir(), "portfolio-case-"));
   t.after(() => rmSync(fixture, { recursive: true, force: true }));
   // Run the real Astro config, loader and routes, with their own output and caches.
@@ -461,7 +468,7 @@ function buildCaseFixture(t, english = caseSource("writing-harness", "en"), extr
   }
   for (const [path, content] of Object.entries({
     "writing-harness/en.md": english,
-    "writing-harness/es.md": caseSource("writing-harness", "es"),
+    "writing-harness/es.md": fixtureSource("writing-harness", "es"),
     ...extra,
   })) {
     const file = join(fixture, "src/content/case-studies", path);
@@ -485,7 +492,7 @@ const writingDossier = (extension) => `${caseRoute("en", "writing-harness")}inde
 test("terminal commands and output preserve literal placeholder-like words", (t) => {
   const command = "  onboarding --prompt TBD  ";
   const output = "Press Enter to confirm\npending";
-  const english = caseSource("writing-harness", "en")
+  const english = fixtureSource("writing-harness", "en")
     .replace("command: node src/cli.ts evals/fixtures/sucio.txt", `command: ${JSON.stringify(command)}`)
     .replace(/(output: \|-\n)[\s\S]*?(?=\n      - command:)/, `$1${output.split("\n").map((line) => `          ${line}`).join("\n")}`);
   const fixture = buildCaseFixture(t, english);
@@ -498,7 +505,7 @@ test("terminal commands and output preserve literal placeholder-like words", (t)
 });
 
 test("the build still rejects editorial placeholders in a terminal caption", (t) => {
-  const english = caseSource("writing-harness", "en").replace(/^    caption: .*$/m, "    caption: Pending");
+  const english = fixtureSource("writing-harness", "en").replace(/^    caption: .*$/m, "    caption: Pending");
   const { build, output } = buildCaseFixture(t, english);
   assert.equal(build.status, 1, build.stdout);
   assert.match(build.stderr, /terminal\.caption: Omit unverified facts rather than supplying placeholders/);
@@ -509,7 +516,7 @@ test("the build still rejects editorial placeholders in a terminal caption", (t)
 test("fenced heading-like lines survive in the dossier HTML and Markdown without adding sections", (t) => {
   const code = "````text\n```\n## Not a section\n````";
   const tildeCode = "~~~text\n## Also not a section\n~~~";
-  const english = caseSource("writing-harness", "en").replace("\n## How it works\n", `\n${code}\n\n## How it works\n`)
+  const english = fixtureSource("writing-harness", "en").replace("\n## How it works\n", `\n${code}\n\n## How it works\n`)
     + `\n${tildeCode}\n`;
   const fixture = buildCaseFixture(t, english);
   assertBuilt(fixture);
@@ -554,7 +561,7 @@ test("a single-locale case study stays unpublished and links to GitHub from both
 });
 
 test("the Markdown twin keeps both plain-text paragraphs inside their list item", (t) => {
-  const english = caseSource("writing-harness", "en")
+  const english = fixtureSource("writing-harness", "en")
     .replace(/^        reason: .*$/m, "        reason: |-\n          First reason paragraph.\n\n          Second reason paragraph.")
     .replace(/^    consequence: .*$/m, "    consequence: |-\n      First consequence paragraph.\n\n      Second consequence paragraph.")
     .replace(/^    detail: .*$/m, "    detail: |-\n      First result paragraph.\n\n      Second result paragraph.")
@@ -572,12 +579,144 @@ test("the Markdown twin keeps both plain-text paragraphs inside their list item"
 
 test("the Markdown twin serializes evidence destinations without raw spaces", (t) => {
   const url = "https://example.com/technical notes/café (v2).html?mode=quick test#section one";
-  const english = caseSource("writing-harness", "en").replace(/^        url: .*$/m, `        url: ${JSON.stringify(url)}`);
+  const english = fixtureSource("writing-harness", "en").replace(/^        url: .*$/m, `        url: ${JSON.stringify(url)}`);
   const fixture = buildCaseFixture(t, english);
   assertBuilt(fixture);
   const twin = fixture.read(writingDossier("md"));
   const destination = twin.match(/\[Precedence in the README\]\(([^)\s]+)\)/)?.[1];
   assert.equal(destination, "https://example.com/technical%20notes/caf%C3%A9%20%28v2%29.html?mode=quick%20test#section%20one");
+});
+
+const architectureEvidence = "https://example.com/fixture/architecture";
+const fixtureArchitecture = {
+  system: "Fixture system", caption: "A fixture for the container diagram.",
+  nodes: [
+    { id: "checker", kind: "container", label: "CLI", name: "writing-harness", repo: "writing-harness", tech: "Node", does: "Checks writing", col: 0, row: 0 },
+    { id: "rules", kind: "store", label: "Data store", name: "Rule files", does: "Stores rules", col: 1, row: 0 },
+    { id: "runner", kind: "external", label: "External dependency", name: "Shell runner", does: "Runs checks", col: 0, row: 1 },
+  ],
+  edges: [
+    { from: "checker", to: "rules", protocol: "Files", verb: "Reads guidelines", evidence: architectureEvidence },
+    { from: "runner", to: "checker", verb: "Starts the CLI", evidence: architectureEvidence },
+  ],
+};
+const withArchitecture = (locale, architecture = fixtureArchitecture) =>
+  fixtureSource("writing-harness", locale).replace("---\n", `---\narchitecture: ${JSON.stringify(architecture)}\n`);
+const archFixture = (t, english, spanish = fixtureArchitecture) =>
+  buildCaseFixture(t, withArchitecture("en", english), { "writing-harness/es.md": withArchitecture("es", spanish) });
+
+test("architecture renders accessible responsive SVGs with a store and an external outside the system", (t) => {
+  const spanish = structuredClone(fixtureArchitecture);
+  spanish.system = "Sistema de prueba";
+  spanish.nodes[0].does = "Verifica textos";
+  spanish.edges[0].verb = "Lee las guías";
+  const terminal = (locale) => fixtureSource("writing-harness", locale).match(/^demonstration:\n(?:^[ \t][^\n]*\n)+/m)[0];
+  const fallback = (locale) => fixtureSource("studydeck-ai", locale).replace(/^demonstration:\n(?:^[ \t][^\n]*\n)+/m, terminal(locale));
+  const fixture = buildCaseFixture(t, withArchitecture("en"), {
+    "writing-harness/es.md": withArchitecture("es", spanish),
+    "studydeck-ai/en.md": fallback("en"), "studydeck-ai/es.md": fallback("es"),
+  });
+  assertBuilt(fixture);
+  for (const locale of locales) {
+    const html = fixture.read(`${caseRoute(locale, "writing-harness")}index.html`);
+    const figure = html.match(/<figure class="case-arch"[^>]*>[\s\S]*?<\/figure>/)?.[0];
+    assert.ok(figure);
+    assert.ok(html.indexOf('class="case-repos"') > html.indexOf(figure));
+    const svgs = [...figure.matchAll(/<svg\b[^>]*role="img"[^>]*>[\s\S]*?<\/svg>/g)];
+    assert.equal(svgs.length, 2);
+    const data = locale === "en" ? fixtureArchitecture : spanish;
+    for (const [svg] of svgs) {
+      assert.match(svg, /aria-labelledby="([^"]+)"[\s\S]*<title id="\1">[^<]+<\/title>/);
+      const desc = svg.match(/aria-describedby="([^"]+)"[\s\S]*<desc id="\1">([^<]+)<\/desc>/)?.[2];
+      assert.ok(desc);
+      for (const { name, does } of data.nodes) assert.ok(desc.includes(name) && desc.includes(does));
+      for (const { from, to, protocol, verb } of data.edges) {
+        const name = (id) => data.nodes.find((node) => node.id === id).name;
+        assert.ok(desc.split("\n").some((line) => line.includes(`${name(from)} → ${name(to)}`) && line.includes(verb) && (!protocol || line.includes(protocol))));
+      }
+      const boundary = svg.match(/<rect\b[^>]*class="arch-boundary[^>]*>/)?.[0];
+      const store = svg.match(/<g\b[^>]*data-node-kind="store"[^>]*>[\s\S]*?<\/g>/)?.[0];
+      const external = svg.match(/<g\b[^>]*data-node-kind="external"[^>]*>/)?.[0];
+      assert.ok(boundary && store && external);
+      assert.match(store, /<path\b[^>]*d="M[^\"]*C/);
+      const [, x, y] = attr(external, "transform").match(/translate\((\d+) (\d+)\)/).map(Number);
+      assert.ok(x > Number(attr(boundary, "x")) + Number(attr(boundary, "width")) || y > Number(attr(boundary, "y")) + Number(attr(boundary, "height")));
+      assert.match(svg, /stroke-dasharray="4 4"/);
+      assert.match(svg, /marker-end="url\(#[^)]+\)"/);
+    }
+    assert.ok(!figure.includes(architectureEvidence));
+    assert.match(figure, /<figcaption class="case-caption">A fixture for the container diagram\.<\/figcaption>/);
+    const fallbackHtml = fixture.read(`${caseRoute(locale, "studydeck-ai")}index.html`);
+    const fallbackMap = fallbackHtml.match(/<figure class="case-repo-map">[\s\S]*?<\/figure>/)?.[0];
+    assert.ok(fallbackMap);
+    assert.match(fallbackMap, /class="repo-map-labeled"/);
+    const graphic = fallbackMap.match(/<[^>]*\srole="img"[^>]*>/)?.[0];
+    assert.ok(graphic);
+    const connects = locale === "en" ? "connects to" : "se conecta con";
+    assert.equal(attr(graphic, "aria-label"), `API: studydeck-backend; Web: studydeck-frontend. studydeck-backend ${connects} studydeck-frontend.`);
+    assert.doesNotMatch(fallbackHtml, /class="case-arch"/);
+  }
+  const twin = fixture.read(writingDossier("md"));
+  assert.match(twin, /### Architecture\n\n- writing-harness \(CLI, Node\): Checks writing\n- Rule files \(Data store\): Stores rules\n- Shell runner \(External dependency\): Runs checks\n- writing-harness → Rule files \(Files\): Reads guidelines\n- Shell runner → writing-harness: Starts the CLI/);
+  assert.ok(fixture.read("llms-full.txt").includes(twin.trimEnd()));
+  assert.ok(!twin.includes(architectureEvidence));
+});
+
+const extraFixtureNodes = (count) => Array.from({ length: count }, (_, i) => ({
+  id: `store-${i}`, kind: "store", label: "Data store", name: `Store ${i}`, does: "Stores input", col: i % 2 + 2, row: Math.floor(i / 2),
+}));
+
+test("a four-column architecture supports ten nodes", (t) => {
+  const data = structuredClone(fixtureArchitecture);
+  data.nodes.push(...extraFixtureNodes(7));
+  const fixture = archFixture(t, data, data);
+  assertBuilt(fixture);
+  assert.equal([...fixture.read(writingDossier("html")).matchAll(/data-node-kind=/g)].length, 20);
+});
+
+for (const [name, change, message] of [
+  ["unknown edge endpoint", (data) => { data.edges[0].to = "missing"; }, /architecture\.edges\.0\.to: Unknown architecture node: missing/],
+  ["missing repository container", (data) => { delete data.nodes[0].repo; }, /architecture\.nodes: Missing architecture container for repository: writing-harness/],
+  ["unknown repository", (data) => { data.nodes[0].repo = "different-repo"; }, /architecture\.nodes\.0\.repo: Unknown project repository: different-repo/],
+  ["duplicate node id", (data) => { data.nodes[1].id = "checker"; }, /architecture\.nodes\.1\.id: Duplicate architecture node id: checker/],
+  ["eleven nodes", (data) => { data.nodes.push(...extraFixtureNodes(8)); }, /architecture\.nodes: .*<=10/i],
+]) {
+  test(`the build rejects architecture with ${name}`, (t) => {
+    const data = structuredClone(fixtureArchitecture);
+    change(data);
+    const { build, output } = archFixture(t, data);
+    assert.equal(build.status, 1, build.stdout);
+    assert.match(build.stderr, message);
+    for (const extension of ["html", "md"]) assert.ok(!existsSync(join(output, writingDossier(extension))));
+  });
+}
+
+test("paired architecture rejects structural drift between locales", (t) => {
+  const spanish = structuredClone(fixtureArchitecture);
+  spanish.nodes[1].col = 2;
+  const { build, output } = archFixture(t, fixtureArchitecture, spanish);
+  assert.equal(build.status, 1, build.stdout);
+  assert.match(build.stderr, /writing-harness: architecture must agree across locales/);
+  for (const extension of ["html", "md"]) assert.ok(!existsSync(join(output, writingDossier(extension))));
+});
+
+test("case-study stack groups are localized and cover exactly the flat stack inventory", () => {
+  const layerLabels = {
+    en: { frontend: "Frontend", backend: "Backend", data: "Data", tooling: "Tooling", infra: "Infrastructure" },
+    es: { frontend: "Frontend", backend: "Backend", data: "Datos", tooling: "Herramientas", infra: "Infraestructura" },
+  };
+  for (const locale of locales) for (const slug of publishedSlugs) {
+    const folder = caseRoute(locale, slug).slice(1);
+    const html = read(`${folder}index.html`);
+    const fact = html.match(/<div data-case-fact="stack">[\s\S]*?<\/dl>/)?.[0];
+    const flat = read(`${folder}index.md`).match(/^-(?: Stack| Tecnologías): (.+)$/m)?.[1].split(", ");
+    assert.ok(fact && flat, slug);
+    const groups = [...fact.matchAll(/<div data-stack-layer="([^"]+)"><dt>([^<]+)<\/dt>/g)];
+    assert.ok(groups.length, slug);
+    for (const [, layer, label] of groups) assert.equal(label, layerLabels[locale][layer]);
+    const technologies = [...fact.matchAll(/<li class="fact-tech">([^<]+)<\/li>/g)].map(([, tech]) => tech);
+    assert.deepEqual(technologies.sort(), flat.sort(), `${locale} ${slug}`);
+  }
 });
 
 for (const slug of publishedSlugs) {

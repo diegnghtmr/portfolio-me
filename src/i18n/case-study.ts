@@ -2,6 +2,10 @@ export const caseStudyMessages = {
   en: {
     eyebrow: "Case study", facts: "Project facts", role: "Role", timeframe: "Timeframe", team: "Team", people: (count: number) => `Team of ${count}`,
     surfaces: "Surfaces", stack: "Stack", repositories: "Repositories", demo: "Live demo", openDemo: "Open live demo",
+    stackLayers: { frontend: "Frontend", backend: "Backend", data: "Data", tooling: "Tooling", infra: "Infrastructure" },
+    diagram: "Container diagram", diagramTitle: (system: string) => `${system} container diagram`, diagramText: "Architecture",
+    diagramLegend: "Diagram legend", diagramKinds: { container: "Container", store: "Data store", external: "External" },
+    diagramFlows: "Connections",
     all: "All projects", contents: "On this page", breadcrumb: "Breadcrumb",
     problem: "Problem", demonstration: "Demonstration", architecture: "How it works", decisions: "Decisions",
     results: "Results", limitations: "Limitations", next: "Next project", map: "Repository map",
@@ -12,6 +16,10 @@ export const caseStudyMessages = {
   es: {
     eyebrow: "Caso de estudio", facts: "Datos del proyecto", role: "Rol", timeframe: "Periodo", team: "Equipo", people: (count: number) => `Equipo de ${count}`,
     surfaces: "Interfaces", stack: "Tecnologías", repositories: "Repositorios", demo: "Demo en vivo", openDemo: "Abrir demo en vivo",
+    stackLayers: { frontend: "Frontend", backend: "Backend", data: "Datos", tooling: "Herramientas", infra: "Infraestructura" },
+    diagram: "Diagrama de contenedores", diagramTitle: (system: string) => `Diagrama de contenedores de ${system}`, diagramText: "Arquitectura",
+    diagramLegend: "Leyenda del diagrama", diagramKinds: { container: "Contenedor", store: "Almacén de datos", external: "Externo" },
+    diagramFlows: "Conexiones",
     all: "Todos los proyectos", contents: "En esta página", breadcrumb: "Ruta de navegación",
     problem: "Problema", demonstration: "Demostración", architecture: "Cómo funciona", decisions: "Decisiones",
     results: "Resultados", limitations: "Limitaciones", next: "Siguiente proyecto", map: "Mapa de repositorios",

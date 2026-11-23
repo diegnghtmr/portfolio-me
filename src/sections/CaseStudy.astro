@@ -1,4 +1,6 @@
 ---
+import ArchitectureDiagram from "../components/ArchitectureDiagram.astro";
+import CaseStack from "../components/CaseStack.astro";
 import CaseDecisions from "../components/CaseDecisions.astro";
 import CaseDemonstration from "../components/CaseDemonstration.astro";
 import RepositoryMap from "../components/RepositoryMap.astro";
@@ -15,7 +17,7 @@ interface Props { locale: Locale; study: CaseStudy }
 const { locale, study } = Astro.props;
 const { project, entries } = study;
 const entry = entries[locale];
-const { summary, role, timeframe, team, demo, demonstration, decisions, results, limitations } = entry.data;
+const { summary, role, timeframe, team, demo, demonstration, decisions, results, limitations, architecture: diagram } = entry.data;
 const m = caseStudyMessages[locale];
 const w = workMessages[locale];
 const cover = project.featured && "shape" in project.featured ? project.featured : { shape: "sphere", seed: 0 };
@@ -57,7 +59,7 @@ if (blocks.length !== 3 || preamble?.trim() || !problem?.trim() || !architecture
               {timeframe && <div data-case-fact="timeframe"><dt>{m.timeframe}</dt><dd>{timeframe}</dd></div>}
               {team && <div data-case-fact="team"><dt>{m.team}</dt><dd>{m.people(team)}</dd></div>}
               <div data-case-fact="surfaces"><dt>{m.surfaces}</dt><dd>{project.surfaceLabel[locale]}</dd></div>
-              {project.stack.length > 0 && <div data-case-fact="stack"><dt>{m.stack}</dt><dd>{project.stack.join(", ")}</dd></div>}
+              <CaseStack {project} {locale} />
               <div data-case-fact="repositories">
                 <dt>{m.repositories}</dt>
                 <dd><ul role="list" class="fact-repos">
@@ -97,7 +99,7 @@ if (blocks.length !== 3 || preamble?.trim() || !problem?.trim() || !architecture
           <section class="case-chapter" id="architecture" aria-labelledby="architecture-title" tabindex="-1">
             <h2 id="architecture-title">{m.architecture}</h2>
             <div class="case-prose" set:html={architecture}></div>
-            {project.repositories.length > 1 && <figure class="case-repo-map">
+            {diagram ? <ArchitectureDiagram architecture={diagram} {project} {locale} /> : project.repositories.length > 1 && <figure class="case-repo-map">
               <figcaption>{m.map}</figcaption>
               <RepositoryMap {project} {locale} labeled />
             </figure>}

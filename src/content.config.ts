@@ -20,6 +20,41 @@ const decision = z.strictObject({
   quote: text.optional(),
 });
 
+const nodeId = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const architecture = z.strictObject({
+  system: text,
+  caption: text.optional(),
+  nodes: z.array(z.strictObject({
+    id: nodeId,
+    kind: z.enum(["container", "store", "external"]),
+    label: text,
+    name: text,
+    repo: text.optional(),
+    tech: text.optional(),
+    does: z.string().trim().max(48).pipe(text),
+    col: z.number().int().min(0).max(3),
+    row: z.number().int().min(0).max(4),
+  })).min(2).max(10),
+  edges: z.array(z.strictObject({
+    from: nodeId,
+    to: nodeId,
+    protocol: text.optional(),
+    verb: z.string().trim().max(28).pipe(text),
+    evidence: url,
+  })),
+}).superRefine(({ nodes, edges }, ctx) => {
+  const ids = new Set<string>();
+  nodes.forEach(({ id }, i) => {
+    if (ids.has(id)) ctx.addIssue({ code: "custom", path: ["nodes", i, "id"], message: `Duplicate architecture node id: ${id}` });
+    ids.add(id);
+  });
+  edges.forEach((edge, i) => {
+    for (const key of ["from", "to"] as const) {
+      if (!ids.has(edge[key])) ctx.addIssue({ code: "custom", path: ["edges", i, key], message: `Unknown architecture node: ${edge[key]}` });
+    }
+  });
+});
+
 const caseStudies = defineCollection({
   loader: glob({
     base: "./src/content/case-studies",
@@ -74,6 +109,25 @@ const caseStudies = defineCollection({
     decisions: z.array(decision).min(2).max(3),
     results: z.array(z.strictObject({ label: text, detail: text, url: url.optional() })).min(1).optional(),
     limitations: z.array(text).min(1).optional(),
+    architecture: architecture.optional(),
+  }).superRefine(({ project, architecture }, ctx) => {
+    const catalog = atlasProjects.find(({ slug }) => slug === project);
+    if (!architecture || !catalog) return;
+    const repositories = new Set<string>(catalog.repositories.map(({ name }) => name));
+    const represented = new Set<string>();
+    architecture.nodes.forEach(({ kind, name, repo }, i) => {
+      if (!repo) return;
+      if (!repositories.has(repo)) {
+        ctx.addIssue({ code: "custom", path: ["architecture", "nodes", i, "repo"], message: `Unknown project repository: ${repo}` });
+      }
+      if (kind === "container") {
+        represented.add(repo);
+        if (name !== repo) ctx.addIssue({ code: "custom", path: ["architecture", "nodes", i, "name"], message: `Repository container name must be ${repo}` });
+      }
+    });
+    for (const repo of repositories) {
+      if (!represented.has(repo)) ctx.addIssue({ code: "custom", path: ["architecture", "nodes"], message: `Missing architecture container for repository: ${repo}` });
+    }
   }),
 });
 

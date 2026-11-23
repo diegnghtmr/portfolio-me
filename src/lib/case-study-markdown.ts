@@ -3,6 +3,7 @@ import { caseStudyMessages } from "../i18n/case-study";
 import { workMessages } from "../i18n/work";
 import type { Locale } from "../i18n";
 import { absolute } from "./profile";
+import { describeArchitecture } from "./case-study-architecture";
 import { caseBodySections } from "./case-study-content";
 import type { CaseStudies, CaseStudy } from "./case-studies";
 
@@ -18,7 +19,7 @@ export async function caseStudyMarkdown(locale: Locale, { project, entries }: Ca
   const m = caseStudyMessages[locale];
   const w = workMessages[locale];
   const entry = entries[locale];
-  const { summary, role, timeframe, team, demo, demonstration, decisions, results, limitations } = entry.data;
+  const { summary, role, timeframe, team, demo, demonstration, decisions, results, limitations, architecture: diagram } = entry.data;
   const { problem, architecture } = caseBodySections(entry.body ?? "", locale, entry.id);
   const demoLines = demonstration.kind === "screenshots"
     ? await Promise.all(demonstration.screenshots.map(async ({ src, alt, caption }) => {
@@ -40,7 +41,9 @@ export async function caseStudyMarkdown(locale: Locale, { project, entries }: Ca
     ...(demo ? [`- ${m.demo}: ${link(m.openDemo, demo.url)}${demo.note ? ` (${demo.note})` : ""}`] : []),
     "", `## ${m.problem}`, "", problem, "",
     `## ${m.demonstration}`, "", ...demoLines, "",
-    `## ${m.architecture}`, "", architecture, "", `### ${m.repositories}`, "",
+    `## ${m.architecture}`, "", architecture, "",
+    ...(diagram ? [`### ${m.diagramText}`, "", ...describeArchitecture(diagram).map(listItem), ""] : []),
+    `### ${m.repositories}`, "",
     ...project.repositories.map(({ name, url, role }) => `- ${link(name, url)} (${w.roles[role]})`),
     "", `## ${m.decisions}`, "",
     ...decisions.flatMap(({ question, options, consequence, evidence, quote }) => [
