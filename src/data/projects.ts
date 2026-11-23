@@ -39,7 +39,6 @@ export interface Project {
   /** Primary and edge endpoints reference repository names. */
   primaryRepository: string;
   edges?: readonly (readonly [from: string, to: string])[];
-  caseStudy: boolean;
   featured?: Featured;
 }
 
@@ -53,9 +52,9 @@ export const atlasProjects = [
   {
     slug: "studydeck-ai", name: "StudyDeck AI", ...webApi,
     purpose: { en: "Spaced-repetition decks with AI card generation, RAG and an MCP server.", es: "Mazos de repaso espaciado con generación de tarjetas por IA, RAG y un servidor MCP." },
-    stack: ["Java 25", "Spring Boot", "PostgreSQL/pgvector", "React"], stackTags: ["java"],
-    repositories: [repo("studydeck-backend", "api", "api", "Java"), repo("studydeck-frontend", "web")],
-    primaryRepository: "studydeck-backend", edges: [["studydeck-backend", "studydeck-frontend"]], caseStudy: false,
+    stack: ["Java 25", "Spring Boot", "PostgreSQL/pgvector", "React", "TypeScript"], stackTags: ["java", "typescript"],
+    repositories: [repo("studydeck-backend", "api", "api", "Java"), repo("studydeck-frontend", "web", "web", "TypeScript")],
+    primaryRepository: "studydeck-backend", edges: [["studydeck-backend", "studydeck-frontend"]],
     featured: { id: "p1", description: "studydeck", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, pgvector, React 19", shape: "dunes", seed: 1 },
   },
   {
@@ -64,15 +63,15 @@ export const atlasProjects = [
     stack: ["Spring Boot", "React", "TypeScript"], stackTags: ["java", "typescript"],
     repositories: [repo("food-court-ui", "web"), repo("user-microservice", "api", "identity", "Java"), repo("food-court-microservice", "api", "menu", "Java"), repo("order-microservice", "api", "orders", "Java"), repo("traceability-microservice", "api", "traceability", "Java")],
     primaryRepository: "food-court-ui",
-    edges: [["food-court-ui", "user-microservice"], ["food-court-ui", "food-court-microservice"], ["food-court-ui", "order-microservice"], ["food-court-ui", "traceability-microservice"]], caseStudy: false,
+    edges: [["food-court-ui", "user-microservice"], ["food-court-ui", "food-court-microservice"], ["food-court-ui", "order-microservice"], ["food-court-ui", "traceability-microservice"]],
     featured: { id: "p2", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: searchRepos("food-court"), shape: "ripple", seed: 2 },
   },
   {
     slug: "brujula", name: "Brújula", ...webApi,
     purpose: { en: "Academic planning for Universidad del Quindío students.", es: "Planeación académica para estudiantes de la Universidad del Quindío." },
-    stack: ["Spring Modulith", "Keycloak", "OpenAPI"], stackTags: ["java"],
-    repositories: [repo("brujula-backend", "api", "api", "Java"), repo("brujula-frontend", "web")],
-    primaryRepository: "brujula-backend", edges: [["brujula-backend", "brujula-frontend"]], caseStudy: false,
+    stack: ["Spring Modulith", "Keycloak", "OpenAPI", "React", "TypeScript"], stackTags: ["java", "typescript"],
+    repositories: [repo("brujula-backend", "api", "api", "Java"), repo("brujula-frontend", "web", "web", "TypeScript")],
+    primaryRepository: "brujula-backend", edges: [["brujula-backend", "brujula-frontend"]],
     featured: { id: "p3", description: "brujula", kind: "systemTwo", categories: ["api", "web"], stack: "Spring Modulith, Keycloak", href: searchRepos("brujula"), shape: "wave", seed: 3 },
   },
   {
@@ -80,69 +79,69 @@ export const atlasProjects = [
     purpose: { en: "Similarity analysis and clustering for research abstracts.", es: "Análisis de similitud y agrupamiento de resúmenes de investigación." },
     stack: ["React 19", "Java 25", "OpenAPI"], stackTags: ["java", "typescript"],
     repositories: [repo("legajo-backend", "api", "api", "Java"), repo("legajo-frontend", "web", "web", "TypeScript")],
-    primaryRepository: "legajo-frontend", edges: [["legajo-backend", "legajo-frontend"]], caseStudy: false,
+    primaryRepository: "legajo-frontend", edges: [["legajo-backend", "legajo-frontend"]],
     featured: { id: "p4", description: "legajo", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, React 19", shape: "orbit", seed: 4, live: true },
   },
   {
     slug: "profundiza-uq", name: "Profundiza UQ", ...webApi,
-    purpose: { en: "Elective course enrollment.", es: "Inscripción a cursos electivos." },
-    stack: ["Go", "chi", "pgx", "PostgreSQL", "React"], stackTags: ["go"],
-    repositories: [repo("profundiza-uq-backend", "api", "api", "Go"), repo("profundiza-uq-frontend", "web")],
-    primaryRepository: "profundiza-uq-backend", edges: [["profundiza-uq-backend", "profundiza-uq-frontend"]], caseStudy: false,
+    purpose: { en: "Elective course enrollment at Universidad del Quindío.", es: "Inscripción a cursos electivos en la Universidad del Quindío." },
+    stack: ["Go", "chi", "pgx", "PostgreSQL", "React", "TypeScript"], stackTags: ["go", "typescript"],
+    repositories: [repo("profundiza-uq-backend", "api", "api", "Go"), repo("profundiza-uq-frontend", "web", "web", "TypeScript")],
+    primaryRepository: "profundiza-uq-backend", edges: [["profundiza-uq-backend", "profundiza-uq-frontend"]],
     featured: { id: "p5", description: "profundiza", kind: "systemTwo", categories: ["api", "web"], stack: "Go, pgx, React 19", shape: "capacity", seed: 5 },
   },
   {
     slug: "writing-harness", name: "writing-harness", ...toolOnly, surfaceLabel: { en: "CLI / skills", es: "CLI / skills" },
     purpose: { en: "Spanish writing rules for AI agents, with checks for prose in code.", es: "Reglas de redacción en español para agentes de IA, con verificaciones de prosa en el código." },
-    stack: ["Node"], stackTags: ["node"], repositories: [repo("writing-harness", "cli", "cli", "JavaScript")], primaryRepository: "writing-harness", caseStudy: false,
+    stack: ["Node", "TypeScript"], stackTags: ["node", "typescript"], repositories: [repo("writing-harness", "cli", "cli", "TypeScript")], primaryRepository: "writing-harness",
     featured: { id: "p6", description: "writingHarness", kind: "headless", categories: ["cli"], stack: "Node, zero deps", stackLabel: "noDeps", terminal: true },
   },
   {
     slug: "savia", name: "Savia", ...webApi, surfaceLabel: { en: "Web + mobile + API + MCP", es: "Web + móvil + API + MCP" },
-    purpose: { en: "Health and wellbeing system across web, mobile, API and MCP. In progress.", es: "Sistema de salud y bienestar con web, móvil, API y MCP. En desarrollo." },
+    purpose: { en: "Personal finance across web, mobile, API and MCP. In progress.", es: "Finanzas personales con web, móvil, API y MCP. En desarrollo." },
     stack: ["NestJS/Fastify", "Next.js", "Expo"], stackTags: ["typescript", "node"],
     repositories: [repo("savia-web", "web"), repo("savia-mobile", "web", "mobile"), repo("savia-backend", "api"), repo("savia-mcp", "cli", "mcp")],
     primaryRepository: "savia-web",
-    edges: [["savia-web", "savia-backend"], ["savia-mobile", "savia-backend"], ["savia-backend", "savia-mcp"]], caseStudy: false,
+    edges: [["savia-web", "savia-backend"]],
   },
   {
     slug: "academic-triage", name: "Academic Triage", ...webApi,
     purpose: { en: "Academic request triage over a Java backend contract.", es: "Clasificación de solicitudes académicas sobre un contrato de backend en Java." },
-    stack: ["Angular 20", "Java"], stackTags: ["java", "typescript"],
-    repositories: [repo("academic-triage-frontend", "web"), repo("academic-triage-system", "api", "api", "Java")],
-    primaryRepository: "academic-triage-frontend", edges: [["academic-triage-frontend", "academic-triage-system"]], caseStudy: false,
+    stack: ["Angular 20", "Java 21", "Spring Boot 3.5", "MariaDB 11"], stackTags: ["java", "typescript"],
+    repositories: [repo("academic-triage-frontend", "web", "web", "TypeScript"), repo("academic-triage-system", "api", "api", "Java")],
+    primaryRepository: "academic-triage-frontend", edges: [["academic-triage-frontend", "academic-triage-system"]],
   },
   {
     slug: "vale", name: "Vale", ...webOnly,
     purpose: { en: "Academic schedule planner with calendar export.", es: "Planificador de horarios académicos con exportación al calendario." },
-    stack: ["TypeScript"], stackTags: ["typescript"], repositories: [repo("vale", "web")], primaryRepository: "vale", caseStudy: false,
+    stack: ["TypeScript", "React", "Vite", "FullCalendar"], stackTags: ["typescript"], repositories: [repo("vale", "web", "web", "TypeScript")], primaryRepository: "vale",
   },
   {
-    slug: "saber-inverso", name: "Saber Inverso", ...webOnly,
-    purpose: { en: "Estimates Saber 11 scores from UQ admission weights, with uncertainty.", es: "Estima puntajes de Saber 11 a partir de las ponderaciones de admisión de la UQ, con incertidumbre." },
-    stack: ["Astro", "TypeScript"], stackTags: ["typescript"], repositories: [repo("saber-inverso", "web")], primaryRepository: "saber-inverso", caseStudy: false,
+    slug: "saber-inverso", name: "Saber Inverso", ...webApi,
+    purpose: { en: "Estimates Saber 11 scores from a UQ program and weighted admission score, with uncertainty.", es: "Estima puntajes de Saber 11 a partir de un programa de la UQ y su puntaje ponderado de admisión, con incertidumbre." },
+    stack: ["Astro", "TypeScript", "Python", "FastAPI"], stackTags: ["typescript"], repositories: [repo("saber-inverso", "web")], primaryRepository: "saber-inverso",
   },
   {
     slug: "doc-sentinel", name: "doc-sentinel", ...toolOnly,
     purpose: { en: "CLI that strips document traces and detects prompt injection.", es: "CLI que elimina rastros de documentos y detecta inyecciones de instrucciones." },
-    stack: [], stackTags: [], repositories: [repo("doc-sentinel", "cli")], primaryRepository: "doc-sentinel", caseStudy: false,
+    stack: ["Python"], stackTags: [], repositories: [repo("doc-sentinel", "cli", "cli", "Python")], primaryRepository: "doc-sentinel",
   },
   {
     slug: "resume-maker", name: "resume-maker", ...toolOnly, surfaceLabel: { en: "Build pipeline", es: "Flujo de compilación" },
     purpose: { en: "Build pipeline for publishing résumé PDFs.", es: "Flujo de compilación para publicar hojas de vida en PDF." },
-    stack: ["LaTeX"], stackTags: [], repositories: [repo("resume-maker", "cli", "pipeline")], primaryRepository: "resume-maker", caseStudy: false,
+    stack: ["LaTeX"], stackTags: [], repositories: [repo("resume-maker", "cli", "pipeline")], primaryRepository: "resume-maker",
   },
   {
     slug: "enterprise-monitoring-stack", name: "Enterprise Monitoring Stack", primarySurface: "infra",
     surfaceLabel: { en: "Infrastructure", es: "Infraestructura" },
     purpose: { en: "Team project for containerized monitoring with redundant storage.", es: "Proyecto en equipo para monitoreo en contenedores con almacenamiento redundante." },
     stack: ["Docker", "RAID 1", "LVM", "Netdata"], stackTags: [], repositories: [repo("enterprise-monitoring-stack", "infra")],
-    primaryRepository: "enterprise-monitoring-stack", caseStudy: false,
+    primaryRepository: "enterprise-monitoring-stack",
   },
   {
     slug: "nexride", name: "NexRide", ...apiOnly,
     purpose: { en: "Ride dispatch backend with pickup suggestions and composite scoring.", es: "Backend de asignación de viajes con sugerencias de recogida y una puntuación compuesta." },
-    stack: [], stackTags: [], repositories: [repo("NexRide", "api")], primaryRepository: "NexRide", caseStudy: false,
+    stack: ["TypeScript", "NestJS 11", "PostgreSQL/PostGIS", "Redis"], stackTags: ["typescript", "node"], repositories: [repo("NexRide", "api", "api", "TypeScript")], primaryRepository: "NexRide",
   },
 ] as const satisfies readonly Project[];
 
@@ -157,6 +156,7 @@ const featuredHref = (project: Project & { featured: Featured }) => project.feat
 const [studyDeck, foodCourt, brujula, legajo, profundiza, writingHarness] = atlasProjects;
 const projectCard = <T extends Project & { featured: Featured }>(project: T) => ({
   ...project.featured as T["featured"],
+  slug: project.slug,
   name: project.name,
   href: featuredHref(project),
   repositories: project.repositories,

@@ -73,7 +73,7 @@ results:
     detail: Pasaron las 36 verificaciones de Playwright sin simular la API. Entre ellas, el cotejo de un puntaje con la respuesta del servidor y un corte de Ward que repartió los 20 documentos.
     url: https://github.com/diegnghtmr/legajo-frontend/tree/main/e2e-fullstack
 limitations:
-  - El corpus de referencia contiene 20 resúmenes. La demo no importa PDF desde el navegador: la ingesta y la validación son pasos separados, fuera de la aplicación web.
+  - "El corpus de referencia contiene 20 resúmenes. La demo no importa PDF desde el navegador: la ingesta y la validación son pasos separados, fuera de la aplicación web."
   - La página de rendimiento muestra resultados versionados de JMH. No mide el equipo del visitante ni vuelve a ejecutar JMH.
 ---
 

@@ -39,7 +39,7 @@ summary: >-                       # required; one sentence, <= 160 chars, what i
 role: >-                          # optional; only with git or README evidence, e.g.
   Sole developer                  #   "Sole developer" or "Backend and architecture in a team of 3"
 timeframe: 2025–2026              # optional; first and last commit years across the project's repos
-team: 3                           # optional; number of distinct human committers, only if > 1
+team: 3                           # optional; distinct human committers, or the team the README credits; only if > 1
 demo:                             # optional; only if the analyst opened it and it worked
   url: https://...
   note: First load can take ~30 s while the backend wakes up.   # optional
