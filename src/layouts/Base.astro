@@ -12,9 +12,10 @@ interface Props {
   title?: string;
   description?: string;
   structuredData?: object;
+  localSections?: readonly { label: string; target: string }[];
 }
 
-const { locale, page = "home", title = `${siteName}, ${t(locale, "titleRole")}`, description = t(locale, "description"), structuredData = jsonLd(locale) } = Astro.props;
+const { locale, page = "home", title = `${siteName}, ${t(locale, "titleRole")}`, description = t(locale, "description"), structuredData = jsonLd(locale), localSections } = Astro.props;
 const pageUrl = (language: Locale) => new URL(pagePath(language, page), Astro.site);
 const image = absolute(ogImagePath(locale));
 const imageAlt = locale === "en"
@@ -80,7 +81,7 @@ const graph = JSON.stringify(structuredData).replaceAll("<", "\\u003c");
     <a class="skip-link" href="#main">{t(locale, "skip")}</a>
     <Nav {locale} {page} />
     <slot />
-    <CommandMenu {locale} {page} />
+    <CommandMenu {locale} {page} {...(localSections ? { localSections } : {})} />
     <slot name="footer">
       <Footer {locale} {page} />
     </slot>

@@ -4,15 +4,16 @@ import { atlasProjects } from "../data/projects";
 import { localePath, otherLocale, pagePath, sections, t, workPath, type Locale, type Page } from "../i18n";
 import { workMessages } from "../i18n/work";
 
-interface Props { locale: Locale; page?: Page }
-const { locale, page = "home" } = Astro.props;
+interface Props { locale: Locale; page?: Page; localSections?: readonly { label: string; target: string }[] }
+const { locale, page = "home", localSections = [] } = Astro.props;
 const homePrefix = page === "home" ? "" : localePath(locale);
 const m = workMessages[locale];
-const projectItems = page === "work"
-  ? atlasProjects.map(({ name, slug, stack }) => ({ label: name, target: `#${slug}`, stack: stack.join(", ") || undefined }))
+const projectItems = page !== "home"
+  ? atlasProjects.map(({ name, slug, stack }) => ({ label: name, target: `${page === "work" ? "" : workPath(locale)}#${slug}`, stack: stack.join(", ") || undefined }))
   : projects.map(({ name, id }) => ({ label: name, target: `#${id}` }));
 const groups = [
   { label: 'sections', items: [
+    ...localSections,
     ...sections.map((id) => ({ label: t(locale, id === 'work' ? 'selectedWork' : id === 'about' ? 'experience' : id), target: `${homePrefix}#${id}` })),
     { label: m.index, target: workPath(locale) },
   ] },
@@ -46,7 +47,7 @@ const groups = [
       </li>
     ))}
   </ul>
-  <p class="empty" data-command-empty data-prefix={t(locale, 'nothingMatches')} data-hint={page === 'work' ? m.searchHint : t(locale, 'searchHint')} role="status" hidden></p>
+  <p class="empty" data-command-empty data-prefix={t(locale, 'nothingMatches')} data-hint={page !== 'home' ? m.searchHint : t(locale, 'searchHint')} role="status" hidden></p>
   <p class="instructions"><span><kbd>↑↓</kbd>{t(locale, 'move')}</span><span><kbd>Enter</kbd>{t(locale, 'open')}</span><span><kbd>Esc</kbd>{t(locale, 'close')}</span></p>
 </dialog>
 

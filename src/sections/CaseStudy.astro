@@ -1,0 +1,145 @@
+---
+import CaseDecisions from "../components/CaseDecisions.astro";
+import CaseDemonstration from "../components/CaseDemonstration.astro";
+import RepositoryMap from "../components/RepositoryMap.astro";
+import { caseStudyPath, siteHandle, workPath, type Locale } from "../i18n";
+import { caseStudyMessages } from "../i18n/case-study";
+import { workMessages } from "../i18n/work";
+import Base from "../layouts/Base.astro";
+import { getCaseStudies, type CaseStudy } from "../lib/case-studies";
+import { caseStudyJsonLd } from "../lib/profile";
+import "../styles/case-study.css";
+import "../styles/work-transition.css";
+
+interface Props { locale: Locale; study: CaseStudy }
+const { locale, study } = Astro.props;
+const { project, entries } = study;
+const entry = entries[locale];
+const { summary, role, timeframe, team, demo, demonstration, decisions, results, limitations } = entry.data;
+const m = caseStudyMessages[locale];
+const w = workMessages[locale];
+const cover = project.featured && "shape" in project.featured ? project.featured : { shape: "sphere", seed: 0 };
+const published = [...(await getCaseStudies()).values()];
+const currentIndex = published.findIndex(({ project: candidate }) => candidate.slug === project.slug);
+const next = published.length > 1 ? published[(currentIndex + 1) % published.length] : undefined;
+const chapters = [
+  { id: "problem", label: m.problem },
+  { id: "demonstration", label: m.demonstration },
+  { id: "architecture", label: m.architecture },
+  { id: "decisions", label: m.decisions },
+  ...(results ? [{ id: "results", label: m.results }] : []),
+  ...(limitations ? [{ id: "limitations", label: m.limitations }] : []),
+  ...(next ? [{ id: "next-project", label: m.next }] : []),
+];
+const localSections = chapters.map(({ id, label }) => ({ label, target: `#${id}` }));
+// Use Astro's compiled Markdown for inline syntax and links. The validated two
+// headings are replaced by the dossier landmarks so the demonstration can sit between them.
+const rendered = entry.rendered?.html ?? "";
+const blocks = rendered.split(/<h2\b[^>]*>[\s\S]*?<\/h2>/);
+const [preamble, problem, architecture] = blocks;
+if (blocks.length !== 3 || preamble?.trim() || !problem?.trim() || !architecture?.trim()) {
+  throw new Error(`${entry.filePath}: expected two compiled case study sections`);
+}
+---
+
+<Base {locale} page={project} title={`${project.name} | ${siteHandle}`} description={summary} structuredData={caseStudyJsonLd(locale, study)} {localSections}>
+  <main class="wrap case-study" id="main" tabindex="-1">
+    <article aria-labelledby="case-title">
+      <header class="case-overview">
+        <a href={workPath(locale)} class="case-back"><span aria-hidden="true">←</span> {m.all}</a>
+        <div class="case-hero">
+          <div class="case-introduction">
+            <p class="case-eyebrow">{m.eyebrow}</p>
+            <h1 id="case-title" class="case-title" style={`--project-transition: project-${project.slug}`}>{project.name}</h1>
+            <p class="case-summary">{summary}</p>
+            <dl class="case-facts" aria-label={m.facts}>
+              {role && <div data-case-fact="role"><dt>{m.role}</dt><dd>{role}</dd></div>}
+              {timeframe && <div data-case-fact="timeframe"><dt>{m.timeframe}</dt><dd>{timeframe}</dd></div>}
+              {team && <div data-case-fact="team"><dt>{m.team}</dt><dd>{m.people(team)}</dd></div>}
+              <div data-case-fact="surfaces"><dt>{m.surfaces}</dt><dd>{project.surfaceLabel[locale]}</dd></div>
+              {project.stack.length > 0 && <div data-case-fact="stack"><dt>{m.stack}</dt><dd>{project.stack.join(", ")}</dd></div>}
+              <div data-case-fact="repositories">
+                <dt>{m.repositories}</dt>
+                <dd><ul role="list">
+                  {project.repositories.map(({ name, url }) => <li><a href={url} rel="external">{name} <span aria-hidden="true">↗</span></a></li>)}
+                </ul></dd>
+              </div>
+              {demo && <div data-case-fact="demo">
+                <dt>{m.demo}</dt>
+                <dd><a href={demo.url} rel="external">{m.openDemo} <span aria-hidden="true">↗</span></a>{demo.note && <p>{demo.note}</p>}</dd>
+              </div>}
+            </dl>
+          </div>
+          <div class="field case-cover" data-bayer={cover.shape} data-seed={cover.seed} aria-hidden="true"></div>
+        </div>
+      </header>
+      <div class="case-layout">
+        <nav class="case-contents" data-case-contents aria-labelledby="case-contents-title">
+          <h2 id="case-contents-title">{m.contents}</h2>
+          <ul role="list">{chapters.map(({ id, label }) => <li><a href={`#${id}`}>{label}</a></li>)}</ul>
+        </nav>
+        <div class="case-chapters">
+          <section class="case-chapter" id="problem" aria-labelledby="problem-title" tabindex="-1">
+            <h2 id="problem-title">{m.problem}</h2>
+            <div class="case-prose" set:html={problem}></div>
+          </section>
+          <section class="case-chapter" id="demonstration" aria-labelledby="demonstration-title" tabindex="-1">
+            <h2 id="demonstration-title">{m.demonstration}</h2>
+            <CaseDemonstration {locale} {demonstration} />
+          </section>
+          <section class="case-chapter" id="architecture" aria-labelledby="architecture-title" tabindex="-1">
+            <h2 id="architecture-title">{m.architecture}</h2>
+            <div class="case-prose" set:html={architecture}></div>
+            {project.repositories.length > 1 && <figure class="case-repo-map">
+              <figcaption>{m.map}</figcaption>
+              <RepositoryMap {project} {locale} labeled />
+            </figure>}
+            <div class="case-repos">
+              <h3>{m.repositories}</h3>
+              <ul role="list">
+                {project.repositories.map(({ name, url, role }) => (
+                  <li><a href={url} rel="external"><strong>{name}</strong><span class="repo-role">{w.roles[role]}</span><span class="case-arrow" aria-hidden="true">↗</span></a></li>
+                ))}
+              </ul>
+            </div>
+          </section>
+          <section class="case-chapter" id="decisions" aria-labelledby="decisions-title" tabindex="-1">
+            <h2 id="decisions-title">{m.decisions}</h2>
+            <CaseDecisions {locale} {decisions} />
+          </section>
+          {results && <section class="case-chapter" id="results" aria-labelledby="results-title" tabindex="-1">
+            <h2 id="results-title">{m.results}</h2>
+            <dl class="case-results">
+              {results.map(({ label, detail, url }) => (
+                <div>
+                  <dt>{url ? <a href={url} rel="external">{label} <span aria-hidden="true">↗</span></a> : label}</dt>
+                  <dd>{detail}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>}
+          {limitations && <section class="case-chapter" id="limitations" aria-labelledby="limitations-title" tabindex="-1">
+            <h2 id="limitations-title">{m.limitations}</h2>
+            <ul class="case-limits case-prose">{limitations.map((item) => <li>{item}</li>)}</ul>
+          </section>}
+          <div class="case-end">
+            {next && <section id="next-project" aria-labelledby="next-title" tabindex="-1">
+              <h2 id="next-title">{m.next}</h2>
+              <a class="case-next" href={caseStudyPath(locale, next.project.slug)}>
+                <div><RepositoryMap project={next.project} {locale} decorative /></div>
+                <span><strong>{next.project.name}</strong><span>{next.entries[locale].data.summary}</span></span>
+                <span class="case-arrow" aria-hidden="true">→</span>
+              </a>
+            </section>}
+            <a class="case-back" href={workPath(locale)}><span aria-hidden="true">←</span> {m.all}</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+</Base>
+
+<script>
+  import "../scripts/fields";
+  import "../scripts/case-contents";
+</script>

@@ -1,7 +1,7 @@
 // Checks the built site (dist/) for the SEO and agent-facing outputs (odd T17-T20).
 // Run after `pnpm build`: `pnpm test:site`.
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -15,6 +15,11 @@ const atlasNames = [...projectNames, "Savia", "Academic Triage", "Vale", "Saber 
 const workRoutes = { en: "/en/work/", es: "/es/trabajo/" };
 const workTitles = { en: "Work", es: "Trabajo" };
 const pageRoutes = ["/en/", "/es/", ...Object.values(workRoutes)];
+const caseDir = join(root, "src/content/case-studies");
+const slugs = existsSync(caseDir) ? readdirSync(caseDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name) : [];
+const complete = slugs.filter((slug) => locales.every((locale) => existsSync(join(caseDir, slug, `${locale}.md`))));
+const caseRoute = (locale, slug) => `${workRoutes[locale]}${slug}/`;
+const caseRoutes = complete.flatMap((slug) => locales.map((locale) => caseRoute(locale, slug)));
 const trainingBots = ["GPTBot", "ClaudeBot", "Google-Extended", "CCBot", "Applebot-Extended"];
 const github = "https://github.com/diegnghtmr";
 const repoUrl = (name) => `${github}/${name}`;
@@ -29,12 +34,12 @@ const featuredDescriptions = [
 ];
 const foodServices = ["user-microservice", "food-court-microservice", "order-microservice", "traceability-microservice"];
 const featuredContracts = [
-  [["api", "web"], [["studydeck-backend", "api", "Java"], ["studydeck-frontend", "web"]], ["Java 25", "pgvector", "React 19"], repoUrl("studydeck-backend")],
+  [["api", "web"], [["studydeck-backend", "api", "Java"], ["studydeck-frontend", "web", "TypeScript"]], ["Java 25", "pgvector", "React 19"], repoUrl("studydeck-backend")],
   [["4 api", "web"], [["food-court-ui", "web"], ...foodServices.map((name) => [name, "api", "Java"])], ["Spring Boot", "React"], repoSearch("food-court")],
-  [["api", "web"], [["brujula-backend", "api", "Java"], ["brujula-frontend", "web"]], ["Spring Modulith", "Keycloak"], repoSearch("brujula")],
+  [["api", "web"], [["brujula-backend", "api", "Java"], ["brujula-frontend", "web", "TypeScript"]], ["Spring Modulith", "Keycloak"], repoSearch("brujula")],
   [["api", "web"], [["legajo-backend", "api", "Java"], ["legajo-frontend", "web", "TypeScript"]], ["Java 25", "React 19"], repoUrl("legajo-frontend"), true],
-  [["api", "web"], [["profundiza-uq-backend", "api", "Go"], ["profundiza-uq-frontend", "web"]], ["Go", "pgx", "React 19"], repoUrl("profundiza-uq-backend")],
-  [["cli"], [["writing-harness", "cli", "JavaScript"]], ["Node", "zero deps"], repoUrl("writing-harness")],
+  [["api", "web"], [["profundiza-uq-backend", "api", "Go"], ["profundiza-uq-frontend", "web", "TypeScript"]], ["Go", "pgx", "React 19"], repoUrl("profundiza-uq-backend")],
+  [["cli"], [["writing-harness", "cli", "TypeScript"]], ["Node", "zero deps"], repoUrl("writing-harness")],
 ];
 const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
 const workRows = (html) => [...html.matchAll(/(<li\b[^>]*\sdata-project(?:\s[^>]*|)>)([\s\S]*?)<\/li>/g)];
@@ -155,12 +160,17 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
     assert.ok(project.kind.en && project.kind.es, project.name);
     assert.ok(project.url.startsWith("https://github.com/"), project.name);
     assert.ok(project.repositories.length > 0, project.name);
-    assert.ok(Array.isArray(project.stack), project.name);
-    assert.equal(project.stack.length === 0, ["doc-sentinel", "NexRide"].includes(project.name), project.name);
+    assert.ok(Array.isArray(project.stack) && project.stack.length > 0, project.name);
   }
+  const docSentinel = projects.find(({ name }) => name === "doc-sentinel");
+  assert.deepEqual(docSentinel.stack, ["Python"]);
+  assert.equal(docSentinel.repositories[0].programmingLanguage, "Python");
+  const nexRide = projects.find(({ name }) => name === "NexRide");
+  assert.deepEqual(nexRide.stack, ["TypeScript", "NestJS 11", "PostgreSQL/PostGIS", "Redis"]);
+  assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
-test("projects.json adds repository roles without changing the original six entries", () => {
+test("projects.json preserves the original six entries with additive repository metadata", () => {
   const { projects } = JSON.parse(read("projects.json"));
   const specializedRoles = new Map([
     ...foodServices.map((name, index) => [name, ["identity", "menu", "orders", "traceability"][index]]),
@@ -171,7 +181,7 @@ test("projects.json adds repository roles without changing the original six entr
       assert.equal(role, specializedRoles.get(name) ?? surface, name);
     }
   }
-  assert.deepEqual(projects.slice(0, 6).map(({ repositories, ...project }) => ({
+  assert.deepEqual(projects.slice(0, 6).map(({ repositories, caseStudy, ...project }) => ({
     ...project, repositories: repositories.map(({ role, ...repository }) => repository),
   })), featuredContracts.map(([categories, repos, stack, url, live = false], index) => {
     const [en, es] = featuredDescriptions[index];
@@ -210,8 +220,14 @@ for (const locale of locales) {
     for (const [row] of rows) {
       const links = [...row.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
       assert.equal(links.length, 1);
-      assert.match(links[0][1], /^https:\/\/github\.com\/diegnghtmr\/[\w-]+$/);
-      assert.match(links[0][0], /rel="external"/);
+      const slug = attr(row.match(/<li\b[^>]*>/)[0], "id");
+      if (complete.includes(slug)) {
+        assert.equal(links[0][1], caseRoute(locale, slug));
+        assert.doesNotMatch(links[0][0], /rel="external"/);
+      } else {
+        assert.match(links[0][1], /^https:\/\/github\.com\/diegnghtmr\/[\w-]+$/);
+        assert.match(links[0][0], /rel="external"/);
+      }
       assert.match(row, /<svg\b[^>]*class="repo-map\b[^>]*>[\s\S]*?<circle\b/);
     }
   });
@@ -254,13 +270,18 @@ for (const locale of locales) {
   test(`${locale}: primary links and repository map edges match their named repositories`, () => {
     const rows = workRows(read(`${path.slice(1)}index.html`));
     const byName = new Map(rows.map(([, , body]) => [body.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1], body]));
-    assert.deepEqual(Object.fromEntries([...byName].map(([name, row]) => [name, attr(row.match(/<a\b[^>]*>/)[0], "href")])), {
+    const fallbacks = {
       "StudyDeck AI": repoUrl("studydeck-backend"), "Food Court": repoUrl("food-court-ui"), Brújula: repoUrl("brujula-backend"),
       Legajo: repoUrl("legajo-frontend"), "Profundiza UQ": repoUrl("profundiza-uq-backend"), Savia: repoUrl("savia-web"),
       "Academic Triage": repoUrl("academic-triage-frontend"), Vale: repoUrl("vale"), "Saber Inverso": repoUrl("saber-inverso"),
       NexRide: repoUrl("NexRide"), "writing-harness": repoUrl("writing-harness"), "doc-sentinel": repoUrl("doc-sentinel"),
       "resume-maker": repoUrl("resume-maker"), "Enterprise Monitoring Stack": repoUrl("enterprise-monitoring-stack"),
-    });
+    };
+    const bySlug = new Map(rows.map(([, tag, body]) => [attr(tag, "id"), body]));
+    for (const [slug, row] of bySlug) {
+      const name = row.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1];
+      assert.equal(attr(row.match(/<a\b[^>]*>/)[0], "href"), complete.includes(slug) ? caseRoute(locale, slug) : fallbacks[name], name);
+    }
     const edgesFor = (name) => {
       const row = byName.get(name);
       const nodes = new Map([...row.matchAll(/<circle\b[^>]*>/g)].map(([tag]) => [`${attr(tag, "cx")} ${attr(tag, "cy")}`, attr(tag, "data-repository")]));
@@ -268,7 +289,7 @@ for (const locale of locales) {
         .map(([, from, to]) => [nodes.get(from), nodes.get(to)]);
     };
     assert.deepEqual(edgesFor("Food Court"), foodServices.map((name) => ["food-court-ui", name]));
-    assert.deepEqual(edgesFor("Savia"), [["savia-web", "savia-backend"], ["savia-mobile", "savia-backend"], ["savia-backend", "savia-mcp"]]);
+    assert.deepEqual(edgesFor("Savia"), [["savia-web", "savia-backend"]]);
   });
 
   test(`${locale}: repository map accessible labels describe roles and connections`, () => {
@@ -281,8 +302,38 @@ for (const locale of locales) {
     const foodRoles = locale === "en" ? ["Identity", "Menu", "Orders", "Traceability"] : ["Identidad", "Menú", "Pedidos", "Trazabilidad"];
     assert.equal(labelFor("Food Court"), `Web: food-court-ui; ${foodServices.map((name, i) => `${foodRoles[i]}: ${name}`).join("; ")}. food-court-ui ${connects} ${foodServices.join(", ")}.`);
     const mobile = locale === "en" ? "Mobile" : "Móvil";
-    assert.equal(labelFor("Savia"), `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend; savia-mobile ${connects} savia-backend; savia-backend ${connects} savia-mcp.`);
+    assert.equal(labelFor("Savia"), `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend.`);
     assert.equal(labelFor("Saber Inverso"), "Web: saber-inverso");
+  });
+
+  test(`${locale}: dossiers label paired, branched and isolated repositories without mapping a single repo`, () => {
+    const chapter = (slug) => read(`${caseRoute(locale, slug).slice(1)}index.html`)
+      .match(/<section\b[^>]*id="architecture"[^>]*>[\s\S]*?<\/section>/)[0];
+    const mapFor = (slug) => chapter(slug).match(/<figure\b[^>]*class="case-repo-map"[^>]*>([\s\S]*?)<\/figure>/)?.[1];
+    const caption = locale === "en" ? "Repository map" : "Mapa de repositorios";
+    const connects = locale === "en" ? "connects to" : "se conecta con";
+    const mobile = locale === "en" ? "Mobile" : "Móvil";
+    const foodRoles = locale === "en" ? ["Identity", "Menu", "Orders", "Traceability"] : ["Identidad", "Menú", "Pedidos", "Trazabilidad"];
+    const check = (slug, description, connected, detached = []) => {
+      const map = mapFor(slug);
+      assert.ok(map, slug);
+      assert.ok(map.includes(`<figcaption>${caption}</figcaption>`), slug);
+      const graphic = map.match(/<[^>]*\srole="img"[^>]*>/)?.[0];
+      assert.ok(graphic, slug);
+      assert.equal(attr(graphic, "aria-label"), description, slug);
+      const rows = [...map.matchAll(/<div\b[^>]*class="map-network( map-detached)?"[^>]*>([\s\S]*?)<\/div>/g)];
+      assert.deepEqual(rows.map(([, isolated, row]) => [Boolean(isolated), [...row.matchAll(
+        /<span\b[^>]*class="map-name"[^>]*>([^<]+)<\/span>\s*<span\b[^>]*class="map-role"[^>]*>([^<]+)<\/span>/g,
+      )].map(([, name, role]) => [name, role])]), [[false, connected], ...(detached.length ? [[true, detached]] : [])], slug);
+    };
+    check("brujula", `API: brujula-backend; Web: brujula-frontend. brujula-backend ${connects} brujula-frontend.`,
+      [["brujula-backend", "API"], ["brujula-frontend", "Web"]]);
+    check("food-court", `Web: food-court-ui; ${foodServices.map((name, i) => `${foodRoles[i]}: ${name}`).join("; ")}. food-court-ui ${connects} ${foodServices.join(", ")}.`,
+      [["food-court-ui", "Web"], ...foodServices.map((name, i) => [name, foodRoles[i]])]);
+    check("savia", `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend.`,
+      [["savia-web", "Web"], ["savia-backend", "API"]], [["savia-mobile", mobile], ["savia-mcp", "MCP"]]);
+    assert.equal(mapFor("writing-harness"), undefined);
+    assert.match(chapter("writing-harness"), /<a href="https:\/\/github\.com\/diegnghtmr\/writing-harness"[^>]*><strong>writing-harness<\/strong>/);
   });
 
   test(`${locale}: work index publishes a Markdown twin and linked structured data`, () => {
@@ -338,9 +389,9 @@ for (const locale of locales) {
 
 test("middleware serves the markdown twin only to clients that ask for markdown", async () => {
   const { default: middleware, config } = await import(new URL("../middleware.js", import.meta.url));
-  assert.deepEqual(config.matcher, pageRoutes);
   const call = (path, accept) => middleware(new Request(`${site}${path}`, accept ? { headers: { accept } } : {}));
-  for (const path of pageRoutes) {
+  for (const path of [...pageRoutes, ...caseRoutes]) {
+    assert.ok(config.matcher.some((pattern) => new RegExp(`^${pattern}$`).test(path)), path);
     for (const accept of ["text/markdown", "text/markdown, text/plain;q=0.5", "text/markdown, text/html;q=0.9"]) {
       const response = await call(path, accept);
       assert.equal(response?.headers.get("x-middleware-rewrite"), `${site}${path}index.md`, `${path} ${accept}`);
@@ -356,11 +407,117 @@ test("vercel.json sets markdown headers, Vary and the root redirect by language"
   assert.equal(config.rewrites, undefined, "static files win over rewrites on Vercel; negotiation lives in middleware.js");
   const markdownHeaders = config.headers.find((rule) => rule.source === "/(.*)\\.md").headers;
   assert.ok(markdownHeaders.some((header) => header.key === "Content-Type" && header.value.startsWith("text/markdown")));
-  for (const path of pageRoutes) {
+  for (const path of [...pageRoutes, ...caseRoutes]) {
     const headers = config.headers.filter((rule) => new RegExp(`^${rule.source}$`).test(path)).flatMap((rule) => rule.headers);
     assert.ok(headers.some((header) => header.key === "Vary" && header.value.includes("Accept")), path);
   }
   const spanish = config.redirects.find((rule) => rule.source === "/" && rule.destination === "/es/");
   assert.ok(spanish?.has.some((condition) => condition.key === "accept-language"));
   assert.equal(spanish.permanent, false);
+});
+
+test("only complete bilingual content pairs are published", () => {
+  assert.ok(complete.includes("writing-harness"), "terminal case study fixture");
+  for (const locale of locales) {
+    for (const slug of slugs) assert.equal(resolves(caseRoute(locale, slug)), complete.includes(slug), `${locale} ${slug}`);
+  }
+});
+
+for (const slug of complete) {
+  for (const locale of locales) {
+    const path = caseRoute(locale, slug);
+    const other = locale === "en" ? "es" : "en";
+    const source = readFileSync(join(caseDir, slug, `${locale}.md`), "utf8");
+    test(`${locale} ${slug}: localized dossier, adaptive facts, decisions and evidence`, () => {
+      const html = read(`${path.slice(1)}index.html`);
+      assert.match(html, new RegExp(`<html lang="${locale}"`));
+      assert.ok(html.includes(`<link rel="canonical" href="${site}${path}"`));
+      assert.ok(html.includes(`<meta property="og:url" content="${site}${path}"`));
+      assert.match(html, /<meta name="description" content="[^"]+"/);
+      assert.match(html, /<title>[^<]+ \| diegnghtmr<\/title>/);
+      assert.ok(resolves(html.match(/<meta property="og:image" content="([^"]+)"/)[1]));
+      for (const lang of [...locales, "x-default"]) {
+        const alternate = caseRoute(lang === "x-default" ? "en" : lang, slug);
+        assert.ok(html.includes(`<link rel="alternate" hreflang="${lang}" href="${site}${alternate}"`), lang);
+      }
+      const header = html.match(/<header\b[^>]*data-site-nav[^>]*>[\s\S]*?<\/header>/)[0];
+      assert.match(header, new RegExp(`data-search-trigger[\\s\\S]*href="${caseRoute(other, slug)}"[\\s\\S]*data-theme-toggle`));
+      assert.ok(header.includes(`href="${workRoutes[locale]}"`));
+      assert.match(header, /aria-current="page"/);
+      for (const field of ["role", "timeframe", "team", "demo"]) {
+        assert.equal(html.includes(`data-case-fact="${field}"`), new RegExp(`^${field}:`, "m").test(source), field);
+      }
+      const records = [...html.matchAll(/<article\b[^>]*data-decision[^>]*>([\s\S]*?)<\/article>/g)];
+      assert.equal(records.length, [...source.matchAll(/^  - question:/gm)].length);
+      for (const [, record] of records) assert.equal([...record.matchAll(/\sdata-chosen\b/g)].length, 1);
+      const rail = html.match(/<nav\b[^>]*data-case-contents[^>]*>[\s\S]*?<\/nav>/)[0];
+      for (const section of ["problem", "demonstration", "architecture", "decisions", "results", "limitations"]) {
+        const present = !["results", "limitations"].includes(section) || new RegExp(`^${section}:`, "m").test(source);
+        assert.equal(rail.includes(`href="#${section}"`), present, section);
+        assert.equal(html.includes(`id="${section}"`), present, section);
+      }
+      if (source.includes("kind: screenshots")) {
+        const images = [...html.matchAll(/<picture>[\s\S]*?<\/picture>/g)];
+        assert.equal(images.length, [...source.matchAll(/^    - src:/gm)].length);
+        for (const [picture] of images) {
+          assert.match(picture, /type="image\/avif"/);
+          assert.match(picture, /<img[^>]*\bsrc="[^"\s]+\.webp"/);
+          assert.match(picture, /<img[^>]*\bsizes="[^"]+"/);
+          assert.match(picture, /<img[^>]*\bwidth="\d+"/);
+          assert.match(picture, /<img[^>]*\bheight="\d+"/);
+        }
+      } else {
+        assert.match(html, /<pre\b[^>]*data-terminal-output/);
+        assert.match(html, /data-terminal-source/);
+      }
+    });
+
+    test(`${locale} ${slug}: catalog links, Markdown twin, sitemap and structured data agree`, () => {
+      const html = read(`${path.slice(1)}index.html`);
+      const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
+      const byType = (type) => graph.find((node) => node["@type"] === type);
+      const project = JSON.parse(read("projects.json")).projects.find(({ caseStudy }) => caseStudy === `${site}${caseRoute("en", slug)}`);
+      assert.ok(project, slug);
+      const creative = byType("CreativeWork");
+      assert.equal(creative.url, `${site}${path}`);
+      assert.equal(creative.name, project.name);
+      assert.equal(creative.author["@id"], byType("Person")["@id"]);
+      assert.deepEqual(graph.filter((node) => node["@type"] === "SoftwareSourceCode").map(({ codeRepository }) => codeRepository), project.repositories.map(({ url }) => url));
+      assert.deepEqual(byType("BreadcrumbList").itemListElement.map(({ item }) => item), [`${site}/${locale}/`, `${site}${workRoutes[locale]}`, `${site}${path}`]);
+      assert.ok(html.includes(`<link rel="alternate" type="text/markdown" href="${path}index.md"`));
+      const twin = read(`${path.slice(1)}index.md`);
+      assert.ok(twin.startsWith(`# ${project.name}\n`));
+      for (const question of source.matchAll(/^  - question: (.+)$/gm)) {
+        if (!/^[|>'"]/.test(question[1])) assert.ok(twin.includes(question[1]), question[1]);
+      }
+      assert.ok(read(locale === "en" ? "llms-full.txt" : "es/llms-full.txt").includes(twin.trimEnd()));
+      assert.ok(read("llms.txt").includes(`](${site}${path}index.md)`));
+      const xml = read("sitemap.xml").split("</url>").find((node) => node.includes(`<loc>${site}${path}</loc>`));
+      assert.ok(xml, path);
+      for (const lang of [...locales, "x-default"]) {
+        const alternate = caseRoute(lang === "x-default" ? "en" : lang, slug);
+        assert.ok(xml.includes(`hreflang="${lang}" href="${site}${alternate}"`), lang);
+      }
+      if (project.id.startsWith("p")) {
+        const home = read(`${locale}/index.html`);
+        assert.match(home, new RegExp(`<li class="card" id="${project.id}"[^>]*>\\s*<a href="${path}"`));
+      }
+      const work = read(`${workRoutes[locale].slice(1)}index.html`);
+      const row = workRows(work).find(([, tag]) => attr(tag, "id") === slug);
+      assert.ok(row?.[2].includes(`href="${path}"`));
+    });
+  }
+}
+
+test("writing-harness is indexed under TypeScript without adding absent demo and team facts", () => {
+  const html = read("en/work/index.html");
+  const row = workRows(html).find(([, tag]) => attr(tag, "id") === "writing-harness");
+  assert.ok(attr(row[1], "data-stack").split(" ").includes("typescript"));
+  for (const locale of locales) assert.doesNotMatch(read(`${caseRoute(locale, "writing-harness").slice(1)}index.html`), /data-case-fact="(?:demo|team)"/);
+});
+
+test("published pages and agent outputs do not expose placeholders", () => {
+  for (const file of readdirSync(dist, { recursive: true }).filter((file) => /\.(?:html|md|txt|json)$/.test(file))) {
+    assert.doesNotMatch(read(file), /\b(?:to confirm|TBD|por confirmar)\b/i, file);
+  }
 });

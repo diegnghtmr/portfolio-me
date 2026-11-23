@@ -17,5 +17,9 @@ export const t = (locale: Locale, key: MessageKey) => messages[locale][key];
 export const otherLocale = (locale: Locale): Locale => (locale === "en" ? "es" : "en");
 export const localePath = (locale: Locale): `/${Locale}/` => `/${locale}/`;
 export const workPath = (locale: Locale) => locale === "en" ? "/en/work/" : "/es/trabajo/";
-export type Page = "home" | "work";
-export const pagePath = (locale: Locale, page: Page) => page === "work" ? workPath(locale) : localePath(locale);
+export type CasePage = { slug: string; name: string };
+export type Page = "home" | "work" | CasePage;
+export const caseStudyPath = (locale: Locale, slug: string) => `${workPath(locale)}${slug}/`;
+export const pagePath = (locale: Locale, page: Page) => typeof page === "object"
+  ? caseStudyPath(locale, page.slug)
+  : page === "work" ? workPath(locale) : localePath(locale);

@@ -1,9 +1,11 @@
 ---
 import { projects } from "../data/home";
 import { atlasProjects } from "../data/projects";
-import { t, workPath, type Locale } from "../i18n";
+import { caseStudyPath, t, workPath, type Locale } from "../i18n";
+import { getCaseStudies } from "../lib/case-studies";
 
 const { locale } = Astro.props as { locale: Locale };
+const studies = await getCaseStudies();
 ---
 
 <section class="wrap" id="work" aria-labelledby="work-heading">
@@ -14,7 +16,7 @@ const { locale } = Astro.props as { locale: Locale };
   <ul class="bento">
     {projects.map((project) => (
       <li class="card" id={project.id} data-reveal tabindex="-1">
-        <a href={project.href} aria-labelledby={`${project.id}-title`}>
+        <a href={studies.has(project.slug) ? caseStudyPath(locale, project.slug) : project.href} aria-labelledby={`${project.id}-title`}>
           {'terminal' in project ? (
             <div class="cover terminal">
               <pre class="sr-only">$ node verify.mjs draft.md{'\n'}93 {t(locale, 'terminalRules')}{'\n'}16 {t(locale, 'terminalSkills')}{'\n'}0 {t(locale, 'terminalDependencies')}</pre>

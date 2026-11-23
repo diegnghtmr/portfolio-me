@@ -21,6 +21,15 @@
       ]
     },
     {
+      "source": "/(en/work|es/trabajo)/([a-z0-9-]+)/",
+      "headers": [
+        {
+          "key": "Vary",
+          "value": "Accept"
+        }
+      ]
+    },
+    {
       "source": "/llms(.*)\\.txt",
       "headers": [
         {

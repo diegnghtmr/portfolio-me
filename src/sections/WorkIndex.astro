@@ -4,9 +4,11 @@ import { atlasProjects } from "../data/projects";
 import { siteHandle, t, type Locale } from "../i18n";
 import { workMessages } from "../i18n/work";
 import Base from "../layouts/Base.astro";
+import { getCaseStudies } from "../lib/case-studies";
 import { workJsonLd } from "../lib/profile";
 import { atlasFacets, atlasGroups, facetOptions, projectHref, projectSurfaces, repoBucket } from "../lib/work";
 import "../styles/work.css";
+import "../styles/work-transition.css";
 
 interface Props { locale: Locale }
 const { locale } = Astro.props;
@@ -14,9 +16,10 @@ const heading = t(locale, "work");
 const m = workMessages[locale];
 const total = atlasProjects.length;
 const facetChoices = facetOptions(locale);
+const studies = await getCaseStudies();
 ---
 
-<Base {locale} page="work" title={`${heading} | ${siteHandle}`} description={m.intro} structuredData={workJsonLd(locale)}>
+<Base {locale} page="work" title={`${heading} | ${siteHandle}`} description={m.intro} structuredData={workJsonLd(locale, studies)}>
   <main class="wrap work-index" id="main" tabindex="-1" data-work-index>
     <header class="atlas-header">
       <div>
@@ -82,23 +85,24 @@ const facetChoices = facetOptions(locale);
             <ul class="atlas-projects" role="list">
               {projects.map((project) => {
                 const titleId = `${project.slug}-title`;
-                const externalLabel = project.caseStudy ? undefined : `${project.slug}-external`;
+                const hasCaseStudy = studies.has(project.slug);
+                const externalLabel = hasCaseStudy ? undefined : `${project.slug}-external`;
                 return (
                   <li id={project.slug} data-project data-surface={projectSurfaces(project).join(" ")} data-repos={repoBucket(project)} data-stack={project.stackTags.join(" ")}>
-                    <a class="atlas-project" href={projectHref(locale, project)} rel={project.caseStudy ? undefined : "external"} aria-labelledby={[titleId, externalLabel].filter(Boolean).join(" ")}>
+                    <a class="atlas-project" href={projectHref(locale, project, studies)} rel={hasCaseStudy ? undefined : "external"} aria-labelledby={[titleId, externalLabel].filter(Boolean).join(" ")}>
                       <div class="atlas-repositories">
                         <RepositoryMap {project} {locale} />
                         <span>{m.repos(project.repositories.length)}</span>
                       </div>
                       <div class="atlas-project-body">
-                        <h3 id={titleId}>{project.name}</h3>
+                        <h3 id={titleId} style={hasCaseStudy ? `--project-transition: project-${project.slug}` : undefined}>{project.name}</h3>
                         <p class="atlas-purpose">{project.purpose[locale]}</p>
                         <p class="atlas-meta">
                           {project.surfaceLabel[locale]}{project.stack.length > 0 && <><span aria-hidden="true"> · </span>{project.stack.join(", ")}</>}
                         </p>
                         {externalLabel && <span class="sr-only" id={externalLabel}>{m.github}</span>}
                       </div>
-                      <span class="atlas-arrow" aria-hidden="true">{project.caseStudy ? "→" : "↗"}</span>
+                      <span class="atlas-arrow" aria-hidden="true">{hasCaseStudy ? "→" : "↗"}</span>
                     </a>
                   </li>
                 );

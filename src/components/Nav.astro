@@ -1,5 +1,6 @@
 ---
-import { languages, localePath, otherLocale, pagePath, sections, siteHandle, t, type Locale, type Page } from "../i18n";
+import { languages, localePath, otherLocale, pagePath, sections, siteHandle, t, workPath, type Locale, type Page } from "../i18n";
+import { caseStudyMessages } from "../i18n/case-study";
 import { workMessages } from "../i18n/work";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const { locale, page = "home" } = Astro.props;
+const casePage = typeof page === "object" ? page : undefined;
 const alternate = otherLocale(locale);
 const alternatePath = pagePath(alternate, page);
 const language = languages[alternate];
@@ -15,15 +17,16 @@ const dark = t(locale, "dark");
 const light = t(locale, "light");
 ---
 
-<header class="site-nav" data-site-nav data-work-nav={page === "work" ? "" : undefined}>
+<header class="site-nav" data-site-nav data-work-nav={page !== "home" ? "" : undefined}>
   <div class="wrap nav-inner">
     <a class="brand font-mono" href={localePath(locale)}>{siteHandle}</a>
-    <nav id="primary-nav" class="nav-links" aria-label={t(locale, "primary")}>
+    <nav id="primary-nav" class="nav-links" aria-label={casePage ? caseStudyMessages[locale].breadcrumb : t(locale, "primary")}>
       <ul>
-        {page === "work" ? (
+        {page !== "home" ? (
           <>
             <li><a href={localePath(locale)}><span aria-hidden="true">←</span> {workMessages[locale].home}</a></li>
-            <li class="current-page"><span aria-current="page">{t(locale, "work")}</span></li>
+            {casePage && <li class="nav-parent"><a href={workPath(locale)}>{t(locale, "work")}</a></li>}
+            <li class="current-page"><span aria-current="page">{casePage?.name ?? t(locale, "work")}</span></li>
           </>
         ) : sections.map((section) => (
           <li><a href={`#${section}`} data-section-link><span>{t(locale, section)}</span></a></li>
@@ -126,7 +129,9 @@ const light = t(locale, "light");
   [data-work-nav] .brand { margin-inline-end: 0; }
   [data-work-nav] .nav-links { margin-inline-end: auto; }
   .current-page { padding: var(--unit) calc(var(--unit) * 1.5); font-size: 14px; font-weight: 600; }
-  .current-page::before { content: "/" / ""; margin-inline-end: var(--unit); color: var(--muted); }
+  .current-page::before, .nav-parent::before { content: "/" / ""; margin-inline-end: var(--unit); color: var(--muted); }
+  .nav-parent { display: flex; align-items: center; }
+  .nav-parent::before { margin-inline-end: 0; }
 
   ul,
   .nav-tools {
@@ -226,7 +231,7 @@ const light = t(locale, "light");
     }
 
     [data-work-nav] .brand { margin-inline-end: auto; }
-    .current-page::before { display: none; }
+    .current-page::before, .nav-parent::before { display: none; }
 
     .search-label,
     .desktop-language,

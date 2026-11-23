@@ -3,12 +3,13 @@ import { repositoryByName, type Project } from "../data/projects";
 import { workMessages } from "../i18n/work";
 import type { Locale } from "../i18n";
 
-interface Props { project: Project; locale: Locale; decorative?: boolean }
-const { project, locale, decorative = false } = Astro.props;
+interface Props { project: Project; locale: Locale; decorative?: boolean; labeled?: boolean }
+const { project, locale, decorative = false, labeled = false } = Astro.props;
 const m = workMessages[locale];
 const { repositories, edges = [] } = project;
 // Place connected nodes in edge order so the topology does not depend on the repo list order.
-const names = [...new Set([...edges.flat(), ...repositories.map(({ name }) => name).sort()])];
+const connectedNames = new Set(edges.flat());
+const names = [...new Set([...connectedNames, ...repositories.map(({ name }) => name).sort()])];
 const count = names.length;
 const positions = count === 1 ? [[40, 24]]
   : count === 2 ? (repositoryByName(project, names[0]!).surface === "api" ? [[58, 24], [22, 24]] : [[22, 24], [58, 24]])
@@ -19,6 +20,7 @@ const nodes = new Map(names.map((name, i) => {
   return [name, {
     x: positions[i]?.[0] ?? 40,
     y: positions[i]?.[1] ?? 24,
+    role: m.roles[repo.role],
     tone: project.slug === "saber-inverso" ? "data" : repo.surface === "cli" ? "mcp" : repo.surface,
   }];
 }));
@@ -35,12 +37,41 @@ for (const [from, to] of edges) {
 }
 const connectionText = [...connections].map(([from, to]) => m.connects(from, to.join(", "))).join("; ");
 const description = connectionText ? `${roles}. ${connectionText}.` : roles;
+const detached = repositories.filter(({ name }) => !connectedNames.has(name)).map(({ name }) => [name]);
+const networks = [...connections].map(([from, to]) => ({ columns: [[from], to], isolated: false }));
+if (detached.length) networks.push({ columns: detached, isolated: true });
+const accessibility = decorative ? { "aria-hidden": "true" } as const : { role: "img", "aria-label": description } as const;
 ---
 
-<svg class="repo-map" viewBox="0 0 80 48" width="80" height="48" role={decorative ? undefined : "img"} aria-hidden={decorative ? "true" : undefined} aria-label={decorative ? undefined : description}>
-  {links.map((d) => <path {d} />)}
-  {[...nodes].map(([name, { x, y, tone }]) => <circle cx={x} cy={y} r="4" class={`node-${tone}`} data-repository={name} />)}
-</svg>
+{labeled ? (
+  <div class="repo-map-labeled" {...accessibility}>
+    {networks.map(({ columns, isolated }) => (
+      <div class:list={["map-network", { "map-detached": isolated }]}>
+        {columns.map((column, index) => (
+          <ul class:list={["map-column", { "map-branch": !isolated && index === 1 }]}>
+            {column.map((name) => {
+              const { tone, role } = nodes.get(name)!;
+              return (
+                <li><span class="map-node">
+                  <svg width="8" height="8" viewBox="0 0 8 8" class="map-dot" aria-hidden="true">
+                    <circle cx="4" cy="4" r="4" class={`node-${tone}`} />
+                  </svg>
+                  <span class="map-name">{name}</span>
+                  <span class="map-role">{role}</span>
+                </span></li>
+              );
+            })}
+          </ul>
+        ))}
+      </div>
+    ))}
+  </div>
+) : (
+  <svg class="repo-map" viewBox="0 0 80 48" width="80" height="48" {...accessibility}>
+    {links.map((d) => <path {d} />)}
+    {[...nodes].map(([name, { x, y, tone }]) => <circle cx={x} cy={y} r="4" class={`node-${tone}`} data-repository={name} />)}
+  </svg>
+)}
 
 <style>
   .repo-map { display: block; width: 100%; height: auto; color: var(--subtle); }

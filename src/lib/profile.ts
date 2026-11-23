@@ -1,10 +1,11 @@
 // Machine-readable views of the shared, bilingual profile and project content.
 import { contact, experience, openSource, principles, projects, stack } from "../data/home";
 import { atlasProjects, primaryRepository, type Repository } from "../data/projects";
-import { localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, type Page } from "../i18n";
+import { caseStudyPath, localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, type Page } from "../i18n";
 import { en } from "../i18n/en";
 import { es } from "../i18n/es";
 import { workMessages } from "../i18n/work";
+import type { CaseStudies, CaseStudy } from "./case-studies";
 import { atlasGroups, projectHref, projectSurfaces } from "./work";
 
 export const site = "https://diegnghtmr.me";
@@ -85,7 +86,7 @@ export function jsonLd(locale: Locale) {
   };
 }
 
-export function workJsonLd(locale: Locale) {
+export function workJsonLd(locale: Locale, studies: CaseStudies) {
   const page = absolute(workPath(locale));
   const title = t(locale, "work");
   const m = workMessages[locale];
@@ -115,7 +116,7 @@ export function workJsonLd(locale: Locale) {
             "@id": `${page}#${project.slug}`,
             name: project.name,
             description: project.purpose[locale],
-            url: absolute(projectHref(locale, project)),
+            url: absolute(projectHref(locale, project, studies)),
             genre: m.groups[project.primarySurface],
             ...(project.stack.length ? { keywords: project.stack.join(", ") } : {}),
             hasPart: project.repositories.map(sourceCode),
@@ -128,6 +129,32 @@ export function workJsonLd(locale: Locale) {
         itemListElement: [
           { "@type": "ListItem", position: 1, name: m.home, item: absolute(localePath(locale)) },
           { "@type": "ListItem", position: 2, name: title, item: page },
+        ],
+      },
+    ],
+  };
+}
+
+export function caseStudyJsonLd(locale: Locale, { project, entries }: CaseStudy) {
+  const page = absolute(caseStudyPath(locale, project.slug));
+  const repositories = project.repositories.map(sourceCode);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CreativeWork", "@id": `${page}#case-study`, url: page, name: project.name,
+        description: entries[locale].data.summary, inLanguage: locale, author: { "@id": personId },
+        about: { "@type": "Thing", name: project.name },
+        hasPart: repositories.map(({ "@id": id }) => ({ "@id": id })),
+      },
+      { "@type": "Person", "@id": personId, name: siteName, url: `${site}/`, sameAs: [contact.github, contact.linkedin] },
+      ...repositories,
+      {
+        "@type": "BreadcrumbList", "@id": `${page}#breadcrumbs`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: workMessages[locale].home, item: absolute(localePath(locale)) },
+          { "@type": "ListItem", position: 2, name: t(locale, "work"), item: absolute(workPath(locale)) },
+          { "@type": "ListItem", position: 3, name: project.name, item: page },
         ],
       },
     ],
@@ -199,7 +226,7 @@ export function homeMarkdown(locale: Locale) {
   return lines.join("\n");
 }
 
-export function workMarkdown(locale: Locale) {
+export function workMarkdown(locale: Locale, studies: CaseStudies) {
   const m = workMessages[locale];
   return [
     `# ${t(locale, "work")} | ${siteHandle}`,
@@ -212,7 +239,7 @@ export function workMarkdown(locale: Locale) {
       `## ${m.groups[surface]} (${m.projects(projects.length)})`,
       "",
       ...projects.flatMap((project) => [
-        `### [${project.name}](${absolute(projectHref(locale, project))})`,
+        `### [${project.name}](${absolute(projectHref(locale, project, studies))})`,
         "",
         project.purpose[locale],
         "",
@@ -226,7 +253,7 @@ export function workMarkdown(locale: Locale) {
 }
 
 /** llms.txt (llmstxt.org): what the site is and where the machine-readable files live. */
-export function llmsTxt() {
+export function llmsTxt(studies: CaseStudies) {
   return [
     `# ${siteName}`,
     "",
@@ -247,6 +274,13 @@ export function llmsTxt() {
     `- [Índice de trabajo en español](${absolute(markdownPath("es", "work"))}): el atlas completo`,
     ...projects.map((project) => `- [${project.name}](${project.href}): ${en[project.description]} Stack: ${project.stack}.`),
     "",
+    ...(studies.size ? [
+      "## Case studies",
+      "",
+      ...[...studies.values()].flatMap(({ project, entries }) => locales.map((locale) =>
+        `- [${project.name} (${locale.toUpperCase()})](${absolute(markdownPath(locale, project))}): ${entries[locale].data.summary}`)),
+      "",
+    ] : []),
     "## Open source",
     "",
     ...openSource.map(({ owner, repo, description }) => `- [${owner}/${repo}](${repoUrl(owner, repo)}): ${en[description]}`),
@@ -326,7 +360,8 @@ const serializeRepository = ({ name, surface, url, role, programmingLanguage }: 
 });
 
 /** projects.json: the full bilingual atlas; preserve the original featured entries. */
-export function projectsJson() {
+export function projectsJson(studies: CaseStudies) {
+  const caseStudy = (slug: string) => studies.has(slug) ? { caseStudy: absolute(caseStudyPath("en", slug)) } : {};
   return {
     owner: { name: siteName, github: contact.github, site: `${site}/` },
     allRepositories: contact.projects,
@@ -341,6 +376,7 @@ export function projectsJson() {
         stack: stackList(project.stack),
         url: project.href,
         live: "live" in project ? project.live : false,
+        ...caseStudy(project.slug),
       })),
       ...atlasProjects.flatMap((project) => "featured" in project ? [] : [{
         id: project.slug,
@@ -352,6 +388,7 @@ export function projectsJson() {
         stack: project.stack,
         url: primaryRepository(project).url,
         live: false,
+        ...caseStudy(project.slug),
       }]),
     ],
   };

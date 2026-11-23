@@ -1,0 +1,36 @@
+---
+import type { Locale } from "../i18n";
+import { caseStudyMessages } from "../i18n/case-study";
+import type { CaseData } from "../lib/case-studies";
+
+interface Props { locale: Locale; decisions: CaseData["decisions"] }
+const { locale, decisions } = Astro.props;
+const m = caseStudyMessages[locale];
+---
+
+<div class="decision-records">
+  {decisions.map(({ question, options, consequence, evidence, quote }, index) => {
+    const id = `decision-${index + 1}`;
+    return (
+      <article class="decision-record" aria-labelledby={id} data-decision>
+        <h3 id={id}>{question}</h3>
+        <dl class="decision-options">
+          {options.map(({ label, reason, chosen }) => (
+            <div class="decision-option" data-chosen={chosen ? "" : undefined}>
+              <dt><span class="option-state">{chosen ? m.chosen : m.notChosen}</span>{label}</dt>
+              <dd>{reason}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="decision-consequence"><strong>{m.consequence}:</strong> {consequence}</p>
+        {quote && <blockquote class="decision-quote"><p><q>{quote}</q></p></blockquote>}
+        <div class="decision-evidence">
+          <p>{m.evidence}</p>
+          <ul role="list">
+            {evidence.map(({ label, url }) => <li><a href={url} rel="external">{label} <span aria-hidden="true">↗</span></a></li>)}
+          </ul>
+        </div>
+      </article>
+    );
+  })}
+</div>

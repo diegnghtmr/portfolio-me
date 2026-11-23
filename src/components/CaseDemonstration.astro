@@ -1,0 +1,68 @@
+---
+import { getImage, Picture } from "astro:assets";
+import type { Locale } from "../i18n";
+import { caseStudyMessages } from "../i18n/case-study";
+import type { CaseData } from "../lib/case-studies";
+
+interface Props { locale: Locale; demonstration: CaseData["demonstration"] }
+const { locale, demonstration } = Astro.props;
+const m = caseStudyMessages[locale];
+const shots = demonstration.kind === "screenshots" ? await Promise.all(demonstration.screenshots.map(async (shot) => ({
+  ...shot,
+  enlarged: (await getImage({ src: shot.src, width: shot.src.width, format: "webp" })).src,
+}))) : [];
+// The gallery follows the cover and Problem section, below the LCP content.
+const wideSizes = "(max-width: 640px) calc(100vw - 40px), (max-width: 860px) calc(100vw - 64px), (max-width: 1200px) calc(100vw - 288px), 912px";
+const halfSizes = "(max-width: 640px) calc(100vw - 40px), (max-width: 860px) calc((100vw - 80px) / 2), (max-width: 1200px) calc((100vw - 304px) / 2), 448px";
+---
+
+{demonstration.kind === "terminal" ? (
+  <figure class="case-terminal">
+    <div class="terminal-heading">
+      <span><span class="terminal-symbol" aria-hidden="true">›_</span> {m.terminal}</span>
+      <span data-terminal-source>{m[demonstration.terminal.source]}</span>
+    </div>
+    <div class="terminal-transcript" role="region" aria-label={m.terminal} tabindex="0">
+      {demonstration.terminal.steps.map(({ command, output }) => (
+        <div class="terminal-step">
+          <pre class="terminal-command"><code><span>$ </span>{command}</code></pre>
+          <pre data-terminal-output><code>{output}</code></pre>
+        </div>
+      ))}
+    </div>
+    <figcaption class="case-caption">{demonstration.terminal.caption}</figcaption>
+  </figure>
+) : (
+  <>
+    <div class="case-gallery">
+      {shots.map(({ src, alt, caption, enlarged }, index) => {
+        const id = `capture-${index + 1}`;
+        const wide = index === 0 && shots.length % 2 === 1;
+        return (
+          <figure class:list={{ "gallery-lead": wide }}>
+            <a class="shot-link" href={enlarged} aria-label={`${m.enlarge}: ${alt}`} aria-describedby={id} data-case-image>
+              <Picture {src} {alt} formats={["avif"]} fallbackFormat="webp"
+                widths={wide ? [360, 540, 720, 960, 1440] : [360, 540, 720, 960]}
+                sizes={wide ? wideSizes : halfSizes} loading="lazy" decoding="async" />
+              <span class="shot-expand" aria-hidden="true">↗</span>
+            </a>
+            <figcaption class="case-caption" id={id}>{caption}</figcaption>
+          </figure>
+        );
+      })}
+    </div>
+    <dialog class="shot-dialog" data-case-gallery aria-label={m.gallery}>
+      <div class="shot-toolbar">
+        <form method="dialog"><button class="home-button" type="submit" autofocus>{m.close}</button></form>
+      </div>
+      <figure>
+        <img alt="" width="1440" height="900" decoding="async" />
+        <figcaption class="case-caption"></figcaption>
+      </figure>
+    </dialog>
+  </>
+)}
+
+<script>
+  import "../scripts/case-gallery";
+</script>
