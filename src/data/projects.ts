@@ -117,7 +117,7 @@ export const atlasProjects = [
     stack: ["TypeScript", "React", "Vite", "FullCalendar"], stackTags: ["typescript"], repositories: [repo("vale", "web", "web", "TypeScript")], primaryRepository: "vale",
   },
   {
-    slug: "saber-inverso", name: "Saber Inverso", ...webApi,
+    slug: "saber-inverso", name: "Saber Inverso", ...webOnly,
     purpose: { en: "Estimates Saber 11 scores from a UQ program and weighted admission score, with uncertainty.", es: "Estima puntajes de Saber 11 a partir de un programa de la UQ y su puntaje ponderado de admisión, con incertidumbre." },
     stack: ["Astro", "TypeScript", "Python", "FastAPI"], stackTags: ["typescript"], repositories: [repo("saber-inverso", "web")], primaryRepository: "saber-inverso",
   },
