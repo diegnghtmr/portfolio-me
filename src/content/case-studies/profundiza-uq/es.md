@@ -69,6 +69,74 @@ results:
     detail: Pasaron 187 pruebas de Vitest en local, incluidas las de acceso, oferta de electivas, solicitudes del estudiante y cola de revisión.
 limitations:
   - El endpoint de importación masiva de estudiantes acepta JSON, no archivos enviados como multipart.
+architecture:
+  system: Profundiza UQ
+  caption: >-
+    La transacción de inscripción deja la notificación en cola y una tarea dentro de la API la envía después de la confirmación.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Aplicación web
+      name: profundiza-uq-frontend
+      repo: profundiza-uq-frontend
+      tech: React 19 / TypeScript
+      does: Muestra electivas y la cola de revisión
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: Servicio de API
+      name: profundiza-uq-backend
+      repo: profundiza-uq-backend
+      tech: Go / chi
+      does: Asigna cupos y encola notificaciones
+      col: 1
+      row: 0
+    - id: postgres
+      kind: store
+      label: Almacén de datos
+      name: PostgreSQL
+      tech: pgx
+      does: Guarda sesiones, solicitudes y notificaciones
+      col: 2
+      row: 0
+    - id: report-files
+      kind: store
+      label: Almacén de archivos
+      name: Report exports
+      tech: XLSX
+      does: Guarda hojas de cálculo para su descarga
+      col: 2
+      row: 1
+    - id: mail-server
+      kind: external
+      label: Servidor de correo
+      name: Configured SMTP relay
+      tech: SMTP
+      does: Retransmite códigos y avisos de estado
+      col: 2
+      row: 2
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Envía peticiones a la API
+      evidence: https://github.com/diegnghtmr/profundiza-uq-frontend/blob/main/src/shared/api/client.ts
+    - from: backend
+      to: postgres
+      protocol: SQL
+      verb: Guarda solicitud y aviso
+      evidence: https://github.com/diegnghtmr/profundiza-uq-backend/blob/main/internal/enrollment/adapter/postgres/submit.go
+    - from: backend
+      to: report-files
+      protocol: Files
+      verb: Escribe hojas de cálculo
+      evidence: https://github.com/diegnghtmr/profundiza-uq-backend/blob/main/internal/reporting/adapter/file/generator.go
+    - from: backend
+      to: mail-server
+      protocol: SMTP
+      verb: Envía correos
+      evidence: https://github.com/diegnghtmr/profundiza-uq-backend/blob/main/cmd/api/main.go
 ---
 
 ## Problema

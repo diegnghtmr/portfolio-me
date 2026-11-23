@@ -67,6 +67,44 @@ results:
     detail: Al marcar un grupo de Cálculo I como completado, ambos desaparecieron de la lista de grupos disponibles. El panel mostró cuatro de 11 asignaturas completadas en el conjunto de datos ficticio.
 limitations:
   - La exportación del calendario abarca una sola semana y no genera eventos recurrentes para el semestre.
+architecture:
+  system: Vale
+  caption: El navegador valida los archivos importados y genera las descargas del calendario sin un servidor de aplicación.
+  nodes:
+    - id: web
+      kind: container
+      label: Aplicación web
+      name: vale
+      repo: vale
+      tech: React / TypeScript / FullCalendar
+      does: Construye y exporta horarios semanales
+      col: 0
+      row: 0
+    - id: browser-storage
+      kind: store
+      label: Almacenamiento del navegador
+      name: localStorage
+      does: Conserva cursos y preferencias tras recargar
+      col: 1
+      row: 0
+    - id: bundled-periods
+      kind: store
+      label: Datos incluidos
+      name: JSON
+      does: Contiene periodos académicos incluidos
+      col: 1
+      row: 1
+  edges:
+    - from: web
+      to: browser-storage
+      protocol: Web Storage API
+      verb: Lee y guarda cursos
+      evidence: https://github.com/diegnghtmr/vale/blob/main/src/services/api.ts
+    - from: web
+      to: bundled-periods
+      protocol: JSON
+      verb: Carga periodos incluidos
+      evidence: https://github.com/diegnghtmr/vale/blob/main/src/utils/loadAcademicPeriods.ts
 ---
 
 ## Problema

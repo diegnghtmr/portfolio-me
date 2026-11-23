@@ -66,6 +66,120 @@ results:
 limitations:
   - The checked-in Compose file points to build directories that are absent. The Apache and MySQL Dockerfiles also refer to an HTML page and a SQL seed file that are not included.
   - The local run used Docker volumes and service-level collectors. It did not reproduce RAID/LVM, disk-failure behavior, or the documented monitoring through host mounts and the Docker socket.
+architecture:
+  system: Enterprise Monitoring Stack
+  caption: Each web server and MySQL has its own logical volume; Netdata reads metrics from the shared host.
+  nodes:
+    - id: deployment
+      kind: container
+      label: Deployment definition
+      name: enterprise-monitoring-stack
+      repo: enterprise-monitoring-stack
+      tech: Docker Compose
+      does: Defines services and their mounts
+      col: 0
+      row: 1
+    - id: apache
+      kind: container
+      label: Web server
+      name: Apache
+      tech: httpd 2.4
+      does: Serves its own web root
+      col: 1
+      row: 0
+    - id: nginx
+      kind: container
+      label: Web server
+      name: Nginx
+      tech: 'nginx:stable'
+      does: Serves a separate web root
+      col: 1
+      row: 1
+    - id: mysql
+      kind: store
+      label: Database
+      name: MySQL
+      tech: MySQL 8.0
+      does: Stores the lab database
+      col: 1
+      row: 2
+    - id: netdata
+      kind: container
+      label: Monitoring agent
+      name: Netdata
+      does: Shows host and container metrics
+      col: 1
+      row: 3
+    - id: service-volumes
+      kind: store
+      label: Persistent volumes
+      name: Service volumes
+      tech: RAID 1 / LVM / ext4
+      does: Keep web content and database files
+      col: 2
+      row: 1
+    - id: netdata-volumes
+      kind: store
+      label: Persistent volumes
+      name: Netdata volumes
+      tech: Docker volumes
+      does: Keep Netdata state and cache
+      col: 2
+      row: 3
+    - id: host
+      kind: external
+      label: Runtime host
+      name: Docker host
+      tech: Linux / Docker
+      does: Exposes host and container stats to Netdata
+      col: 2
+      row: 4
+  edges:
+    - from: deployment
+      to: apache
+      protocol: Compose
+      verb: Defines service
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L4-L12
+    - from: deployment
+      to: nginx
+      protocol: Compose
+      verb: Defines service
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L14-L22
+    - from: deployment
+      to: mysql
+      protocol: Compose
+      verb: Defines service
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L24-L35
+    - from: deployment
+      to: netdata
+      protocol: Compose
+      verb: Defines agent
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L37-L42
+    - from: apache
+      to: service-volumes
+      protocol: Bind mount
+      verb: Reads web content
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L10-L11
+    - from: nginx
+      to: service-volumes
+      protocol: Bind mount
+      verb: Reads web content
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L20-L21
+    - from: mysql
+      to: service-volumes
+      protocol: Bind mount
+      verb: Persists database files
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L33-L34
+    - from: netdata
+      to: netdata-volumes
+      protocol: Volume mount
+      verb: Writes state and cache
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L55-L56
+    - from: netdata
+      to: host
+      protocol: procfs / sysfs / Docker API
+      verb: Collects metrics
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L48-L54
 ---
 
 ## Problem

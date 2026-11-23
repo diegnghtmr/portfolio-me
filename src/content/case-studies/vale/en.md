@@ -67,6 +67,44 @@ results:
     detail: Marking one Calculus I section complete removed both groups from the available list. The dashboard reported four of 11 distinct subjects complete in the fictional dataset.
 limitations:
   - Calendar export covers a single week and does not generate a recurring series for the semester.
+architecture:
+  system: Vale
+  caption: The browser validates imported files and generates calendar downloads without a backend.
+  nodes:
+    - id: web
+      kind: container
+      label: Web app
+      name: vale
+      repo: vale
+      tech: React / TypeScript / FullCalendar
+      does: Builds and exports weekly timetables
+      col: 0
+      row: 0
+    - id: browser-storage
+      kind: store
+      label: Browser storage
+      name: localStorage
+      does: Keeps courses and preferences across reloads
+      col: 1
+      row: 0
+    - id: bundled-periods
+      kind: store
+      label: Bundled data
+      name: JSON
+      does: Holds bundled academic periods
+      col: 1
+      row: 1
+  edges:
+    - from: web
+      to: browser-storage
+      protocol: Web Storage API
+      verb: Reads and saves courses
+      evidence: https://github.com/diegnghtmr/vale/blob/main/src/services/api.ts
+    - from: web
+      to: bundled-periods
+      protocol: JSON
+      verb: Loads bundled periods
+      evidence: https://github.com/diegnghtmr/vale/blob/main/src/utils/loadAcademicPeriods.ts
 ---
 
 ## Problem

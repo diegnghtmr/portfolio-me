@@ -80,6 +80,32 @@ results:
 limitations:
   - El verificador no determina si una reescritura conservó todos los hechos del original.
   - El corpus original no se incluye y la búsqueda de frases literales cuenta de menos las expresiones partidas entre líneas de subtítulos.
+architecture:
+  system: writing-harness
+  caption: Si no se indica un archivo, el verificador lee la entrada estándar y muestra los hallazgos en la salida estándar.
+  nodes:
+    - id: cli
+      kind: container
+      label: CLI
+      name: writing-harness
+      repo: writing-harness
+      tech: Node.js / TypeScript
+      does: Revisa borradores y sugiere tonos
+      col: 0
+      row: 0
+    - id: draft-files
+      kind: store
+      label: Archivos locales de entrada
+      name: UTF-8
+      does: Contienen los borradores para revisar
+      col: 1
+      row: 0
+  edges:
+    - from: cli
+      to: draft-files
+      protocol: UTF-8
+      verb: Lee borradores
+      evidence: https://github.com/diegnghtmr/writing-harness/blob/main/src/cli.ts
 ---
 
 ## Problema

@@ -72,6 +72,77 @@ limitations:
   - The checked-in browser OpenAPI snapshot does not include every backend endpoint; the dashboard statistics call uses Axios directly.
   - The backend returned COMPLETED after indexing, but the browser showed Registered because its status mapping expects lowercase values.
   - Generating cards and composing chat answers require a configured chat model; neither was exercised with a live provider.
+architecture:
+  system: StudyDeck AI
+  caption: >-
+    The browser client is generated from the backend's OpenAPI contract.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Web app
+      name: studydeck-frontend
+      repo: studydeck-frontend
+      tech: React 19 / TypeScript
+      does: Runs the study and review UI
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: API service
+      name: studydeck-backend
+      repo: studydeck-backend
+      tech: Java 25 / Spring Boot
+      does: Owns OpenAPI and review rules
+      col: 1
+      row: 0
+    - id: postgres
+      kind: store
+      label: Data store
+      name: PostgreSQL
+      tech: pgvector
+      does: Stores review logs and vectors
+      col: 2
+      row: 0
+    - id: chat-model
+      kind: external
+      label: External dependency
+      name: Configured chat model
+      does: Answers with retrieved context
+      col: 2
+      row: 1
+    - id: identity
+      kind: external
+      label: Identity provider
+      name: Configured identity provider
+      tech: OpenID Connect / Keycloak
+      does: Signs in learners and manages sessions
+      col: 2
+      row: 2
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Calls via Axios
+      evidence: https://github.com/diegnghtmr/studydeck-frontend/blob/main/src/shared/api/client.ts
+    - from: backend
+      to: postgres
+      protocol: SQL
+      verb: Reads / writes
+      evidence: https://github.com/diegnghtmr/studydeck-backend/blob/master/app/src/main/resources/application.yml
+    - from: backend
+      to: chat-model
+      verb: Sends retrieved context
+      evidence: https://github.com/diegnghtmr/studydeck-backend/blob/master/app/src/main/java/com/studydeck/infrastructure/adapter/out/ai/SpringAiChatAdapter.java
+    - from: frontend
+      to: identity
+      protocol: OIDC
+      verb: Signs in learners
+      evidence: https://github.com/diegnghtmr/studydeck-frontend/blob/main/src/shared/auth/OidcProvider.tsx
+    - from: backend
+      to: identity
+      protocol: HTTP/JSON
+      verb: Manages Keycloak sessions
+      evidence: https://github.com/diegnghtmr/studydeck-backend/blob/master/app/src/main/java/com/studydeck/infrastructure/adapter/out/idp/KeycloakAdminAdapter.java
 ---
 
 ## Problem

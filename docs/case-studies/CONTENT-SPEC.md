@@ -122,6 +122,41 @@ The Spanish file mirrors the English one. Spanish headings:
   - use `kind: terminal` with real API requests and responses (curl against the running backend), or with real CLI output;
   - drop to `kind: terminal` with commands documented in the README (`source: readme`).
 
+## Architecture diagram (`architecture`, T33)
+
+Every case study gets a C4 container diagram, as in `design/case-study-page/01-studydeck-ai.html`. The same frontmatter block goes in both locales: names, ids and technologies stay the same, and only `system`, `label`, `does`, `verb` and `caption` are translated.
+
+```yaml
+architecture:
+  system: StudyDeck AI          # boundary label
+  caption: >-                   # optional; one sentence that adds what the boxes cannot say
+    The browser client is generated from the backend's OpenAPI contract.
+  nodes:                        # 2–10 nodes (one per repository plus each store it owns)
+    - id: frontend              # kebab-case, unique within the diagram
+      kind: container           # container | store | external
+      label: Web app            # short type label: Web app, API service, CLI, Worker, Data store, External dependency…
+      name: studydeck-frontend  # repository name for containers; product or service name otherwise
+      repo: studydeck-frontend  # optional; must be a repository of this project in src/data/projects.ts
+      tech: React 19 / TypeScript   # optional; only documented technology
+      does: Runs the study and review UI   # ≤ 48 chars, present tense
+      col: 0                    # layout column, left to right (0–3)
+      row: 0                    # layout row inside the column, top to bottom (0–4)
+  edges:                        # every edge needs evidence
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON       # optional; transport or format (HTTP/JSON, SQL, Feign, stdin/stdout, files…)
+      verb: Calls via Axios     # ≤ 28 chars
+      evidence: https://github.com/diegnghtmr/studydeck-frontend/blob/main/src/shared/api/client.ts   # not rendered; required
+```
+
+Rules:
+
+- **Inside the boundary:** every repository of the project appears as a `container` with `repo` set. Add the data stores each repository owns (`store`).
+- **Outside the boundary:** add `external` nodes only for systems the code really calls, such as an LLM provider, a mail server or an external API. If the code does not pin a provider, name the role, for example "Configured chat model".
+- **Edges:** an edge exists only when code or configuration shows the call. Each edge links its `evidence` to a file on the default branch.
+- **No-UI projects** still get a diagram: a CLI with its inputs and outputs, or an API with its stores. For a single repository with nothing to connect, use at least the container plus its store, or the external tools it calls.
+- **Layout:** columns follow the direction of the requests, left to right: client → services → stores. Put externals in their own column or in the last row.
+
 ## Isolation while running projects
 
 - **Work folders:** the parent provisions full-history clones in `.runtime/cs/<slug>/<repo>/`. That folder is gitignored and excluded from the portfolio's tsconfig. All installs, builds, logs, local env files and raw captures stay inside it.

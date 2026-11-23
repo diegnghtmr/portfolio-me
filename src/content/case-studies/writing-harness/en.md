@@ -80,6 +80,32 @@ results:
 limitations:
   - The verifier does not judge whether a rewrite preserved every fact in the original.
   - The source corpus is not included, and searches for literal phrases undercount expressions split across subtitle lines.
+architecture:
+  system: writing-harness
+  caption: Without a file argument, the verifier reads standard input and prints its findings to standard output.
+  nodes:
+    - id: cli
+      kind: container
+      label: CLI
+      name: writing-harness
+      repo: writing-harness
+      tech: Node.js / TypeScript
+      does: Checks drafts and suggests writing tones
+      col: 0
+      row: 0
+    - id: draft-files
+      kind: store
+      label: Local input files
+      name: UTF-8
+      does: Hold drafts to check
+      col: 1
+      row: 0
+  edges:
+    - from: cli
+      to: draft-files
+      protocol: UTF-8
+      verb: Reads drafts
+      evidence: https://github.com/diegnghtmr/writing-harness/blob/main/src/cli.ts
 ---
 
 ## Problem

@@ -60,6 +60,73 @@ limitations:
   - El modelo aproxima la distribución conjunta de los puntajes. Al redondear a enteros, el ponderado recalculado puede apartarse del objetivo.
   - Las estadísticas incluidas abarcan seis periodos de examen entre 2014 y 2022.
   - El estimador no cubre programas que no figuran en la tabla de pesos ni aspirantes con exención de la prueba de Inglés.
+architecture:
+  system: Saber Inverso
+  caption: Solo el proceso por lotes lee los datos del ICFES y la hoja de pesos por programa; las estimaciones usan los archivos resultantes.
+  nodes:
+    - id: web
+      kind: container
+      label: Aplicación web
+      name: saber-inverso
+      repo: saber-inverso
+      tech: Astro / Preact / nginx
+      does: Muestra estimaciones y rangos por área
+      col: 0
+      row: 0
+    - id: api
+      kind: container
+      label: Servicio API
+      name: saber-inverso
+      repo: saber-inverso
+      tech: FastAPI / NumPy
+      does: Estima puntajes a partir de un ponderado
+      col: 1
+      row: 0
+    - id: etl
+      kind: container
+      label: Proceso por lotes
+      name: saber-inverso
+      repo: saber-inverso
+      tech: Python / pandas / openpyxl
+      does: Prepara estadísticas y pesos por programa
+      col: 1
+      row: 2
+    - id: model-files
+      kind: store
+      label: Archivos de datos
+      name: JSON
+      does: Guardan estadísticas por población y pesos
+      col: 2
+      row: 0
+    - id: open-data
+      kind: external
+      label: Portal de datos abiertos
+      name: Datos.gov.co
+      tech: Socrata
+      does: Publica registros de exámenes del ICFES
+      col: 3
+      row: 2
+  edges:
+    - from: web
+      to: api
+      protocol: HTTP/JSON
+      verb: Solicita estimaciones
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/web/nginx.conf
+    - from: api
+      to: model-files
+      protocol: JSON
+      verb: Carga el modelo al iniciar
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/services/api/app/domain/repositories.py
+    - from: etl
+      to: model-files
+      protocol: JSON
+      verb: Escribe archivos del modelo
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/services/etl/etl.py
+    - from: etl
+      to: open-data
+      protocol: HTTPS/JSON
+      verb: Descarga datos de exámenes
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/services/etl/etl.py
 ---
 
 ## Problema

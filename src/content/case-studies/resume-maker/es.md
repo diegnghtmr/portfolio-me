@@ -73,6 +73,69 @@ results:
     url: https://diegnghtmr.github.io/resume-maker/
 limitations:
   - El sitio de Pages es público. Excluir los PDF de las postulaciones del despliegue no oculta sus archivos fuente si se registran en el repositorio público.
+architecture:
+  system: resume-maker
+  caption: Solo los PDF oficiales se publican en GitHub Pages; las versiones para postulaciones quedan fuera del despliegue.
+  nodes:
+    - id: pipeline
+      kind: container
+      label: Flujo de compilación
+      name: resume-maker
+      repo: resume-maker
+      tech: LaTeX / GitHub Actions
+      does: Genera y publica hojas de vida en dos idiomas
+      col: 0
+      row: 1
+    - id: sources
+      kind: store
+      label: Archivos fuente
+      name: LaTeX sources
+      does: Contienen plantillas y secciones por idioma
+      col: 1
+      row: 0
+    - id: pdfs
+      kind: store
+      label: Archivos generados
+      name: PDF artifacts
+      does: Separan los PDF oficiales de los adaptados
+      col: 1
+      row: 1
+    - id: tex-live
+      kind: external
+      label: Herramienta local
+      name: TeX Live
+      tech: latexmk / pdfLaTeX
+      does: Compila archivos LaTeX y genera PDF
+      col: 2
+      row: 2
+    - id: pages
+      kind: external
+      label: Alojamiento estático
+      name: GitHub Pages
+      does: Sirve los PDF oficiales en URL estables
+      col: 2
+      row: 3
+  edges:
+    - from: pipeline
+      to: sources
+      protocol: Files
+      verb: Lee fuentes de LaTeX
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/latexmkrc
+    - from: pipeline
+      to: pdfs
+      protocol: PDF
+      verb: Guarda los PDF generados
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/scripts/build.sh#L36-L44
+    - from: pipeline
+      to: tex-live
+      protocol: Docker
+      verb: Ejecuta latexmk en local
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/scripts/build.sh#L36-L44
+    - from: pipeline
+      to: pages
+      protocol: Pages artifact
+      verb: Publica los PDF oficiales
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/.github/workflows/publish.yml#L55-L84
 ---
 
 ## Problema

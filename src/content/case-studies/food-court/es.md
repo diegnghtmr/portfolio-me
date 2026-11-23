@@ -74,6 +74,154 @@ results:
 limitations:
   - El registro del restaurante devolvió un error durante la ejecución local. El catálogo busca al propietario en una ruta distinta de la que expone la API de identidad, por lo que la demostración usa un restaurante cargado como dato de prueba.
   - La tabla de platos del propietario mostró las categorías en blanco. El catálogo devuelve sus nombres en un campo que esa vista no lee.
+architecture:
+  system: Food Court
+  caption: >-
+    El pedido y su historial se guardan por separado, así que un fallo de trazabilidad no revierte la actualización del pedido.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Aplicación web
+      name: food-court-ui
+      repo: food-court-ui
+      tech: React 19 / TypeScript
+      does: Atiende a clientes, personal y propietarios
+      col: 0
+      row: 1
+    - id: orders
+      kind: container
+      label: API de pedidos
+      name: order-microservice
+      repo: order-microservice
+      tech: Spring Boot
+      does: Gestiona pedidos y verifica códigos de retiro
+      col: 1
+      row: 1
+    - id: catalog
+      kind: container
+      label: API de catálogo
+      name: food-court-microservice
+      repo: food-court-microservice
+      tech: Spring Boot
+      does: Gestiona restaurantes, platos y disponibilidad
+      col: 2
+      row: 0
+    - id: identity
+      kind: container
+      label: API de identidad
+      name: user-microservice
+      repo: user-microservice
+      tech: Spring Boot
+      does: Gestiona cuentas y emite JWT
+      col: 2
+      row: 1
+    - id: traceability
+      kind: container
+      label: API de trazabilidad
+      name: traceability-microservice
+      repo: traceability-microservice
+      tech: Spring Boot
+      does: Registra estados y calcula tiempos
+      col: 2
+      row: 2
+    - id: catalog-db
+      kind: store
+      label: Almacén de datos
+      name: food_court_db
+      tech: PostgreSQL
+      does: Guarda restaurantes, platos y categorías
+      col: 3
+      row: 0
+    - id: user-db
+      kind: store
+      label: Almacén de datos
+      name: user_db
+      tech: PostgreSQL
+      does: Guarda cuentas y roles
+      col: 3
+      row: 1
+    - id: trace-db
+      kind: store
+      label: Almacén de datos
+      name: traceability_db
+      tech: MongoDB
+      does: Guarda cambios de estado y sus fechas
+      col: 3
+      row: 2
+    - id: orders-db
+      kind: store
+      label: Almacén de datos
+      name: orders_db
+      tech: MongoDB
+      does: Guarda pedidos y su estado actual
+      col: 3
+      row: 3
+  edges:
+    - from: frontend
+      to: orders
+      protocol: HTTP/JSON
+      verb: Crea y consulta pedidos
+      evidence: https://github.com/diegnghtmr/food-court-ui/blob/main/src/features/client/services/orderService.ts
+    - from: frontend
+      to: catalog
+      protocol: HTTP/JSON
+      verb: Lista platos disponibles
+      evidence: https://github.com/diegnghtmr/food-court-ui/blob/main/src/features/client/services/dishService.ts
+    - from: frontend
+      to: identity
+      protocol: HTTP/JSON
+      verb: Inicia sesión
+      evidence: https://github.com/diegnghtmr/food-court-ui/blob/main/src/features/auth/services/authService.ts
+    - from: frontend
+      to: traceability
+      protocol: HTTP/JSON
+      verb: Consulta historial de pedido
+      evidence: https://github.com/diegnghtmr/food-court-ui/blob/main/src/features/client/services/orderService.ts
+    - from: orders
+      to: catalog
+      protocol: Feign
+      verb: Valida restaurante y platos
+      evidence: https://github.com/diegnghtmr/order-microservice/blob/main/src/main/java/com/pragma/powerup/ordermicroservice/infrastructure/output/feign/client/FoodCourtFeignClient.java
+    - from: orders
+      to: identity
+      protocol: Feign
+      verb: Consulta clientes
+      evidence: https://github.com/diegnghtmr/order-microservice/blob/main/src/main/java/com/pragma/powerup/ordermicroservice/infrastructure/output/feign/client/UserFeignClient.java
+    - from: orders
+      to: traceability
+      protocol: Feign
+      verb: Envía cambios de estado
+      evidence: https://github.com/diegnghtmr/order-microservice/blob/main/src/main/java/com/pragma/powerup/ordermicroservice/infrastructure/output/feign/client/TraceabilityFeignClient.java
+    - from: catalog
+      to: identity
+      protocol: Feign
+      verb: Intenta buscar propietario
+      evidence: https://github.com/diegnghtmr/food-court-microservice/blob/main/src/main/java/com/pragma/powerup/foodcourtmicroservice/infrastructure/output/feign/client/UserClient.java
+    - from: traceability
+      to: identity
+      protocol: HTTP/JSON
+      verb: Busca nombres del personal
+      evidence: https://github.com/diegnghtmr/traceability-microservice/blob/main/src/main/java/com/pragma/powerup/traceabilitymicroservice/infrastructure/output/http/adapter/UserHttpAdapter.java
+    - from: catalog
+      to: catalog-db
+      protocol: SQL
+      verb: Lee y escribe el menú
+      evidence: https://github.com/diegnghtmr/food-court-microservice/blob/main/docker-compose.yml
+    - from: identity
+      to: user-db
+      protocol: SQL
+      verb: Lee y escribe cuentas
+      evidence: https://github.com/diegnghtmr/user-microservice/blob/main/docker-compose.yml
+    - from: traceability
+      to: trace-db
+      protocol: MongoDB
+      verb: Lee y guarda transiciones
+      evidence: https://github.com/diegnghtmr/traceability-microservice/blob/main/docker-compose.yml
+    - from: orders
+      to: orders-db
+      protocol: MongoDB
+      verb: Lee y escribe pedidos
+      evidence: https://github.com/diegnghtmr/order-microservice/blob/main/docker-compose.yml
 ---
 
 ## Problema

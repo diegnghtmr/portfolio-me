@@ -66,6 +66,120 @@ results:
 limitations:
   - El archivo Compose del repositorio apunta a directorios de compilación que no existen. Los Dockerfiles de Apache y MySQL también hacen referencia a una página HTML y un archivo SQL de inicialización que no se incluyen.
   - En la ejecución local se usaron volúmenes de Docker y recolectores por servicio. No se reprodujeron la capa RAID/LVM, el comportamiento ante fallos de disco ni el monitoreo documentado mediante montajes del servidor y el socket de Docker.
+architecture:
+  system: Enterprise Monitoring Stack
+  caption: Cada servidor web y MySQL tienen su propio volumen lógico; Netdata lee métricas del servidor compartido.
+  nodes:
+    - id: deployment
+      kind: container
+      label: Configuración del despliegue
+      name: enterprise-monitoring-stack
+      repo: enterprise-monitoring-stack
+      tech: Docker Compose
+      does: Define los servicios y sus montajes
+      col: 0
+      row: 1
+    - id: apache
+      kind: container
+      label: Servidor web
+      name: Apache
+      tech: httpd 2.4
+      does: Sirve contenido de su directorio web
+      col: 1
+      row: 0
+    - id: nginx
+      kind: container
+      label: Servidor web
+      name: Nginx
+      tech: 'nginx:stable'
+      does: Sirve contenido de otro directorio web
+      col: 1
+      row: 1
+    - id: mysql
+      kind: store
+      label: Base de datos
+      name: MySQL
+      tech: MySQL 8.0
+      does: Guarda la base de datos del laboratorio
+      col: 1
+      row: 2
+    - id: netdata
+      kind: container
+      label: Agente de monitoreo
+      name: Netdata
+      does: Muestra métricas del servidor y los contenedores
+      col: 1
+      row: 3
+    - id: service-volumes
+      kind: store
+      label: Volúmenes persistentes
+      name: Service volumes
+      tech: RAID 1 / LVM / ext4
+      does: Guardan contenido web y datos de MySQL
+      col: 2
+      row: 1
+    - id: netdata-volumes
+      kind: store
+      label: Volúmenes persistentes
+      name: Netdata volumes
+      tech: Docker volumes
+      does: Guardan el estado y la caché de Netdata
+      col: 2
+      row: 3
+    - id: host
+      kind: external
+      label: Servidor de ejecución
+      name: Docker host
+      tech: Linux / Docker
+      does: Expone métricas del servidor y sus contenedores
+      col: 2
+      row: 4
+  edges:
+    - from: deployment
+      to: apache
+      protocol: Compose
+      verb: Define el servicio
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L4-L12
+    - from: deployment
+      to: nginx
+      protocol: Compose
+      verb: Define el servicio
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L14-L22
+    - from: deployment
+      to: mysql
+      protocol: Compose
+      verb: Define el servicio
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L24-L35
+    - from: deployment
+      to: netdata
+      protocol: Compose
+      verb: Define el agente
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L37-L42
+    - from: apache
+      to: service-volumes
+      protocol: Bind mount
+      verb: Lee el contenido web
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L10-L11
+    - from: nginx
+      to: service-volumes
+      protocol: Bind mount
+      verb: Lee el contenido web
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L20-L21
+    - from: mysql
+      to: service-volumes
+      protocol: Bind mount
+      verb: Guarda archivos de datos
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L33-L34
+    - from: netdata
+      to: netdata-volumes
+      protocol: Volume mount
+      verb: Escribe estado y caché
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L55-L56
+    - from: netdata
+      to: host
+      protocol: procfs / sysfs / Docker API
+      verb: Recopila métricas
+      evidence: https://github.com/diegnghtmr/enterprise-monitoring-stack/blob/main/docs/docker-compose.yml#L48-L54
 ---
 
 ## Problema

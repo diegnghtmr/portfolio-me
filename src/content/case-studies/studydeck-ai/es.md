@@ -72,6 +72,77 @@ limitations:
   - La copia de OpenAPI del cliente no incluye todos los endpoints del backend; el panel consulta las estadísticas directamente con Axios.
   - Tras indexar, el backend devolvió COMPLETED, pero el navegador mostró Registered porque espera los estados en minúsculas.
   - La generación de tarjetas y las respuestas del chat requieren configurar un modelo conversacional; no se probaron con un proveedor activo.
+architecture:
+  system: StudyDeck AI
+  caption: >-
+    El cliente web se genera a partir del contrato OpenAPI del backend.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Aplicación web
+      name: studydeck-frontend
+      repo: studydeck-frontend
+      tech: React 19 / TypeScript
+      does: Ofrece la interfaz de estudio y repaso
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: Servicio de API
+      name: studydeck-backend
+      repo: studydeck-backend
+      tech: Java 25 / Spring Boot
+      does: Define OpenAPI y las reglas de repaso
+      col: 1
+      row: 0
+    - id: postgres
+      kind: store
+      label: Almacén de datos
+      name: PostgreSQL
+      tech: pgvector
+      does: Guarda el historial de repaso y los vectores
+      col: 2
+      row: 0
+    - id: chat-model
+      kind: external
+      label: Dependencia externa
+      name: Configured chat model
+      does: Responde con el contexto recuperado
+      col: 2
+      row: 1
+    - id: identity
+      kind: external
+      label: Proveedor de identidad
+      name: Configured identity provider
+      tech: OpenID Connect / Keycloak
+      does: Autentica a estudiantes y gestiona sesiones
+      col: 2
+      row: 2
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Llama mediante Axios
+      evidence: https://github.com/diegnghtmr/studydeck-frontend/blob/main/src/shared/api/client.ts
+    - from: backend
+      to: postgres
+      protocol: SQL
+      verb: Lee y escribe datos
+      evidence: https://github.com/diegnghtmr/studydeck-backend/blob/master/app/src/main/resources/application.yml
+    - from: backend
+      to: chat-model
+      verb: Envía contexto recuperado
+      evidence: https://github.com/diegnghtmr/studydeck-backend/blob/master/app/src/main/java/com/studydeck/infrastructure/adapter/out/ai/SpringAiChatAdapter.java
+    - from: frontend
+      to: identity
+      protocol: OIDC
+      verb: Autentica a estudiantes
+      evidence: https://github.com/diegnghtmr/studydeck-frontend/blob/main/src/shared/auth/OidcProvider.tsx
+    - from: backend
+      to: identity
+      protocol: HTTP/JSON
+      verb: Gestiona sesiones Keycloak
+      evidence: https://github.com/diegnghtmr/studydeck-backend/blob/master/app/src/main/java/com/studydeck/infrastructure/adapter/out/idp/KeycloakAdminAdapter.java
 ---
 
 ## Problema

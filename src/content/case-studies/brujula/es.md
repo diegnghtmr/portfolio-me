@@ -67,6 +67,79 @@ results:
 limitations:
   - En un despliegue estático de producción, un proxy debe quitar el prefijo /api/v1 o el backend debe servir la API bajo esa ruta.
   - El endpoint de ofertas acepta el identificador de una materia, pero no filtra por él.
+architecture:
+  system: Brújula
+  caption: >-
+    El backend conserva los tokens de identidad en el servidor y entrega al navegador una cookie de sesión.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Aplicación web
+      name: brujula-frontend
+      repo: brujula-frontend
+      tech: React 19 / TypeScript
+      does: Muestra planes de estudio, avance y horarios
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: Servicio de API
+      name: brujula-backend
+      repo: brujula-backend
+      tech: Spring Boot / Spring Modulith
+      does: Valida prerrequisitos, créditos y cruces
+      col: 1
+      row: 0
+    - id: planner-db
+      kind: store
+      label: Almacén de datos
+      name: planner_db
+      tech: PostgreSQL
+      does: Guarda planes de estudio, avances y sesiones
+      col: 2
+      row: 0
+    - id: keycloak
+      kind: external
+      label: Proveedor de identidad
+      name: Keycloak
+      tech: OpenID Connect
+      does: Autentica usuarios y verifica correos
+      col: 2
+      row: 1
+    - id: mailpit
+      kind: external
+      label: Servidor de correo local
+      name: Mailpit
+      tech: SMTP
+      does: Captura correos en el entorno local
+      col: 3
+      row: 1
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Llama mediante Axios
+      evidence: https://github.com/diegnghtmr/brujula-frontend/blob/main/src/api/client.ts
+    - from: backend
+      to: planner-db
+      protocol: SQL
+      verb: Lee y escribe planes
+      evidence: https://github.com/diegnghtmr/brujula-backend/blob/main/ops/local/compose.full.yaml
+    - from: backend
+      to: keycloak
+      protocol: OIDC
+      verb: Canjea códigos de acceso
+      evidence: https://github.com/diegnghtmr/brujula-backend/blob/main/src/main/resources/application.yaml
+    - from: frontend
+      to: keycloak
+      protocol: HTTP
+      verb: Redirige al cerrar sesión
+      evidence: https://github.com/diegnghtmr/brujula-frontend/blob/main/src/features/auth/components/logout-button.tsx
+    - from: keycloak
+      to: mailpit
+      protocol: SMTP
+      verb: Envía correo de verificación
+      evidence: https://github.com/diegnghtmr/brujula-backend/blob/main/ops/local/keycloak/realm-export.json
 ---
 
 ## Problema

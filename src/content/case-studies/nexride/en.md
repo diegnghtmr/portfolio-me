@@ -104,6 +104,46 @@ limitations:
   - Arrival times and walking distances are estimated using straight-line distance. The safety score comes from a catalog, not from live street conditions.
   - The backend reads vehicle telemetry from Redis. Live telemetry ingestion and rider authentication are outside this implementation.
   - The trip lifecycle stops at assignment. There is no rider app or fleet operator dashboard in this slice.
+architecture:
+  system: NexRide
+  caption: The API estimates travel times locally with straight-line distances, without calling a maps service.
+  nodes:
+    - id: api
+      kind: container
+      label: API service
+      name: NexRide
+      repo: NexRide
+      tech: NestJS 11 / TypeScript
+      does: Ranks pickup options and assigns vehicles
+      col: 0
+      row: 0
+    - id: postgres
+      kind: store
+      label: Database
+      name: PostgreSQL
+      tech: PostGIS
+      does: Stores points, decisions, trips and events
+      col: 1
+      row: 0
+    - id: redis
+      kind: store
+      label: Fleet state and cache
+      name: Redis
+      tech: Redis 7
+      does: Holds fleet snapshots and cached estimates
+      col: 1
+      row: 1
+  edges:
+    - from: api
+      to: postgres
+      protocol: SQL
+      verb: Reads and writes
+      evidence: https://github.com/diegnghtmr/NexRide/blob/main/src/app.module.ts#L84-L104
+    - from: api
+      to: redis
+      protocol: RESP
+      verb: Reads fleet state
+      evidence: https://github.com/diegnghtmr/NexRide/blob/main/src/fleet/infrastructure/redis-fleet.adapter.ts#L53-L95
 ---
 
 ## Problem

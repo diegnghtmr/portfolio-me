@@ -72,6 +72,69 @@ limitations:
   - The built-in instruction rules cover English and Spanish. They can miss paraphrases, and visible discussion can be flagged.
   - XLSX, PPTX, EPUB and ODT scans check extracted text only, not hidden content in the file structure.
   - Sanitizing a PDF rebuilds it as a DOCX. Layout may differ, and scanned pages stay as images without an OCR text layer.
+architecture:
+  system: doc-sentinel
+  caption: Detection runs without network access by default; only the update command fetches new tool revisions.
+  nodes:
+    - id: cli
+      kind: container
+      label: CLI
+      name: doc-sentinel
+      repo: doc-sentinel
+      tech: Python
+      does: Scans documents and verifies cleaned copies
+      col: 0
+      row: 1
+    - id: input
+      kind: store
+      label: Input files
+      name: Originals
+      does: Hold the documents to inspect
+      col: 1
+      row: 0
+    - id: output
+      kind: store
+      label: Output files
+      name: Cleaned copies and reports
+      does: Hold results separately from the originals
+      col: 1
+      row: 1
+    - id: tools
+      kind: external
+      label: Local dependency
+      name: Pinned document tools
+      tech: Git submodules
+      does: Check documents and remove known traces
+      col: 2
+      row: 2
+    - id: upstream
+      kind: external
+      label: Code hosting
+      name: GitHub
+      does: Hosts the upstream tool repositories
+      col: 2
+      row: 3
+  edges:
+    - from: cli
+      to: input
+      protocol: Files
+      verb: Reads originals
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/extract.py#L201-L205
+    - from: cli
+      to: output
+      protocol: Files
+      verb: Writes copies and reports
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/cli.py#L310-L315
+    - from: cli
+      to: tools
+      protocol: Subprocess
+      verb: Runs pinned tools
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/adapters/perlecta.py#L120-L123
+    - from: cli
+      to: upstream
+      protocol: Git over HTTPS
+      verb: Fetches updates on demand
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/update.py#L137-L144
 ---
 
 ## Problem

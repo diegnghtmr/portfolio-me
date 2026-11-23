@@ -73,6 +73,69 @@ results:
     url: https://diegnghtmr.github.io/resume-maker/
 limitations:
   - The Pages site is public. Keeping application PDFs out of the deployment does not hide their source files if they are committed to the public repository.
+architecture:
+  system: resume-maker
+  caption: Only the canonical PDFs go to GitHub Pages; tailored applications stay out of the deployment.
+  nodes:
+    - id: pipeline
+      kind: container
+      label: Build pipeline
+      name: resume-maker
+      repo: resume-maker
+      tech: LaTeX / GitHub Actions
+      does: Builds and publishes bilingual résumé PDFs
+      col: 0
+      row: 1
+    - id: sources
+      kind: store
+      label: Source files
+      name: LaTeX sources
+      does: Hold the templates and sections by language
+      col: 1
+      row: 0
+    - id: pdfs
+      kind: store
+      label: Build outputs
+      name: PDF artifacts
+      does: Keep canonical and tailored builds separate
+      col: 1
+      row: 1
+    - id: tex-live
+      kind: external
+      label: Local build tool
+      name: TeX Live
+      tech: latexmk / pdfLaTeX
+      does: Compiles LaTeX into PDFs
+      col: 2
+      row: 2
+    - id: pages
+      kind: external
+      label: Static hosting
+      name: GitHub Pages
+      does: Serves the canonical PDFs at stable URLs
+      col: 2
+      row: 3
+  edges:
+    - from: pipeline
+      to: sources
+      protocol: Files
+      verb: Reads LaTeX sources
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/latexmkrc
+    - from: pipeline
+      to: pdfs
+      protocol: PDF
+      verb: Writes compiled PDFs
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/scripts/build.sh#L36-L44
+    - from: pipeline
+      to: tex-live
+      protocol: Docker
+      verb: Runs latexmk locally
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/scripts/build.sh#L36-L44
+    - from: pipeline
+      to: pages
+      protocol: Pages artifact
+      verb: Deploys canonical PDFs
+      evidence: https://github.com/diegnghtmr/resume-maker/blob/main/.github/workflows/publish.yml#L55-L84
 ---
 
 ## Problem

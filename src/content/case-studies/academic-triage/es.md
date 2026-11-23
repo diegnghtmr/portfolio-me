@@ -67,6 +67,60 @@ results:
 limitations:
   - La API exige If-Match para ciertas actualizaciones administrativas, pero la aplicación web no envía esa cabecera.
   - La lista de validación del formulario siguió mostrando avisos de campos obligatorios después de introducir una descripción válida. La solicitud sí se envió correctamente.
+architecture:
+  system: Gestión de solicitudes académicas
+  caption: El modelo de chat es opcional y apoya la clasificación y los resúmenes; las recomendaciones de prioridad usan reglas de negocio.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Aplicación web
+      name: academic-triage-frontend
+      repo: academic-triage-frontend
+      tech: Angular 20 / TypeScript
+      does: Envía y consulta solicitudes académicas
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: Servicio API
+      name: academic-triage-system
+      repo: academic-triage-system
+      tech: Java 21 / Spring Boot 3.5
+      does: Aplica el flujo de las solicitudes
+      col: 1
+      row: 0
+    - id: mariadb
+      kind: store
+      label: Almacén de datos
+      name: MariaDB
+      tech: MariaDB 11
+      does: Guarda solicitudes y su historial
+      col: 2
+      row: 0
+    - id: chat-model
+      kind: external
+      label: Dependencia opcional
+      name: LLM
+      tech: OpenAI-compatible API
+      does: Sugiere categorías y redacta resúmenes
+      col: 3
+      row: 1
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Envía y consulta solicitudes
+      evidence: https://github.com/diegnghtmr/academic-triage-frontend/blob/main/src/app/features/requests/data-access/requests-api.service.ts
+    - from: backend
+      to: mariadb
+      protocol: SQL
+      verb: Lee y guarda casos
+      evidence: https://github.com/diegnghtmr/academic-triage-system/blob/main/docker-compose.yml
+    - from: backend
+      to: chat-model
+      protocol: HTTPS/JSON
+      verb: Llama si está habilitado
+      evidence: https://github.com/diegnghtmr/academic-triage-system/blob/main/infrastructure/src/main/java/co/edu/uniquindio/triage/infrastructure/adapter/out/ai/SpringAiAssistantAdapter.java
 ---
 
 ## Problema

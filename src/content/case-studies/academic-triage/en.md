@@ -67,6 +67,60 @@ results:
 limitations:
   - Administrative updates that require If-Match are enforced by the API, but the SPA does not send that header.
   - The intake checklist still showed required-field warnings after a valid description was entered. The request itself submitted successfully.
+architecture:
+  system: Academic Triage
+  caption: The optional chat model assists with classification and summaries; priority recommendations use business rules instead.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Web app
+      name: academic-triage-frontend
+      repo: academic-triage-frontend
+      tech: Angular 20 / TypeScript
+      does: Submits and tracks academic requests
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: API service
+      name: academic-triage-system
+      repo: academic-triage-system
+      tech: Java 21 / Spring Boot 3.5
+      does: Enforces the request workflow
+      col: 1
+      row: 0
+    - id: mariadb
+      kind: store
+      label: Data store
+      name: MariaDB
+      tech: MariaDB 11
+      does: Stores requests and their history
+      col: 2
+      row: 0
+    - id: chat-model
+      kind: external
+      label: Optional dependency
+      name: LLM
+      tech: OpenAI-compatible API
+      does: Suggests classifications and drafts summaries
+      col: 3
+      row: 1
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Submits and queries requests
+      evidence: https://github.com/diegnghtmr/academic-triage-frontend/blob/main/src/app/features/requests/data-access/requests-api.service.ts
+    - from: backend
+      to: mariadb
+      protocol: SQL
+      verb: Reads and writes cases
+      evidence: https://github.com/diegnghtmr/academic-triage-system/blob/main/docker-compose.yml
+    - from: backend
+      to: chat-model
+      protocol: HTTPS/JSON
+      verb: Calls when enabled
+      evidence: https://github.com/diegnghtmr/academic-triage-system/blob/main/infrastructure/src/main/java/co/edu/uniquindio/triage/infrastructure/adapter/out/ai/SpringAiAssistantAdapter.java
 ---
 
 ## Problem

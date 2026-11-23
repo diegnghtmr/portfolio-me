@@ -60,6 +60,73 @@ limitations:
   - The model approximates the joint score distribution. Rounding estimates to whole subject scores can move the recalculated weighted score off the target.
   - The bundled statistics cover six exam periods from 2014 to 2022.
   - Programs absent from the weights table and applicants exempt from the English test are outside the estimator’s scope.
+architecture:
+  system: Saber Inverso
+  caption: Only the batch job reads ICFES exam data and the program weights spreadsheet; live estimates use the resulting files.
+  nodes:
+    - id: web
+      kind: container
+      label: Web app
+      name: saber-inverso
+      repo: saber-inverso
+      tech: Astro / Preact / nginx
+      does: Shows estimates and subject score ranges
+      col: 0
+      row: 0
+    - id: api
+      kind: container
+      label: API service
+      name: saber-inverso
+      repo: saber-inverso
+      tech: FastAPI / NumPy
+      does: Estimates scores from a weighted target
+      col: 1
+      row: 0
+    - id: etl
+      kind: container
+      label: Batch job
+      name: saber-inverso
+      repo: saber-inverso
+      tech: Python / pandas / openpyxl
+      does: Precomputes statistics and program weights
+      col: 1
+      row: 2
+    - id: model-files
+      kind: store
+      label: Data files
+      name: JSON
+      does: Keep population statistics and weights
+      col: 2
+      row: 0
+    - id: open-data
+      kind: external
+      label: Open data portal
+      name: Datos.gov.co
+      tech: Socrata
+      does: Serves public ICFES exam records
+      col: 3
+      row: 2
+  edges:
+    - from: web
+      to: api
+      protocol: HTTP/JSON
+      verb: Requests score estimates
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/web/nginx.conf
+    - from: api
+      to: model-files
+      protocol: JSON
+      verb: Loads model at startup
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/services/api/app/domain/repositories.py
+    - from: etl
+      to: model-files
+      protocol: JSON
+      verb: Writes model files
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/services/etl/etl.py
+    - from: etl
+      to: open-data
+      protocol: HTTPS/JSON
+      verb: Fetches exam records
+      evidence: https://github.com/diegnghtmr/saber-inverso/blob/main/services/etl/etl.py
 ---
 
 ## Problem

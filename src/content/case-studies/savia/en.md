@@ -63,6 +63,101 @@ limitations:
   - No authenticated finance workflow was run against a live PostgreSQL database. The OpenAPI verifier does not check the upstream planning source.
   - The full suite had 3,101 passes, 3 failures, and 1 skip. Two OCR tests need Tesseract, which is absent from the slim image. One monthly recurrence test uses the real clock but expects a fixed date.
   - The mobile app does not load financial data or record transactions. The local MCP server handles protocol startup and ping, but exposes no tools and does not connect to the API.
+architecture:
+  system: Savia
+  caption: Onboarding calls the API from the web server; mobile and MCP run independently.
+  nodes:
+    - id: web
+      kind: container
+      label: Web app
+      name: savia-web
+      repo: savia-web
+      tech: Next.js / TypeScript
+      does: Signs users in and submits workspace setup
+      col: 0
+      row: 0
+    - id: mobile
+      kind: container
+      label: Mobile app
+      name: savia-mobile
+      repo: savia-mobile
+      tech: Expo / React Native
+      does: Shows a standalone mobile interface
+      col: 0
+      row: 1
+    - id: mcp
+      kind: container
+      label: MCP server
+      name: savia-mcp
+      repo: savia-mcp
+      tech: Node.js / TypeScript
+      does: Handles initialization and ping over stdio
+      col: 0
+      row: 2
+    - id: backend
+      kind: container
+      label: API and worker
+      name: savia-backend
+      repo: savia-backend
+      tech: NestJS / Fastify
+      does: Manages workspaces and financial records
+      col: 1
+      row: 0
+    - id: postgres
+      kind: store
+      label: Data store
+      name: PostgreSQL
+      tech: PostgreSQL / pgmq
+      does: Stores financial records and job queues
+      col: 2
+      row: 0
+    - id: files
+      kind: store
+      label: Object storage
+      name: Supabase Storage
+      does: Holds receipts, reports and exports
+      col: 2
+      row: 1
+    - id: auth
+      kind: external
+      label: Authentication service
+      name: Supabase Auth
+      does: Registers users and issues access tokens
+      col: 1
+      row: 3
+    - id: jwt-keys
+      kind: external
+      label: Configured key server
+      name: JWKS
+      does: Publishes token verification keys
+      col: 3
+      row: 2
+  edges:
+    - from: web
+      to: backend
+      protocol: HTTP/JSON
+      verb: Submits workspace setup
+      evidence: https://github.com/diegnghtmr/savia-web/blob/main/src/lib/onboarding-gateway.ts
+    - from: web
+      to: auth
+      protocol: HTTP/JSON
+      verb: Signs users in and up
+      evidence: https://github.com/diegnghtmr/savia-web/blob/main/src/lib/auth-gateway.ts
+    - from: backend
+      to: postgres
+      protocol: SQL
+      verb: Reads and writes records
+      evidence: https://github.com/diegnghtmr/savia-backend/blob/main/src/platform/postgres-pool.ts
+    - from: backend
+      to: files
+      protocol: HTTP
+      verb: Uploads and downloads files
+      evidence: https://github.com/diegnghtmr/savia-backend/blob/main/src/platform/supabase-storage.adapter.ts
+    - from: backend
+      to: jwt-keys
+      protocol: HTTPS/JWKS
+      verb: Fetches verification keys
+      evidence: https://github.com/diegnghtmr/savia-backend/blob/main/src/platform/jose-jwt-verifier.ts
 ---
 
 ## Problem

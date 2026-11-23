@@ -67,6 +67,79 @@ results:
 limitations:
   - A static production deployment needs a proxy to strip the /api/v1 prefix, or the backend must be mounted under that path.
   - The offerings endpoint accepts a course ID parameter but does not filter by it.
+architecture:
+  system: Brújula
+  caption: >-
+    The backend keeps identity tokens server-side and gives the browser a session cookie.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Web app
+      name: brujula-frontend
+      repo: brujula-frontend
+      tech: React 19 / TypeScript
+      does: Shows curricula, progress, and schedules
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: API service
+      name: brujula-backend
+      repo: brujula-backend
+      tech: Spring Boot / Spring Modulith
+      does: Checks prerequisites, credits, and overlaps
+      col: 1
+      row: 0
+    - id: planner-db
+      kind: store
+      label: Data store
+      name: planner_db
+      tech: PostgreSQL
+      does: Stores study plans, progress, and sessions
+      col: 2
+      row: 0
+    - id: keycloak
+      kind: external
+      label: Identity provider
+      name: Keycloak
+      tech: OpenID Connect
+      does: Authenticates users and verifies email
+      col: 2
+      row: 1
+    - id: mailpit
+      kind: external
+      label: Local mail server
+      name: Mailpit
+      tech: SMTP
+      does: Captures email in local development
+      col: 3
+      row: 1
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Calls via Axios
+      evidence: https://github.com/diegnghtmr/brujula-frontend/blob/main/src/api/client.ts
+    - from: backend
+      to: planner-db
+      protocol: SQL
+      verb: Reads and writes plans
+      evidence: https://github.com/diegnghtmr/brujula-backend/blob/main/ops/local/compose.full.yaml
+    - from: backend
+      to: keycloak
+      protocol: OIDC
+      verb: Exchanges sign-in codes
+      evidence: https://github.com/diegnghtmr/brujula-backend/blob/main/src/main/resources/application.yaml
+    - from: frontend
+      to: keycloak
+      protocol: HTTP
+      verb: Redirects on sign-out
+      evidence: https://github.com/diegnghtmr/brujula-frontend/blob/main/src/features/auth/components/logout-button.tsx
+    - from: keycloak
+      to: mailpit
+      protocol: SMTP
+      verb: Sends verification email
+      evidence: https://github.com/diegnghtmr/brujula-backend/blob/main/ops/local/keycloak/realm-export.json
 ---
 
 ## Problem

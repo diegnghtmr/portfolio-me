@@ -69,6 +69,74 @@ results:
     detail: 187 Vitest checks passed locally, including tests for sign-in, offerings, student requests and the staff review queue.
 limitations:
   - The bulk student import endpoint accepts JSON; it does not accept multipart file uploads.
+architecture:
+  system: Profundiza UQ
+  caption: >-
+    The enrollment transaction queues a notification, and a worker in the API process sends it after commit.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Web app
+      name: profundiza-uq-frontend
+      repo: profundiza-uq-frontend
+      tech: React 19 / TypeScript
+      does: Presents electives and the review queue
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: API service
+      name: profundiza-uq-backend
+      repo: profundiza-uq-backend
+      tech: Go / chi
+      does: Assigns review slots and queues notifications
+      col: 1
+      row: 0
+    - id: postgres
+      kind: store
+      label: Data store
+      name: PostgreSQL
+      tech: pgx
+      does: Stores sessions, requests, and the outbox
+      col: 2
+      row: 0
+    - id: report-files
+      kind: store
+      label: File store
+      name: Report exports
+      tech: XLSX
+      does: Holds generated spreadsheets for download
+      col: 2
+      row: 1
+    - id: mail-server
+      kind: external
+      label: Mail server
+      name: Configured SMTP relay
+      tech: SMTP
+      does: Relays sign-in codes and status updates
+      col: 2
+      row: 2
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Sends API requests
+      evidence: https://github.com/diegnghtmr/profundiza-uq-frontend/blob/main/src/shared/api/client.ts
+    - from: backend
+      to: postgres
+      protocol: SQL
+      verb: Saves requests and outbox
+      evidence: https://github.com/diegnghtmr/profundiza-uq-backend/blob/main/internal/enrollment/adapter/postgres/submit.go
+    - from: backend
+      to: report-files
+      protocol: Files
+      verb: Writes spreadsheets
+      evidence: https://github.com/diegnghtmr/profundiza-uq-backend/blob/main/internal/reporting/adapter/file/generator.go
+    - from: backend
+      to: mail-server
+      protocol: SMTP
+      verb: Sends email
+      evidence: https://github.com/diegnghtmr/profundiza-uq-backend/blob/main/cmd/api/main.go
 ---
 
 ## Problem

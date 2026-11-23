@@ -75,6 +75,74 @@ results:
 limitations:
   - "El corpus de referencia contiene 20 resúmenes. La demo no importa PDF desde el navegador: la ingesta y la validación son pasos separados, fuera de la aplicación web."
   - La página de rendimiento muestra resultados versionados de JMH. No mide el equipo del visitante ni vuelve a ejecutar JMH.
+architecture:
+  system: Legajo
+  caption: >-
+    Los vectores en caché permiten ejecutar la demostración sin llamar a la API de embeddings.
+  nodes:
+    - id: frontend
+      kind: container
+      label: Aplicación web
+      name: legajo-frontend
+      repo: legajo-frontend
+      tech: React 19 / TypeScript
+      does: Muestra matrices, trazas y dendrogramas
+      col: 0
+      row: 0
+    - id: backend
+      kind: container
+      label: Servicio de API
+      name: legajo-backend
+      repo: legajo-backend
+      tech: Java 25 / Spring Boot
+      does: Calcula similitudes y agrupamientos
+      col: 1
+      row: 0
+    - id: corpus
+      kind: store
+      label: Archivos versionados
+      name: Corpus and vector cache
+      tech: JSON
+      does: Contiene resúmenes y vectores precalculados
+      col: 2
+      row: 0
+    - id: benchmarks
+      kind: store
+      label: Archivos versionados
+      name: Benchmark results
+      tech: CSV / JMH
+      does: Conserva tiempos medidos y pendientes ajustadas
+      col: 2
+      row: 1
+    - id: embedding-api
+      kind: external
+      label: Dependencia externa
+      name: Configured embedding API
+      tech: OpenAI-compatible API
+      does: Genera vectores bajo demanda
+      col: 2
+      row: 2
+  edges:
+    - from: frontend
+      to: backend
+      protocol: HTTP/JSON
+      verb: Llama mediante Axios
+      evidence: https://github.com/diegnghtmr/legajo-frontend/blob/main/src/infrastructure/httpClient.ts
+    - from: backend
+      to: corpus
+      protocol: Files
+      verb: Carga resúmenes y vectores
+      evidence: https://github.com/diegnghtmr/legajo-backend/blob/main/bootstrap/src/main/java/co/edu/uniquindio/legajo/DomainConfiguration.java
+    - from: backend
+      to: benchmarks
+      protocol: Files
+      verb: Lee resultados exportados
+      evidence: https://github.com/diegnghtmr/legajo-backend/blob/main/infrastructure/src/main/java/co/edu/uniquindio/legajo/infrastructure/benchmarks/CsvBenchmarkReportRepository.java
+    - from: backend
+      to: embedding-api
+      protocol: HTTP/JSON
+      verb: Solicita vectores en vivo
+      evidence: https://github.com/diegnghtmr/legajo-backend/blob/main/infrastructure/src/main/java/co/edu/uniquindio/legajo/infrastructure/embedding/LiveApiEmbeddingRepository.java
 ---
 
 ## Problema

@@ -104,6 +104,46 @@ limitations:
   - Los tiempos de llegada y las distancias a pie se estiman en línea recta. La puntuación de seguridad procede de un catálogo, no de las condiciones de la calle en tiempo real.
   - El backend lee la telemetría de los vehículos desde Redis. La ingesta de telemetría en directo y la autenticación de pasajeros quedan fuera de esta implementación.
   - El ciclo del viaje termina en la asignación. Este alcance no incluye una aplicación para pasajeros ni un panel para operadores de flota.
+architecture:
+  system: NexRide
+  caption: La API estima los tiempos de viaje con distancias en línea recta, sin consultar un servicio de mapas.
+  nodes:
+    - id: api
+      kind: container
+      label: Servicio API
+      name: NexRide
+      repo: NexRide
+      tech: NestJS 11 / TypeScript
+      does: Ordena opciones de recogida y asigna vehículos
+      col: 0
+      row: 0
+    - id: postgres
+      kind: store
+      label: Base de datos
+      name: PostgreSQL
+      tech: PostGIS
+      does: Guarda puntos, decisiones, viajes y eventos
+      col: 1
+      row: 0
+    - id: redis
+      kind: store
+      label: Estado de la flota y caché
+      name: Redis
+      tech: Redis 7
+      does: Guarda estados de la flota y estimaciones
+      col: 1
+      row: 1
+  edges:
+    - from: api
+      to: postgres
+      protocol: SQL
+      verb: Lee y escribe
+      evidence: https://github.com/diegnghtmr/NexRide/blob/main/src/app.module.ts#L84-L104
+    - from: api
+      to: redis
+      protocol: RESP
+      verb: Consulta el estado de flota
+      evidence: https://github.com/diegnghtmr/NexRide/blob/main/src/fleet/infrastructure/redis-fleet.adapter.ts#L53-L95
 ---
 
 ## Problema

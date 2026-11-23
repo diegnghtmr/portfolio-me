@@ -63,6 +63,101 @@ limitations:
   - No se ejecutó un flujo financiero autenticado contra una base de datos PostgreSQL en funcionamiento. El verificador de OpenAPI no comprueba la fuente original de planificación.
   - En la suite completa pasaron 3101 pruebas, fallaron 3 y se omitió 1. Dos pruebas de OCR necesitan Tesseract, que no está instalado en la imagen ligera. Una prueba de recurrencia mensual usa el reloj del sistema, pero espera una fecha fija.
   - La app móvil no carga datos financieros ni permite registrar movimientos. El servidor MCP local inicia el protocolo y responde a ping, pero no expone herramientas ni se conecta con la API.
+architecture:
+  system: Savia
+  caption: La configuración inicial llama a la API desde el servidor web; la aplicación móvil y MCP funcionan por separado.
+  nodes:
+    - id: web
+      kind: container
+      label: Aplicación web
+      name: savia-web
+      repo: savia-web
+      tech: Next.js / TypeScript
+      does: Gestiona el acceso y el alta del espacio
+      col: 0
+      row: 0
+    - id: mobile
+      kind: container
+      label: Aplicación móvil
+      name: savia-mobile
+      repo: savia-mobile
+      tech: Expo / React Native
+      does: Muestra una interfaz móvil independiente
+      col: 0
+      row: 1
+    - id: mcp
+      kind: container
+      label: Servidor MCP
+      name: savia-mcp
+      repo: savia-mcp
+      tech: Node.js / TypeScript
+      does: Responde a inicio y ping por E/S estándar
+      col: 0
+      row: 2
+    - id: backend
+      kind: container
+      label: API y proceso en segundo plano
+      name: savia-backend
+      repo: savia-backend
+      tech: NestJS / Fastify
+      does: Gestiona espacios y registros financieros
+      col: 1
+      row: 0
+    - id: postgres
+      kind: store
+      label: Almacén de datos
+      name: PostgreSQL
+      tech: PostgreSQL / pgmq
+      does: Guarda registros financieros y colas de tareas
+      col: 2
+      row: 0
+    - id: files
+      kind: store
+      label: Almacenamiento de objetos
+      name: Supabase Storage
+      does: Guarda recibos, informes y exportaciones
+      col: 2
+      row: 1
+    - id: auth
+      kind: external
+      label: Servicio de autenticación
+      name: Supabase Auth
+      does: Registra usuarios y emite tokens de acceso
+      col: 1
+      row: 3
+    - id: jwt-keys
+      kind: external
+      label: Servidor de claves configurable
+      name: JWKS
+      does: Publica claves para verificar tokens
+      col: 3
+      row: 2
+  edges:
+    - from: web
+      to: backend
+      protocol: HTTP/JSON
+      verb: Envía el alta del espacio
+      evidence: https://github.com/diegnghtmr/savia-web/blob/main/src/lib/onboarding-gateway.ts
+    - from: web
+      to: auth
+      protocol: HTTP/JSON
+      verb: Registra e inicia sesión
+      evidence: https://github.com/diegnghtmr/savia-web/blob/main/src/lib/auth-gateway.ts
+    - from: backend
+      to: postgres
+      protocol: SQL
+      verb: Lee y guarda registros
+      evidence: https://github.com/diegnghtmr/savia-backend/blob/main/src/platform/postgres-pool.ts
+    - from: backend
+      to: files
+      protocol: HTTP
+      verb: Sube y descarga archivos
+      evidence: https://github.com/diegnghtmr/savia-backend/blob/main/src/platform/supabase-storage.adapter.ts
+    - from: backend
+      to: jwt-keys
+      protocol: HTTPS/JWKS
+      verb: Consulta claves de firma
+      evidence: https://github.com/diegnghtmr/savia-backend/blob/main/src/platform/jose-jwt-verifier.ts
 ---
 
 ## Problema

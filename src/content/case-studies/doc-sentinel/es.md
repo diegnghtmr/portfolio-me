@@ -72,6 +72,69 @@ limitations:
   - Las reglas de instrucciones incorporadas cubren inglés y español. Pueden omitir paráfrasis y señalar texto visible que solo discute las inyecciones.
   - En XLSX, PPTX, EPUB y ODT solo se comprueba el texto extraído, no el contenido oculto en la estructura del archivo.
   - Al sanear un PDF se reconstruye como DOCX. La disposición puede variar y las páginas escaneadas quedan como imágenes, sin una capa de texto de OCR.
+architecture:
+  system: doc-sentinel
+  caption: La detección se ejecuta sin red por defecto; solo el comando de actualización descarga nuevas revisiones de las herramientas.
+  nodes:
+    - id: cli
+      kind: container
+      label: CLI
+      name: doc-sentinel
+      repo: doc-sentinel
+      tech: Python
+      does: Analiza documentos y verifica copias limpias
+      col: 0
+      row: 1
+    - id: input
+      kind: store
+      label: Archivos de entrada
+      name: Originals
+      does: Contienen los documentos que se analizan
+      col: 1
+      row: 0
+    - id: output
+      kind: store
+      label: Archivos de salida
+      name: Cleaned copies and reports
+      does: Guardan los resultados por separado
+      col: 1
+      row: 1
+    - id: tools
+      kind: external
+      label: Dependencia local
+      name: Pinned document tools
+      tech: Git submodules
+      does: Revisan documentos y eliminan rastros conocidos
+      col: 2
+      row: 2
+    - id: upstream
+      kind: external
+      label: Alojamiento de código
+      name: GitHub
+      does: Aloja los repositorios de origen
+      col: 2
+      row: 3
+  edges:
+    - from: cli
+      to: input
+      protocol: Files
+      verb: Lee los originales
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/extract.py#L201-L205
+    - from: cli
+      to: output
+      protocol: Files
+      verb: Escribe copias e informes
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/cli.py#L310-L315
+    - from: cli
+      to: tools
+      protocol: Subprocess
+      verb: Ejecuta las herramientas
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/adapters/perlecta.py#L120-L123
+    - from: cli
+      to: upstream
+      protocol: Git over HTTPS
+      verb: Descarga nuevas revisiones
+      evidence: https://github.com/diegnghtmr/doc-sentinel/blob/main/src/doc_sentinel/update.py#L137-L144
 ---
 
 ## Problema
