@@ -59,14 +59,63 @@
   font-size: 14px;
 }
 .case-facts > div { flex: 1 1 9rem; min-inline-size: 0; }
-.case-facts > :is([data-case-fact="repositories"], [data-case-fact="demo"]) { flex-basis: 13rem; }
+.case-facts > [data-case-fact="demo"] { flex-basis: 13rem; }
+/* Repositories take a full row so every name, role and link stays on one line. */
+.case-facts > [data-case-fact="repositories"] { flex-basis: 100%; }
+.fact-repos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--unit);
+}
+.case-facts .fact-repo {
+  --repo-ink: var(--cat-web);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--unit);
+  min-block-size: 36px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--r);
+  background: var(--raised);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.fact-repo[data-surface="api"] { --repo-ink: var(--cat-api); }
+.fact-repo[data-surface="cli"] { --repo-ink: var(--cat-mcp); }
+.fact-repo[data-surface="infra"] { --repo-ink: var(--cat-infra); }
+.fact-repo-mark { flex: none; color: var(--subtle); transition: color 150ms ease; }
+.fact-repo-name { font: 600 13px/1.2 var(--mono); overflow-wrap: anywhere; }
+.fact-repo-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--subtle);
+  font: 500 11px/1.2 var(--mono);
+  white-space: nowrap;
+}
+.fact-repo-role::before {
+  content: "";
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: var(--repo-ink);
+}
+.fact-repo-arrow { color: var(--gold-text); transition: transform 160ms var(--ease-out); }
+.case-facts .fact-repo:hover { border-color: var(--ink); background: var(--surface); }
+.fact-repo:hover .fact-repo-mark { color: var(--text); }
+.fact-repo:is(:hover, :focus-visible) .fact-repo-arrow { transform: translate(2px, -2px); }
+@media (prefers-reduced-motion: reduce) {
+  .fact-repo, .fact-repo-mark, .fact-repo-arrow { transition: none; }
+  .fact-repo:is(:hover, :focus-visible) .fact-repo-arrow { transform: none; }
+}
 .case-facts dt {
   margin-block-end: calc(var(--unit) / 2);
   color: var(--subtle);
   font: 500 12px/1.5 var(--mono);
 }
 .case-facts a { display: inline-block; min-block-size: 24px; text-decoration: underline; }
-.case-facts ul { font: 500 13px/1.65 var(--mono); }
+
 .case-facts dd p { color: var(--subtle); }
 .case-cover {
   min-block-size: 304px;
