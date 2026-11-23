@@ -35,6 +35,8 @@ schiavenato-writing
 
 ## Decisions
 
+TO CONFIRM: the sources are linked, but Diego still has to confirm how each decision is framed and what his part in it was.
+
 1. **Copy the base rules into every tone or define a precedence**
    - **Choice:** the base rules always win. A pass the user asks for explicitly replaces tone rules only in the area it governs.
    - **Consequence:** humanization can govern sentence rhythm without removing tone constraints that have nothing to do with rhythm.

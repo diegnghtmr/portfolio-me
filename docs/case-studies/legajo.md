@@ -33,6 +33,8 @@ The README documents these screens; nobody has walked through them on the live d
 
 ## Decisions
 
+TO CONFIRM: the sources are linked, but Diego still has to confirm how each decision is framed and what his part in it was.
+
 1. **Write the algorithms or take them from a library**
    - **Choice:** hand-written similarity, clustering and evaluation algorithms.
    - **Consequence:** the domain owns those implementations. PDF parsing and model inference can still be delegated.

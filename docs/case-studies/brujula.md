@@ -30,6 +30,8 @@ The repository has components and real-stack end-to-end specifications for each 
 
 ## Decisions
 
+TO CONFIRM: the sources are linked, but Diego still has to confirm how each decision is framed and what his part in it was.
+
 1. **Microservices or a modular monolith**
    - **Choice:** Spring Modulith in a "single Spring Boot process".
    - **Consequence:** avoids the overhead of a distributed system from the start, at the cost of sharing one JVM and one deployment lifecycle.

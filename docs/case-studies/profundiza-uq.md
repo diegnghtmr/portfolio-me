@@ -37,6 +37,8 @@
 
 ## Decisions
 
+TO CONFIRM: the sources are linked, but Diego still has to confirm how each decision is framed and what his part in it was.
+
 1. **Read capacity without protection or lock the row**
    - **Choice:** lock the offering-group row with `SELECT … FOR UPDATE` before classifying a request.
    - **Consequence:** concurrent submissions cannot be classified against a stale seat count.

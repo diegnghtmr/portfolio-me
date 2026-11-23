@@ -33,6 +33,8 @@ The frontend's feature pages suggest these screens. TO CONFIRM: the screenshots 
 
 ## Decisions
 
+TO CONFIRM: the sources are linked, but Diego still has to confirm how each decision is framed and what his part in it was.
+
 1. **Couple the domain to the framework or use ports and adapters**
    - **Choice:** hexagonal architecture.
    - **Consequence:** "Domain and application layers have zero Spring/Jakarta dependencies", and ArchUnit enforces that boundary.

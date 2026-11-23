@@ -39,6 +39,8 @@ The UI README already has screenshots for login, client ordering, employee opera
 
 ## Decisions
 
+TO CONFIRM: the sources are linked, but Diego still has to confirm how each decision is framed and what his part in it was.
+
 1. **Organize the UI by technical layer or by business capability**
    - **Choice:** feature slices by role.
    - **Consequence:** "code used by 1 feature stays local", and code that two or more features use moves to `shared/`.
