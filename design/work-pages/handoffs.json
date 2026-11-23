@@ -3,13 +3,14 @@
   "chosen": "02-systems-atlas-index.html",
   "handoffs": {
     "02-systems-atlas-index.html": {
-      "status": "in_progress",
+      "status": "implemented",
       "queued": false,
       "sentAt": "2026-11-23T05:51:45.281Z",
       "startedAt": "2026-11-23T05:52:03.097Z",
-      "implementedAt": null,
+      "implementedAt": "2026-11-23T06:27:02.671Z",
       "feature": "odd/tasks/portfolio-prd-trd.md",
-      "note": "Planning the Astro implementation on branch feat/work-index"
+      "note": "Live at /en/work/ and /es/trabajo/ on branch feat/work-index (cf84bfa + d9204a3); test:site 29/29, Lighthouse 100x4",
+      "previewUrl": "http://127.0.0.1:4321/en/work/"
     }
   }
 }
