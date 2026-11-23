@@ -60,7 +60,7 @@
 }
 .case-facts > div { flex: 1 1 9rem; min-inline-size: 0; }
 .case-facts > [data-case-fact="demo"] { flex-basis: 13rem; }
-/* Repositories take a full row so every name, role and link stays on one line. */
+/* Repositories take a full row so the chips have room; they still wrap on narrow screens. */
 .case-facts > [data-case-fact="repositories"] { flex-basis: 100%; }
 .fact-repos {
   display: flex;
@@ -106,7 +106,7 @@
 .fact-repo:hover .fact-repo-mark { color: var(--text); }
 .fact-repo:is(:hover, :focus-visible) .fact-repo-arrow { transform: translate(2px, -2px); }
 @media (prefers-reduced-motion: reduce) {
-  .fact-repo, .fact-repo-mark, .fact-repo-arrow { transition: none; }
+  .case-facts .fact-repo, .fact-repo-mark, .fact-repo-arrow { transition: none; }
   .fact-repo:is(:hover, :focus-visible) .fact-repo-arrow { transform: none; }
 }
 .case-facts dt {
