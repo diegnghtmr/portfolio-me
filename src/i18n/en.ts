@@ -37,7 +37,7 @@ export const en = {
   stackHint: "Hover or focus a technology to see where I use it.",
   usedIn: "used in",
   selectedWork: "Selected work",
-  allProjects: "All 14 projects",
+  allProjects: "All {count} projects",
   live: "Live",
   systemTwo: "System, 2 repos",
   systemFive: "System, 5 repos",

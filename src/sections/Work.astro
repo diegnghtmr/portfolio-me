@@ -1,6 +1,7 @@
 ---
-import { contact, projects } from "../data/home";
-import { t, type Locale } from "../i18n";
+import { projects } from "../data/home";
+import { atlasProjects } from "../data/projects";
+import { t, workPath, type Locale } from "../i18n";
 
 const { locale } = Astro.props as { locale: Locale };
 ---
@@ -8,7 +9,7 @@ const { locale } = Astro.props as { locale: Locale };
 <section class="wrap" id="work" aria-labelledby="work-heading">
   <header class="section-head work-head" data-reveal>
     <h2 id="work-heading">{t(locale, 'selectedWork')}</h2>
-    <a href={contact.projects}>{t(locale, 'allProjects')} <span class="go" aria-hidden="true">→</span></a>
+    <a href={workPath(locale)}>{t(locale, 'allProjects').replace('{count}', String(atlasProjects.length))} <span class="go" aria-hidden="true">→</span></a>
   </header>
   <ul class="bento">
     {projects.map((project) => (

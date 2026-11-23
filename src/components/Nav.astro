@@ -1,31 +1,38 @@
 ---
-import { languages, localePath, otherLocale, sections, siteHandle, t, type Locale } from "../i18n";
+import { languages, localePath, otherLocale, pagePath, sections, siteHandle, t, type Locale, type Page } from "../i18n";
+import { workMessages } from "../i18n/work";
 
 interface Props {
   locale: Locale;
+  page?: Page;
 }
 
-const { locale } = Astro.props;
+const { locale, page = "home" } = Astro.props;
 const alternate = otherLocale(locale);
-const alternatePath = localePath(alternate);
+const alternatePath = pagePath(alternate, page);
 const language = languages[alternate];
 const dark = t(locale, "dark");
 const light = t(locale, "light");
 ---
 
-<header class="site-nav" data-site-nav>
+<header class="site-nav" data-site-nav data-work-nav={page === "work" ? "" : undefined}>
   <div class="wrap nav-inner">
     <a class="brand font-mono" href={localePath(locale)}>{siteHandle}</a>
     <nav id="primary-nav" class="nav-links" aria-label={t(locale, "primary")}>
       <ul>
-        {sections.map((section) => (
+        {page === "work" ? (
+          <>
+            <li><a href={localePath(locale)}><span aria-hidden="true">←</span> {workMessages[locale].home}</a></li>
+            <li class="current-page"><span aria-current="page">{t(locale, "work")}</span></li>
+          </>
+        ) : sections.map((section) => (
           <li><a href={`#${section}`} data-section-link><span>{t(locale, section)}</span></a></li>
         ))}
         <li class="mobile-language">
           <a href={alternatePath} hreflang={alternate} lang={alternate}>{language.label}</a>
         </li>
       </ul>
-      <span class="nav-indicator bg-gold" data-nav-indicator aria-hidden="true"></span>
+      {page === "home" && <span class="nav-indicator bg-gold" data-nav-indicator aria-hidden="true"></span>}
     </nav>
     <div class="nav-tools">
       <button
@@ -115,6 +122,11 @@ const light = t(locale, "light");
   .nav-links {
     position: relative;
   }
+
+  [data-work-nav] .brand { margin-inline-end: 0; }
+  [data-work-nav] .nav-links { margin-inline-end: auto; }
+  .current-page { padding: var(--unit) calc(var(--unit) * 1.5); font-size: 14px; font-weight: 600; }
+  .current-page::before { content: "/" / ""; margin-inline-end: var(--unit); color: var(--muted); }
 
   ul,
   .nav-tools {
@@ -212,6 +224,9 @@ const light = t(locale, "light");
       gap: var(--unit);
       flex-wrap: wrap;
     }
+
+    [data-work-nav] .brand { margin-inline-end: auto; }
+    .current-page::before { display: none; }
 
     .search-label,
     .desktop-language,

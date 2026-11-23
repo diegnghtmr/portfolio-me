@@ -39,7 +39,7 @@ export const es = {
   stackHint: "Pasa el cursor o enfoca una tecnología para ver dónde la uso.",
   usedIn: "usado en",
   selectedWork: "Trabajo destacado",
-  allProjects: "Los 14 proyectos",
+  allProjects: "Los {count} proyectos",
   live: "En línea",
   systemTwo: "Sistema, 2 repos",
   systemFive: "Sistema, 5 repos",

@@ -34,9 +34,10 @@ Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or
 | Path | Contents |
 |---|---|
 | `src/sections`, `src/components` | Page sections and shared components |
-| `src/data/home.ts`, `src/i18n` | Content and copy (EN/ES); one source for the page and the agent files |
+| `src/pages` | Localized home (`/en/`, `/es/`) and work index (`/en/work/`, `/es/trabajo/`), plus machine-readable routes |
+| `src/data`, `src/i18n` | Bilingual profile and project content shared by pages and agent files |
 | `src/lib/profile.ts` | JSON-LD, Markdown twins, `llms.txt`, JSON Resume, `projects.json` |
-| `src/scripts` | Client behavior: hero shader, cover fields, footer horizon, command menu |
+| `src/scripts` | Client behavior: hero shader, cover fields, footer horizon, command menu, work filters |
 | `scripts` | Asset generators and their tests |
 | `middleware.js`, `vercel.json` | Markdown negotiation, headers, root locale redirect |
 | `docs`, `design`, `odd` | PRD, TRD, research, design artboards and the task log |
@@ -47,7 +48,7 @@ Every push to `main` deploys to production on Vercel; other branches get preview
 
 ## License
 
-The code is released under the [MIT License](LICENSE). It does not cover the personal portrait (`assets-src/portrait.jpg` and the dithered frames made from it in `public/dither/portrait-*`) or the biographical and project text in `src/i18n`; those remain © Diego Alejandro Flores Quintero. Reuse the code freely, but please replace them with your own.
+The code is released under the [MIT License](LICENSE). It does not cover the personal portrait (`assets-src/portrait.jpg` and the dithered frames made from it in `public/dither/portrait-*`) or the biographical and project text in `src/i18n` and `src/data/projects.ts`; those remain © Diego Alejandro Flores Quintero. Reuse the code freely, but please replace them with your own.
 
 ## Credits
 

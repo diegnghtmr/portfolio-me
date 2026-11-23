@@ -1,18 +1,9 @@
 import { siteHandle } from "../i18n";
 import type { MessageKey } from "../i18n/en";
+import { featuredProjects as projects } from "./projects";
 
-type ProjectId = `p${1 | 2 | 3 | 4 | 5 | 6}`;
-export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "sphere" | "capacity";
-type Project = {
-  id: ProjectId;
-  name: string;
-  description: MessageKey;
-  kind: MessageKey;
-  categories: readonly string[];
-  stack: string;
-  href: string;
-  live?: boolean;
-} & ({ shape: CoverShape; seed: number } | { terminal: true; stackLabel: MessageKey });
+export { projects };
+export type { CoverShape } from "./projects";
 
 const github = `https://github.com/${siteHandle}`;
 const repositories = `${github}?tab=repositories`;
@@ -26,15 +17,6 @@ export const contact = {
   cvPdf: { en: "https://diegnghtmr.github.io/resume-maker/cv/main-en.pdf", es: "https://diegnghtmr.github.io/resume-maker/cv/main-es.pdf" },
   projects: repositories,
 } as const;
-
-export const projects = [
-  { id: "p1", name: "StudyDeck AI", description: "studydeck", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, pgvector, React 19", href: `${github}/studydeck-backend`, shape: "dunes", seed: 1 },
-  { id: "p2", name: "Food Court", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: `${repositories}&q=food-court`, shape: "ripple", seed: 2 },
-  { id: "p3", name: "Brújula", description: "brujula", kind: "systemTwo", categories: ["api", "web"], stack: "Spring Modulith, Keycloak", href: `${repositories}&q=brujula`, shape: "wave", seed: 3 },
-  { id: "p4", name: "Legajo", description: "legajo", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, React 19", href: `${github}/legajo-frontend`, shape: "orbit", seed: 4, live: true },
-  { id: "p5", name: "Profundiza UQ", description: "profundiza", kind: "systemTwo", categories: ["api", "web"], stack: "Go, pgx, React 19", href: `${github}/profundiza-uq-backend`, shape: "capacity", seed: 5 },
-  { id: "p6", name: "writing-harness", description: "writingHarness", kind: "headless", categories: ["cli"], stack: "Node, zero deps", stackLabel: "noDeps", href: `${github}/writing-harness`, terminal: true },
-] as const satisfies readonly Project[];
 
 type StackGroup = { label: MessageKey; tools: readonly (readonly [name: string, usedIn: string])[] };
 export const stack = [
@@ -52,7 +34,7 @@ export const principles = [
   { title: "contractFirst", text: "contractEvidence", project: projects[2] },
   { title: "moduleBoundaries", text: "moduleEvidence", project: projects[0] },
   { title: "concurrency", text: "concurrencyEvidence", project: projects[4] },
-] as const satisfies readonly { title: MessageKey; text: MessageKey; project: Project }[];
+] as const satisfies readonly { title: MessageKey; text: MessageKey; project: (typeof projects)[number] }[];
 
 export const openSource = [
   { owner: "basecamp", repo: "omarchy", description: "omarchy", kind: "desktopConfig" },

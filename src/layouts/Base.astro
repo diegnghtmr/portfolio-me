@@ -2,24 +2,26 @@
 import CommandMenu from "../components/CommandMenu.astro";
 import Footer from "../components/Footer.astro";
 import Nav from "../components/Nav.astro";
-import { localePath, otherLocale, siteName, t, type Locale } from "../i18n";
+import { otherLocale, pagePath, siteName, t, type Locale, type Page } from "../i18n";
 import { absolute, jsonLd, markdownPath, ogImagePath } from "../lib/profile";
 import "../styles/global.css";
 
 interface Props {
   locale: Locale;
+  page?: Page;
+  title?: string;
+  description?: string;
+  structuredData?: object;
 }
 
-const { locale } = Astro.props;
-const absoluteHome = (language: Locale) => new URL(localePath(language), Astro.site);
-const title = `${siteName}, ${t(locale, "titleRole")}`;
-const description = t(locale, "description");
+const { locale, page = "home", title = `${siteName}, ${t(locale, "titleRole")}`, description = t(locale, "description"), structuredData = jsonLd(locale) } = Astro.props;
+const pageUrl = (language: Locale) => new URL(pagePath(language, page), Astro.site);
 const image = absolute(ogImagePath(locale));
 const imageAlt = locale === "en"
   ? `${siteName} — ${t(locale, "titleRole")}. Blue dithered sphere on a dark background.`
   : `${siteName} — ${t(locale, "titleRole")}. Esfera azul tramada sobre fondo oscuro.`;
 const ogLocales = { en: "en_US", es: "es_CO" };
-const graph = JSON.stringify(jsonLd(locale)).replaceAll("<", "\\u003c");
+const graph = JSON.stringify(structuredData).replaceAll("<", "\\u003c");
 ---
 
 <!doctype html>
@@ -50,7 +52,7 @@ const graph = JSON.stringify(jsonLd(locale)).replaceAll("<", "\\u003c");
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={absoluteHome(locale)} />
+    <meta property="og:url" content={pageUrl(locale)} />
     <meta property="og:locale" content={ogLocales[locale]} />
     <meta property="og:locale:alternate" content={ogLocales[otherLocale(locale)]} />
     <meta property="og:image" content={image} />
@@ -67,20 +69,20 @@ const graph = JSON.stringify(jsonLd(locale)).replaceAll("<", "\\u003c");
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="canonical" href={absoluteHome(locale)} />
-    <link rel="alternate" hreflang="en" href={absoluteHome("en")} />
-    <link rel="alternate" hreflang="es" href={absoluteHome("es")} />
-    <link rel="alternate" hreflang="x-default" href={absoluteHome("en")} />
-    <link rel="alternate" type="text/markdown" href={markdownPath(locale)} />
+    <link rel="canonical" href={pageUrl(locale)} />
+    <link rel="alternate" hreflang="en" href={pageUrl("en")} />
+    <link rel="alternate" hreflang="es" href={pageUrl("es")} />
+    <link rel="alternate" hreflang="x-default" href={pageUrl("en")} />
+    <link rel="alternate" type="text/markdown" href={markdownPath(locale, page)} />
     <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
   </head>
   <body>
     <a class="skip-link" href="#main">{t(locale, "skip")}</a>
-    <Nav {locale} />
+    <Nav {locale} {page} />
     <slot />
-    <CommandMenu {locale} />
+    <CommandMenu {locale} {page} />
     <slot name="footer">
-      <Footer {locale} />
+      <Footer {locale} {page} />
     </slot>
     <!-- Vercel Web Analytics and Speed Insights, cookieless (PRD D4). Vercel's HTML snippet,
          no npm package; skipped on loopback hosts, where the /_vercel routes do not exist. -->

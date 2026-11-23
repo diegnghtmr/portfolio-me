@@ -1,0 +1,115 @@
+---
+import RepositoryMap from "../components/RepositoryMap.astro";
+import { atlasProjects } from "../data/projects";
+import { siteHandle, t, type Locale } from "../i18n";
+import { workMessages } from "../i18n/work";
+import Base from "../layouts/Base.astro";
+import { workJsonLd } from "../lib/profile";
+import { atlasFacets, atlasGroups, facetOptions, projectHref, repoBucket } from "../lib/work";
+import "../styles/work.css";
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const heading = t(locale, "work");
+const m = workMessages[locale];
+const total = atlasProjects.length;
+const facetChoices = facetOptions(locale);
+---
+
+<Base {locale} page="work" title={`${heading} | ${siteHandle}`} description={m.intro} structuredData={workJsonLd(locale)}>
+  <main class="wrap work-index" id="main" tabindex="-1" data-work-index>
+    <header class="atlas-header">
+      <div>
+        <p class="atlas-eyebrow">{m.eyebrow}</p>
+        <h1>{heading}</h1>
+        <p class="atlas-intro">{m.intro}</p>
+      </div>
+      <figure class="atlas-key">
+        <RepositoryMap project={atlasProjects[0]} {locale} decorative />
+        <figcaption><strong>{m.map}</strong>{m.mapKey}</figcaption>
+      </figure>
+    </header>
+
+    <div class="atlas-grid">
+      <aside class="work-filters" data-work-filters aria-label={m.filters}>
+        <div class="filter-heading">
+          <h2>{m.filters}</h2>
+          <button class="home-button filter-toggle" data-filter-toggle type="button" aria-expanded="false" aria-controls="atlas-facets">
+            <span data-filter-label>{m.filterToggle(0)}</span>
+            <span class="filter-chevron" aria-hidden="true">⌄</span>
+          </button>
+        </div>
+        <div class="atlas-facets" id="atlas-facets">
+          {atlasFacets.map((facet) => (
+            <fieldset>
+              <legend>{m.facet[facet]}</legend>
+              <div class="facet-options">
+                {facetChoices[facet].map(({ value, label, count }) => (
+                  <button type="button" class="atlas-facet" data-facet={facet} {value} aria-pressed="false">
+                    <span data-facet-label>{label}</span>
+                    <span class="facet-count" data-facet-count>{count}</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </aside>
+
+      <div class="atlas-results">
+        <header class="results-header">
+          <p class="atlas-count" role="status" aria-atomic="true" tabindex="-1" data-result-count>{m.projects(total)}</p>
+          <ul class="atlas-breakdown" role="list" aria-label={m.breakdown}>
+            {atlasGroups.map(({ surface, projects }) => (
+              <li><strong data-breakdown={surface}>{projects.length}</strong> {m.surface[surface]}</li>
+            ))}
+          </ul>
+          <div class="atlas-active" data-active-filters hidden>
+            <div class="atlas-chips" data-filter-chips role="group" aria-label={m.active}></div>
+            <button class="atlas-clear" data-filter-clear type="button" title={m.clearAll}>{m.clear}</button>
+          </div>
+        </header>
+        <section class="atlas-empty" data-work-empty aria-labelledby="atlas-empty-title" hidden>
+          <h2 id="atlas-empty-title">{m.empty}</h2>
+          <p>{m.emptyHint(total)}</p>
+        </section>
+        {atlasGroups.map(({ surface, projects }) => (
+          <section class="atlas-group" data-group={surface} aria-labelledby={`atlas-${surface}`}>
+            <header class="atlas-group-head">
+              <h2 id={`atlas-${surface}`}>{m.groups[surface]}</h2>
+              <span class="group-count" data-group-count>{m.projects(projects.length)}</span>
+            </header>
+            <ul class="atlas-projects" role="list">
+              {projects.map((project) => {
+                const externalLabel = project.caseStudy ? undefined : `${project.slug}-external`;
+                return (
+                  <li data-project data-surface={project.surfaces.join(" ")} data-repos={repoBucket(project)} data-stack={project.stackTags.join(" ")}>
+                    <a class="atlas-project" href={projectHref(locale, project)} rel={project.caseStudy ? undefined : "external"} aria-labelledby={[project.slug, externalLabel].filter(Boolean).join(" ")}>
+                      <div class="atlas-repositories">
+                        <RepositoryMap {project} {locale} />
+                        <span>{m.repos(project.repositories.length)}</span>
+                      </div>
+                      <div class="atlas-project-body">
+                        <h3 id={project.slug}>{project.name}</h3>
+                        <p class="atlas-purpose">{project.purpose[locale]}</p>
+                        <p class="atlas-meta">
+                          {project.surfaceLabel[locale]}{project.stack.length > 0 && <><span aria-hidden="true"> · </span>{project.stack.join(", ")}</>}
+                        </p>
+                        {externalLabel && <span class="sr-only" id={externalLabel}>{m.github}</span>}
+                      </div>
+                      <span class="atlas-arrow" aria-hidden="true">{project.caseStudy ? "→" : "↗"}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  </main>
+</Base>
+
+<script>
+  import "../scripts/work-filters";
+</script>

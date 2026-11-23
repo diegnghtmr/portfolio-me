@@ -16,3 +16,6 @@ export const sections = ["work", "oss", "about", "contact"] as const satisfies r
 export const t = (locale: Locale, key: MessageKey) => messages[locale][key];
 export const otherLocale = (locale: Locale): Locale => (locale === "en" ? "es" : "en");
 export const localePath = (locale: Locale): `/${Locale}/` => `/${locale}/`;
+export const workPath = (locale: Locale) => locale === "en" ? "/en/work/" : "/es/trabajo/";
+export type Page = "home" | "work";
+export const pagePath = (locale: Locale, page: Page) => page === "work" ? workPath(locale) : localePath(locale);

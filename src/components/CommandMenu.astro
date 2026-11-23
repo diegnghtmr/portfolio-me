@@ -1,17 +1,22 @@
 ---
 import { contact, projects } from "../data/home";
-import { localePath, otherLocale, sections, t, type Locale } from "../i18n";
+import { localePath, otherLocale, pagePath, sections, t, workPath, type Locale, type Page } from "../i18n";
+import { workMessages } from "../i18n/work";
 
-interface Props { locale: Locale }
-const { locale } = Astro.props;
+interface Props { locale: Locale; page?: Page }
+const { locale, page = "home" } = Astro.props;
+const homePrefix = page === "home" ? "" : localePath(locale);
 const groups = [
-  { label: 'sections', items: sections.map((id) => ({ label: t(locale, id === 'work' ? 'selectedWork' : id === 'about' ? 'experience' : id), target: `#${id}` })) },
-  { label: 'projects', items: projects.map(({ name, id }) => ({ label: name, target: `#${id}` })) },
+  { label: 'sections', items: [
+    ...sections.map((id) => ({ label: t(locale, id === 'work' ? 'selectedWork' : id === 'about' ? 'experience' : id), target: `${homePrefix}#${id}` })),
+    { label: workMessages[locale].index, target: workPath(locale) },
+  ] },
+  { label: 'projects', items: projects.map(({ name, id }) => ({ label: name, target: `${homePrefix}#${id}` })) },
   { label: 'actions', items: [
-    { label: t(locale, 'copyEmail'), target: 'copy' },
+    ...(page === "home" ? [{ label: t(locale, 'copyEmail'), target: 'copy' }] : []),
     { label: t(locale, 'switchTheme'), target: 'theme' },
     { label: t(locale, 'downloadCvPdf'), target: contact.cvPdf[locale] },
-    { label: t(locale, 'languageAction'), target: localePath(otherLocale(locale)), lang: otherLocale(locale) },
+    { label: t(locale, 'languageAction'), target: pagePath(otherLocale(locale), page), lang: otherLocale(locale) },
   ] },
 ] as const;
 ---

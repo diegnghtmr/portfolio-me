@@ -1,16 +1,17 @@
-// Machine-readable views of the home content: JSON-LD, markdown twins, llms.txt,
-// JSON Resume and projects.json. Everything derives from src/data/home.ts and the
-// i18n messages, so the HTML page and the agent-facing files can never disagree.
+// Machine-readable views of the shared, bilingual profile and project content.
 import { contact, experience, openSource, principles, projects, stack } from "../data/home";
-import { localePath, siteHandle, siteName, t, type Locale } from "../i18n";
+import { atlasProjects, primaryRepository, type Repository } from "../data/projects";
+import { localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, type Page } from "../i18n";
 import { en } from "../i18n/en";
 import { es } from "../i18n/es";
+import { workMessages } from "../i18n/work";
+import { atlasGroups, projectHref } from "./work";
 
 export const site = "https://diegnghtmr.me";
 export const buildDate = new Date().toISOString().slice(0, 10);
 export const locales = ["en", "es"] as const satisfies readonly Locale[];
 export const absolute = (path: string) => new URL(path, site).href;
-export const markdownPath = (locale: Locale) => `${localePath(locale)}index.md`;
+export const markdownPath = (locale: Locale, page: Page = "home") => `${pagePath(locale, page)}index.md`;
 export const ogImagePath = (locale: Locale) => `/og/home-${locale}.png`;
 
 const personId = `${site}/#diego`;
@@ -19,28 +20,13 @@ const stackList = (value: string) => value.split(",").map((item) => item.trim())
 const repoUrl = (owner: string, repo: string) => `https://github.com/${owner}/${repo}`;
 const location = { city: "Armenia", region: "Quindío", countryCode: "CO" } as const;
 
-const repository = (name: string, surface: "api" | "web" | "cli", programmingLanguage?: string) => ({
+const sourceCode = ({ name, url, programmingLanguage }: Repository) => ({
+  "@type": "SoftwareSourceCode",
+  "@id": url,
   name,
-  surface,
-  url: repoUrl(siteHandle, name),
+  codeRepository: url,
   ...(programmingLanguage ? { programmingLanguage } : {}),
 });
-
-// Repo names from the portfolio inventory in design/portfolio-home/02-engineered-index.html.
-const repositories = {
-  p1: [repository("studydeck-backend", "api", "Java"), repository("studydeck-frontend", "web")],
-  p2: [
-    repository("food-court-ui", "web"),
-    repository("user-microservice", "api", "Java"),
-    repository("food-court-microservice", "api", "Java"),
-    repository("order-microservice", "api", "Java"),
-    repository("traceability-microservice", "api", "Java"),
-  ],
-  p3: [repository("brujula-backend", "api", "Java"), repository("brujula-frontend", "web")],
-  p4: [repository("legajo-backend", "api", "Java"), repository("legajo-frontend", "web", "TypeScript")],
-  p5: [repository("profundiza-uq-backend", "api", "Go"), repository("profundiza-uq-frontend", "web")],
-  p6: [repository("writing-harness", "cli", "JavaScript")],
-} satisfies Record<(typeof projects)[number]["id"], ReturnType<typeof repository>[]>;
 
 /** One JSON-LD @graph per page: site, person, profile page and the selected work. */
 export function jsonLd(locale: Locale) {
@@ -91,15 +77,58 @@ export function jsonLd(locale: Locale) {
             creator: { "@id": personId },
             keywords: stackList(project.stack).join(", "),
             genre: t(locale, project.kind),
-            hasPart: repositories[project.id].map(({ name, url, programmingLanguage }) => ({
-              "@type": "SoftwareSourceCode",
-              "@id": url,
-              name,
-              codeRepository: url,
-              ...(programmingLanguage ? { programmingLanguage } : {}),
-            })),
+            hasPart: project.repositories.map(sourceCode),
           },
         })),
+      },
+    ],
+  };
+}
+
+export function workJsonLd(locale: Locale) {
+  const page = absolute(workPath(locale));
+  const title = t(locale, "work");
+  const m = workMessages[locale];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${page}#page`,
+        url: page,
+        name: title,
+        description: m.intro,
+        inLanguage: locale,
+        isPartOf: { "@id": websiteId },
+        mainEntity: { "@id": `${page}#projects` },
+        breadcrumb: { "@id": `${page}#breadcrumbs` },
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${page}#projects`,
+        numberOfItems: atlasProjects.length,
+        itemListElement: atlasGroups.flatMap((group) => group.projects).map((project, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "CreativeWork",
+            "@id": `${page}#${project.slug}`,
+            name: project.name,
+            description: project.purpose[locale],
+            url: absolute(projectHref(locale, project)),
+            genre: m.groups[project.primarySurface],
+            ...(project.stack.length ? { keywords: project.stack.join(", ") } : {}),
+            hasPart: project.repositories.map(sourceCode),
+          },
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${page}#breadcrumbs`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: m.home, item: absolute(localePath(locale)) },
+          { "@type": "ListItem", position: 2, name: title, item: page },
+        ],
       },
     ],
   };
@@ -143,7 +172,7 @@ export function homeMarkdown(locale: Locale) {
       "",
       bullet(m("projects"), `${m(project.kind)} (${project.categories.join(", ")})`),
       bullet(m("stack").split(",")[0]!, "stackLabel" in project ? m(project.stackLabel) : project.stack),
-      bullet(labels.repositories, repositories[project.id].map(({ name, url }) => `[${name}](${url})`).join(", ")),
+      bullet(labels.repositories, project.repositories.map(({ name, url }) => `[${name}](${url})`).join(", ")),
       "",
     ]),
     `## ${m("how")}`,
@@ -170,6 +199,32 @@ export function homeMarkdown(locale: Locale) {
   return lines.join("\n");
 }
 
+export function workMarkdown(locale: Locale) {
+  const m = workMessages[locale];
+  return [
+    `# ${t(locale, "work")} | ${siteHandle}`,
+    "",
+    `> ${m.eyebrow}: ${m.intro}`,
+    "",
+    m.projects(atlasProjects.length),
+    "",
+    ...atlasGroups.flatMap(({ surface, projects }) => [
+      `## ${m.groups[surface]} (${m.projects(projects.length)})`,
+      "",
+      ...projects.flatMap((project) => [
+        `### [${project.name}](${absolute(projectHref(locale, project))})`,
+        "",
+        project.purpose[locale],
+        "",
+        bullet(m.facet.surface, project.surfaceLabel[locale]),
+        ...(project.stack.length ? [bullet(m.facet.stack, project.stack.join(", "))] : []),
+        bullet(m.facet.repos, project.repositories.map(({ name, url, role }) => `[${name}](${url}) (${m.roles[role]})`).join(", ")),
+        "",
+      ]),
+    ]),
+  ].join("\n");
+}
+
 /** llms.txt (llmstxt.org): what the site is and where the machine-readable files live. */
 export function llmsTxt() {
   return [
@@ -188,6 +243,8 @@ export function llmsTxt() {
     "",
     "## Projects",
     "",
+    `- [Work index in English](${absolute(markdownPath("en", "work"))}): the full systems atlas`,
+    `- [Índice de trabajo en español](${absolute(markdownPath("es", "work"))}): el atlas completo`,
     ...projects.map((project) => `- [${project.name}](${project.href}): ${en[project.description]} Stack: ${project.stack}.`),
     "",
     "## Open source",
@@ -198,7 +255,7 @@ export function llmsTxt() {
     "",
     `- [resume.json](${absolute("/resume.json")}): JSON Resume, English`,
     `- [resume.json (español)](${absolute("/es/resume.json")}): JSON Resume, Spanish`,
-    `- [projects.json](${absolute("/projects.json")}): selected projects with stack and repositories`,
+    `- [projects.json](${absolute("/projects.json")}): all projects with stack and repositories`,
     `- [llms-full.txt](${absolute("/llms-full.txt")}): the whole site in one markdown file`,
     "",
     "## Optional",
@@ -264,21 +321,34 @@ export function resume(locale: Locale) {
   };
 }
 
-/** projects.json: the selected work, both languages, for agents and the future MCP server. */
+/** projects.json: the full bilingual atlas; preserve the original featured entries. */
 export function projectsJson() {
   return {
     owner: { name: siteName, github: contact.github, site: `${site}/` },
     allRepositories: contact.projects,
-    projects: projects.map((project) => ({
-      id: project.id,
-      name: project.name,
-      description: { en: en[project.description], es: es[project.description] },
-      kind: { en: en[project.kind], es: es[project.kind] },
-      categories: project.categories,
-      repositories: repositories[project.id],
-      stack: stackList(project.stack),
-      url: project.href,
-      live: "live" in project ? project.live : false,
-    })),
+    projects: [
+      ...projects.map((project) => ({
+        id: project.id,
+        name: project.name,
+        description: { en: en[project.description], es: es[project.description] },
+        kind: { en: en[project.kind], es: es[project.kind] },
+        categories: project.categories,
+        repositories: project.repositories.map(({ name, surface, url, programmingLanguage }) => ({ name, surface, url, ...(programmingLanguage ? { programmingLanguage } : {}) })),
+        stack: stackList(project.stack),
+        url: project.href,
+        live: "live" in project ? project.live : false,
+      })),
+      ...atlasProjects.flatMap((project) => "featured" in project ? [] : [{
+        id: project.slug,
+        name: project.name,
+        description: project.purpose,
+        kind: project.surfaceLabel,
+        categories: project.surfaces.map((surface) => surface === "tool" ? "cli" : surface),
+        repositories: project.repositories,
+        stack: project.stack,
+        url: primaryRepository(project).url,
+        live: false,
+      }]),
+    ],
   };
 }

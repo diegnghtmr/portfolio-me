@@ -1,19 +1,21 @@
 ---
 import DitherPoster from "./DitherPoster.astro";
 import { contact } from "../data/home";
-import { languages, localePath, otherLocale, sections, siteName, t, type Locale } from "../i18n";
+import { languages, localePath, otherLocale, pagePath, sections, siteName, t, type Locale, type Page } from "../i18n";
 
 interface Props {
   locale: Locale;
+  page?: Page;
 }
 
-const { locale } = Astro.props;
+const { locale, page = "home" } = Astro.props;
 const alternate = otherLocale(locale);
+const homePrefix = page === "home" ? "" : localePath(locale);
 const year = new Date().getUTCFullYear();
 const elsewhere = [
   ["github", contact.github],
   ["linkedin", contact.linkedin],
-  ["email", "#contact"],
+  ["email", `${homePrefix}#contact`],
   ["cvPdf", contact.cvPdf[locale]],
 ] as const;
 ---
@@ -29,7 +31,7 @@ const elsewhere = [
       <h2 id="footer-site">{t(locale, "site")}</h2>
       <ul>
         {sections.map((section) => (
-          <li><a href={`#${section}`}>{t(locale, section === "about" ? "experience" : section)}</a></li>
+          <li><a href={`${homePrefix}#${section}`}>{t(locale, section === "about" ? "experience" : section)}</a></li>
         ))}
       </ul>
     </nav>
@@ -41,7 +43,7 @@ const elsewhere = [
     </div>
     <div class="footer-bottom">
       <span>&copy; {year} {siteName}</span>
-      <a href={localePath(alternate)} hreflang={alternate} lang={alternate}>
+      <a href={pagePath(alternate, page)} hreflang={alternate} lang={alternate}>
         {languages[alternate].label}
       </a>
     </div>

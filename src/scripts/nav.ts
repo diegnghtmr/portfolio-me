@@ -22,8 +22,26 @@ const menuToggle = header?.querySelector<HTMLButtonElement>("[data-menu-toggle]"
 const menu = header?.querySelector<HTMLElement>("#primary-nav");
 const indicator = menu?.querySelector<HTMLElement>("[data-nav-indicator]");
 
+const mobile = matchMedia("(max-width: 860px)");
+const setOpen = (open: boolean) => {
+  header?.toggleAttribute("data-menu-open", open);
+  menuToggle?.setAttribute("aria-expanded", String(open));
+};
+if (header && menuToggle && menu) {
+  menuToggle.addEventListener("click", () => {
+    const open = !header.hasAttribute("data-menu-open");
+    setOpen(open);
+    if (open) menu.querySelector<HTMLAnchorElement>("a")?.focus();
+  });
+  header.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !header.hasAttribute("data-menu-open")) return;
+    setOpen(false);
+    menuToggle.focus();
+  });
+  mobile.addEventListener("change", () => setOpen(false));
+}
+
 if (header && menuToggle && menu && indicator) {
-  const mobile = matchMedia("(max-width: 860px)");
   const links = Array.from(menu.querySelectorAll<HTMLAnchorElement>("[data-section-link]"));
   const targets = [document.getElementById("intro"), ...links.map((link) => document.getElementById(link.hash.slice(1)))];
   let current: HTMLAnchorElement | null = null;
@@ -40,21 +58,6 @@ if (header && menuToggle && menu && indicator) {
     }
     schedule();
   }, { rootMargin: "0px 0px -52% 0px" });
-
-  const setOpen = (open: boolean) => {
-    header.toggleAttribute("data-menu-open", open);
-    menuToggle.setAttribute("aria-expanded", String(open));
-  };
-  menuToggle.addEventListener("click", () => {
-    const open = !header.hasAttribute("data-menu-open");
-    setOpen(open);
-    if (open) links[0]?.focus();
-  });
-  header.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || !header.hasAttribute("data-menu-open")) return;
-    setOpen(false);
-    menuToggle.focus();
-  });
 
   const moveIndicator = (link: HTMLAnchorElement | null) => {
     const label = link?.querySelector("span");
@@ -103,7 +106,7 @@ if (header && menuToggle && menu && indicator) {
     if (event.relatedTarget instanceof Node && menu.contains(event.relatedTarget)) return;
     moveIndicator(menu.querySelector("[data-section-link]:hover") ?? current);
   });
-  mobile.addEventListener("change", () => { setOpen(false); schedule(); });
+  mobile.addEventListener("change", schedule);
   addEventListener("resize", schedule);
   addEventListener("themechange", schedule);
   void document.fonts?.ready.then(schedule);

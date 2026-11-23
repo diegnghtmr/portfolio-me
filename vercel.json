@@ -12,7 +12,7 @@
       ]
     },
     {
-      "source": "/(en|es)/",
+      "source": "/(en|es|en/work|es/trabajo)/",
       "headers": [
         {
           "key": "Vary",
