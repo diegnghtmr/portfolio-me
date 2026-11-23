@@ -114,12 +114,16 @@ function enhanceFilters(index: HTMLElement) {
       syncUrl();
     });
   }
-  clear.addEventListener("click", () => {
+  function clearSelection() {
     selected.clear();
     render();
     syncUrl();
+  }
+  clear.addEventListener("click", () => {
+    clearSelection();
     status.focus();
   });
+  index.addEventListener("work:reveal-project", clearSelection);
   toggle.addEventListener("click", () => {
     toggle.setAttribute("aria-expanded", String(panel.toggleAttribute("data-open")));
   });

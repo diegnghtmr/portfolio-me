@@ -7,8 +7,10 @@ type WorkMessages = {
   intro: string;
   home: string;
   index: string;
+  searchHint: string;
   map: string;
   mapKey: string;
+  connects: (from: string, to: string) => string;
   github: string;
   surface: Record<Surface, string>;
   groups: Record<Surface, string>;
@@ -34,8 +36,10 @@ const en: WorkMessages = {
   intro: "Case studies grouped by their primary surface: apps, APIs, tools and infrastructure.",
   home: "Home",
   index: "Work index",
+  searchHint: "Try a project name or technology.",
   map: "Repository maps",
   mapKey: "Each dot is a repo. Lines connect related repos.",
+  connects: (from, to) => `${from} connects to ${to}`,
   github: "Opens the repository on GitHub",
   surface: { web: "Web apps", api: "APIs & services", tool: "Tools & CLIs", infra: "Infrastructure" },
   groups: { web: "Products with a UI", api: "Services & APIs", tool: "Tools & CLIs", infra: "Infrastructure" },
@@ -61,8 +65,10 @@ const es: WorkMessages = {
   intro: "Casos de estudio agrupados por su superficie principal: aplicaciones, API, herramientas e infraestructura.",
   home: "Inicio",
   index: "Índice de trabajo",
+  searchHint: "Prueba con el nombre de un proyecto o una tecnología.",
   map: "Mapas de repositorios",
   mapKey: "Cada punto es un repositorio. Las líneas conectan repositorios relacionados.",
+  connects: (from, to) => `${from} se conecta con ${to}`,
   github: "Abre el repositorio en GitHub",
   surface: { web: "Aplicaciones web", api: "API y servicios", tool: "Herramientas y CLI", infra: "Infraestructura" },
   groups: { web: "Productos con interfaz", api: "Servicios y API", tool: "Herramientas y CLI", infra: "Infraestructura" },

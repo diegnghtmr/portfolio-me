@@ -1,34 +1,45 @@
 ---
-import type { Project } from "../data/projects";
+import { repositoryByName, type Project } from "../data/projects";
 import { workMessages } from "../i18n/work";
 import type { Locale } from "../i18n";
 
 interface Props { project: Project; locale: Locale; decorative?: boolean }
 const { project, locale, decorative = false } = Astro.props;
-const labels = workMessages[locale].roles;
+const m = workMessages[locale];
 const { repositories, edges = [] } = project;
-const count = repositories.length;
-// Diagrams share a frame. Coordinates belong to four topologies, not to individual repos.
+// Place connected nodes in edge order so the topology does not depend on the repo list order.
+const names = [...new Set([...edges.flat(), ...repositories.map(({ name }) => name).sort()])];
+const count = names.length;
 const positions = count === 1 ? [[40, 24]]
-  : count === 2 ? (repositories[0].surface === "api" ? [[58, 24], [22, 24]] : [[22, 24], [58, 24]])
-  : count === 4 ? [[16, 12], [16, 36], [52, 24], [70, 24]]
+  : count === 2 ? (repositoryByName(project, names[0]!).surface === "api" ? [[58, 24], [22, 24]] : [[22, 24], [58, 24]])
+  : count === 4 ? [[16, 12], [52, 24], [16, 36], [70, 24]]
   : [[14, 24], [60, 6], [60, 18], [60, 30], [60, 42]];
-const nodes = repositories.map((repo, i) => ({
-  ...repo,
-  x: positions[i]?.[0] ?? 40,
-  y: positions[i]?.[1] ?? 24,
-  tone: project.slug === "saber-inverso" ? "data" : repo.surface === "cli" ? "mcp" : repo.surface,
+const nodes = new Map(names.map((name, i) => {
+  const repo = repositoryByName(project, name);
+  return [name, {
+    x: positions[i]?.[0] ?? 40,
+    y: positions[i]?.[1] ?? 24,
+    tone: project.slug === "saber-inverso" ? "data" : repo.surface === "cli" ? "mcp" : repo.surface,
+  }];
 }));
-const links = edges.flatMap(([from, to]) => {
-  const a = nodes[from], b = nodes[to];
-  return a && b ? [`M${a.x} ${a.y} Q${(a.x + b.x) / 2} ${a.y} ${b.x} ${b.y}`] : [];
+const links = edges.map(([from, to]) => {
+  const a = nodes.get(from)!, b = nodes.get(to)!;
+  return `M${a.x} ${a.y} Q${(a.x + b.x) / 2} ${a.y} ${b.x} ${b.y}`;
 });
-const description = repositories.map(({ role, name }) => `${labels[role]}: ${name}`).join("; ");
+const roles = repositories.map(({ role, name }) => `${m.roles[role]}: ${name}`).join("; ");
+const connections = new Map<string, string[]>();
+for (const [from, to] of edges) {
+  const destinations = connections.get(from);
+  if (destinations) destinations.push(to);
+  else connections.set(from, [to]);
+}
+const connectionText = [...connections].map(([from, to]) => m.connects(from, to.join(", "))).join("; ");
+const description = connectionText ? `${roles}. ${connectionText}.` : roles;
 ---
 
 <svg class="repo-map" viewBox="0 0 80 48" width="80" height="48" role={decorative ? undefined : "img"} aria-hidden={decorative ? "true" : undefined} aria-label={decorative ? undefined : description}>
   {links.map((d) => <path {d} />)}
-  {nodes.map(({ x, y, tone }) => <circle cx={x} cy={y} r="4" class={`node-${tone}`} />)}
+  {[...nodes].map(([name, { x, y, tone }]) => <circle cx={x} cy={y} r="4" class={`node-${tone}`} data-repository={name} />)}
 </svg>
 
 <style>

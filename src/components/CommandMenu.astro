@@ -1,17 +1,22 @@
 ---
 import { contact, projects } from "../data/home";
+import { atlasProjects } from "../data/projects";
 import { localePath, otherLocale, pagePath, sections, t, workPath, type Locale, type Page } from "../i18n";
 import { workMessages } from "../i18n/work";
 
 interface Props { locale: Locale; page?: Page }
 const { locale, page = "home" } = Astro.props;
 const homePrefix = page === "home" ? "" : localePath(locale);
+const m = workMessages[locale];
+const projectItems = page === "work"
+  ? atlasProjects.map(({ name, slug, stack }) => ({ label: name, target: `#${slug}`, stack: stack.join(", ") || undefined }))
+  : projects.map(({ name, id }) => ({ label: name, target: `#${id}` }));
 const groups = [
   { label: 'sections', items: [
     ...sections.map((id) => ({ label: t(locale, id === 'work' ? 'selectedWork' : id === 'about' ? 'experience' : id), target: `${homePrefix}#${id}` })),
-    { label: workMessages[locale].index, target: workPath(locale) },
+    { label: m.index, target: workPath(locale) },
   ] },
-  { label: 'projects', items: projects.map(({ name, id }) => ({ label: name, target: `${homePrefix}#${id}` })) },
+  { label: 'projects', items: projectItems },
   { label: 'actions', items: [
     ...(page === "home" ? [{ label: t(locale, 'copyEmail'), target: 'copy' }] : []),
     { label: t(locale, 'switchTheme'), target: 'theme' },
@@ -33,7 +38,7 @@ const groups = [
         <p class="group-title" id={`command-group-${label}`} role="presentation">{t(locale, label)}</p>
         <ul role="presentation">
           {items.map((item, i) => (
-            <li id={`command-${label}-${i}`} role="option" aria-selected="false" data-command-target={item.target} data-command-label={item.label}>
+            <li id={`command-${label}-${i}`} role="option" aria-selected="false" data-command-target={item.target} data-command-label={item.label} data-command-stack={'stack' in item ? item.stack : undefined}>
               <span class="option-name" lang={'lang' in item ? item.lang : undefined}><i aria-hidden="true"></i>{item.label}</span><span class="enter" aria-hidden="true">Enter</span>
             </li>
           ))}
@@ -41,7 +46,7 @@ const groups = [
       </li>
     ))}
   </ul>
-  <p class="empty" data-command-empty data-prefix={t(locale, 'nothingMatches')} data-hint={t(locale, 'searchHint')} role="status" hidden></p>
+  <p class="empty" data-command-empty data-prefix={t(locale, 'nothingMatches')} data-hint={page === 'work' ? m.searchHint : t(locale, 'searchHint')} role="status" hidden></p>
   <p class="instructions"><span><kbd>↑↓</kbd>{t(locale, 'move')}</span><span><kbd>Enter</kbd>{t(locale, 'open')}</span><span><kbd>Esc</kbd>{t(locale, 'close')}</span></p>
 </dialog>
 

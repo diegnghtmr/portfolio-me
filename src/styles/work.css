@@ -91,6 +91,7 @@
 .atlas-group-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--unit); padding-block-end: var(--unit); border-block-end: 1px solid var(--hair); }
 .atlas-group-head h2, .atlas-empty h2 { font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; }
 .group-count { flex: none; color: var(--subtle); }
+.atlas-projects > li[id] { scroll-margin-block-start: 84px; }
 .atlas-projects li + li { border-block-start: 1px solid var(--hair); }
 .atlas-project {
   display: grid;

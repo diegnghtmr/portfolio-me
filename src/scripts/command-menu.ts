@@ -47,7 +47,7 @@ if (dialog && trigger && query && list && empty && typeof dialog.showModal === "
     const terms = normalize(query.value).trim().split(/\s+/);
     visible = options.filter((option) => {
       const group = option.closest("[data-command-group]")?.firstElementChild?.textContent ?? "";
-      const label = normalize(`${option.dataset.commandLabel ?? ""} ${group}`);
+      const label = normalize(`${option.dataset.commandLabel ?? ""} ${option.dataset.commandStack ?? ""} ${group}`);
       option.hidden = !terms.every((term) => label.includes(term));
       return !option.hidden;
     });
@@ -82,7 +82,10 @@ if (dialog && trigger && query && list && empty && typeof dialog.showModal === "
     else if (target.startsWith("#")) {
       const destination = document.getElementById(target.slice(1));
       if (!destination) return;
-      if (location.hash !== target) history.pushState(null, "", target);
+      const filteredOut = destination.matches("[data-project][hidden]");
+      if (location.hash !== target || filteredOut) history.pushState(null, "", target);
+      // Let the index reveal the row in this history entry; Back restores the previous filters.
+      if (filteredOut) destination.dispatchEvent(new Event("work:reveal-project", { bubbles: true }));
       if (!destination.hasAttribute("tabindex")) destination.tabIndex = -1;
       destination.focus({ preventScroll: true });
       destination.scrollIntoView({ block: "start" });

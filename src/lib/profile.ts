@@ -5,7 +5,7 @@ import { localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, t
 import { en } from "../i18n/en";
 import { es } from "../i18n/es";
 import { workMessages } from "../i18n/work";
-import { atlasGroups, projectHref } from "./work";
+import { atlasGroups, projectHref, projectSurfaces } from "./work";
 
 export const site = "https://diegnghtmr.me";
 export const buildDate = new Date().toISOString().slice(0, 10);
@@ -321,6 +321,10 @@ export function resume(locale: Locale) {
   };
 }
 
+const serializeRepository = ({ name, surface, url, role, programmingLanguage }: Repository) => ({
+  name, surface, url, role, ...(programmingLanguage ? { programmingLanguage } : {}),
+});
+
 /** projects.json: the full bilingual atlas; preserve the original featured entries. */
 export function projectsJson() {
   return {
@@ -333,7 +337,7 @@ export function projectsJson() {
         description: { en: en[project.description], es: es[project.description] },
         kind: { en: en[project.kind], es: es[project.kind] },
         categories: project.categories,
-        repositories: project.repositories.map(({ name, surface, url, programmingLanguage }) => ({ name, surface, url, ...(programmingLanguage ? { programmingLanguage } : {}) })),
+        repositories: project.repositories.map(serializeRepository),
         stack: stackList(project.stack),
         url: project.href,
         live: "live" in project ? project.live : false,
@@ -343,8 +347,8 @@ export function projectsJson() {
         name: project.name,
         description: project.purpose,
         kind: project.surfaceLabel,
-        categories: project.surfaces.map((surface) => surface === "tool" ? "cli" : surface),
-        repositories: project.repositories,
+        categories: projectSurfaces(project).map((surface) => surface === "tool" ? "cli" : surface),
+        repositories: project.repositories.map(serializeRepository),
         stack: project.stack,
         url: primaryRepository(project).url,
         live: false,

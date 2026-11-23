@@ -5,7 +5,7 @@ import { siteHandle, t, type Locale } from "../i18n";
 import { workMessages } from "../i18n/work";
 import Base from "../layouts/Base.astro";
 import { workJsonLd } from "../lib/profile";
-import { atlasFacets, atlasGroups, facetOptions, projectHref, repoBucket } from "../lib/work";
+import { atlasFacets, atlasGroups, facetOptions, projectHref, projectSurfaces, repoBucket } from "../lib/work";
 import "../styles/work.css";
 
 interface Props { locale: Locale }
@@ -81,16 +81,17 @@ const facetChoices = facetOptions(locale);
             </header>
             <ul class="atlas-projects" role="list">
               {projects.map((project) => {
+                const titleId = `${project.slug}-title`;
                 const externalLabel = project.caseStudy ? undefined : `${project.slug}-external`;
                 return (
-                  <li data-project data-surface={project.surfaces.join(" ")} data-repos={repoBucket(project)} data-stack={project.stackTags.join(" ")}>
-                    <a class="atlas-project" href={projectHref(locale, project)} rel={project.caseStudy ? undefined : "external"} aria-labelledby={[project.slug, externalLabel].filter(Boolean).join(" ")}>
+                  <li id={project.slug} data-project data-surface={projectSurfaces(project).join(" ")} data-repos={repoBucket(project)} data-stack={project.stackTags.join(" ")}>
+                    <a class="atlas-project" href={projectHref(locale, project)} rel={project.caseStudy ? undefined : "external"} aria-labelledby={[titleId, externalLabel].filter(Boolean).join(" ")}>
                       <div class="atlas-repositories">
                         <RepositoryMap {project} {locale} />
                         <span>{m.repos(project.repositories.length)}</span>
                       </div>
                       <div class="atlas-project-body">
-                        <h3 id={project.slug}>{project.name}</h3>
+                        <h3 id={titleId}>{project.name}</h3>
                         <p class="atlas-purpose">{project.purpose[locale]}</p>
                         <p class="atlas-meta">
                           {project.surfaceLabel[locale]}{project.stack.length > 0 && <><span aria-hidden="true"> · </span>{project.stack.join(", ")}</>}

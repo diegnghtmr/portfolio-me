@@ -16,6 +16,35 @@ const workRoutes = { en: "/en/work/", es: "/es/trabajo/" };
 const workTitles = { en: "Work", es: "Trabajo" };
 const pageRoutes = ["/en/", "/es/", ...Object.values(workRoutes)];
 const trainingBots = ["GPTBot", "ClaudeBot", "Google-Extended", "CCBot", "Applebot-Extended"];
+const github = "https://github.com/diegnghtmr";
+const repoUrl = (name) => `${github}/${name}`;
+const repoSearch = (name) => `${github}?tab=repositories&q=${name}`;
+const featuredDescriptions = [
+  ["Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.", "Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."],
+  ["Ordering platform split into identity, menu, order and traceability services plus a role-based UI.", "Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."],
+  ["Academic planning for Universidad del Quindío: curriculum graph, degree progress and semester simulation.", "Planeación académica para la Universidad del Quindío: grafo curricular, avance de carrera y simulación de semestres."],
+  ["Text similarity and hierarchical clustering over scientific abstracts, with traces and dendrograms.", "Similitud de textos y agrupamiento jerárquico sobre resúmenes científicos, con trazas y dendrogramas."],
+  ["Elective enrollment with server-generated arrival order and per-group capacity under row-level locking.", "Inscripción a electivas con orden de llegada generado en el servidor y cupos por grupo bajo bloqueo de filas."],
+  ["Spanish writing skills plus a verifier that measures whether a text follows them. Runs on Node 22.6 with nothing installed.", "Skills de redacción en español y un verificador que mide si un texto las cumple. Corre en Node 22.6 sin instalar nada."],
+];
+const foodServices = ["user-microservice", "food-court-microservice", "order-microservice", "traceability-microservice"];
+const featuredContracts = [
+  [["api", "web"], [["studydeck-backend", "api", "Java"], ["studydeck-frontend", "web"]], ["Java 25", "pgvector", "React 19"], repoUrl("studydeck-backend")],
+  [["4 api", "web"], [["food-court-ui", "web"], ...foodServices.map((name) => [name, "api", "Java"])], ["Spring Boot", "React"], repoSearch("food-court")],
+  [["api", "web"], [["brujula-backend", "api", "Java"], ["brujula-frontend", "web"]], ["Spring Modulith", "Keycloak"], repoSearch("brujula")],
+  [["api", "web"], [["legajo-backend", "api", "Java"], ["legajo-frontend", "web", "TypeScript"]], ["Java 25", "React 19"], repoUrl("legajo-frontend"), true],
+  [["api", "web"], [["profundiza-uq-backend", "api", "Go"], ["profundiza-uq-frontend", "web"]], ["Go", "pgx", "React 19"], repoUrl("profundiza-uq-backend")],
+  [["cli"], [["writing-harness", "cli", "JavaScript"]], ["Node", "zero deps"], repoUrl("writing-harness")],
+];
+const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
+const workRows = (html) => [...html.matchAll(/(<li\b[^>]*\sdata-project(?:\s[^>]*|)>)([\s\S]*?)<\/li>/g)];
+const commandProjects = (html) => {
+  const group = html.match(/<li\b[^>]*aria-labelledby="command-group-projects"[^>]*>[\s\S]*?<\/ul>/)?.[0];
+  assert.ok(group, "project command group");
+  return [...group.matchAll(/<li\b[^>]*role="option"[^>]*>/g)].map(([tag]) => ({
+    name: attr(tag, "data-command-label"), target: attr(tag, "data-command-target"), stack: attr(tag, "data-command-stack"),
+  }));
+};
 // A site URL must map to a file in dist (directory URLs map to index.html).
 const resolves = (url) => {
   const path = new URL(url, site).pathname;
@@ -131,6 +160,31 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   }
 });
 
+test("projects.json adds repository roles without changing the original six entries", () => {
+  const { projects } = JSON.parse(read("projects.json"));
+  const specializedRoles = new Map([
+    ...foodServices.map((name, index) => [name, ["identity", "menu", "orders", "traceability"][index]]),
+    ["savia-mobile", "mobile"], ["savia-mcp", "mcp"], ["resume-maker", "pipeline"],
+  ]);
+  for (const project of projects) {
+    for (const { name, surface, role } of project.repositories) {
+      assert.equal(role, specializedRoles.get(name) ?? surface, name);
+    }
+  }
+  assert.deepEqual(projects.slice(0, 6).map(({ repositories, ...project }) => ({
+    ...project, repositories: repositories.map(({ role, ...repository }) => repository),
+  })), featuredContracts.map(([categories, repos, stack, url, live = false], index) => {
+    const [en, es] = featuredDescriptions[index];
+    const [enKind, esKind] = index === 5 ? ["Headless, 1 repo", "Sin interfaz, 1 repo"]
+      : [`System, ${repos.length} repos`, `Sistema, ${repos.length} repos`];
+    return {
+      id: `p${index + 1}`, name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
+      repositories: repos.map(([name, surface, programmingLanguage]) => ({ name, surface, url: repoUrl(name), ...(programmingLanguage ? { programmingLanguage } : {}) })),
+      stack, url, live,
+    };
+  }));
+});
+
 for (const locale of locales) {
   const path = workRoutes[locale];
   const other = locale === "en" ? "es" : "en";
@@ -162,6 +216,75 @@ for (const locale of locales) {
     }
   });
 
+  test(`${locale}: the work command menu searches all project names and stacks and targets their rows`, () => {
+    const html = read(`${path.slice(1)}index.html`);
+    const options = commandProjects(html);
+    assert.equal(options.length, 14);
+    assert.deepEqual(new Set(options.map(({ name }) => name)), new Set(atlasNames));
+    const rows = workRows(html);
+    const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
+    const items = graph.find((node) => node["@type"] === "ItemList").itemListElement.map(({ item }) => item);
+    for (const { name, target, stack } of options) {
+      const item = items.find((item) => item.name === name);
+      assert.equal(target, new URL(item["@id"]).hash, name);
+      const row = rows.find(([, tag]) => attr(tag, "id") === target.slice(1));
+      assert.ok(row, target);
+      assert.match(row[2], new RegExp(`<h3\\b[^>]*>${name}</h3>`));
+      assert.equal(stack, item.keywords ?? undefined, name);
+    }
+    assert.equal(options.find(({ name }) => name === "Saber Inverso").target, "#saber-inverso");
+    assert.match(options.find(({ name }) => name === "Profundiza UQ").stack, /^Go\b/);
+  });
+
+  test(`${locale}: Includes surface counts repositories, without moving Savia out of the web group`, () => {
+    const html = read(`${path.slice(1)}index.html`);
+    const rows = workRows(html);
+    const savia = rows.find(([, , body]) => /<h3\b[^>]*>Savia<\/h3>/.test(body));
+    assert.ok(savia);
+    assert.equal(attr(savia[1], "data-surface"), "web api tool");
+    const webGroup = html.match(/<section\b[^>]*data-group="web"[^>]*>[\s\S]*?<\/section>/)?.[0];
+    assert.ok(webGroup?.includes(savia[0]));
+    const tools = rows.filter(([, tag]) => attr(tag, "data-surface").split(" ").includes("tool"));
+    assert.deepEqual(tools.map(([, , body]) => body.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1]).sort(),
+      ["Savia", "doc-sentinel", "resume-maker", "writing-harness"]);
+    const facet = html.match(/<button\b[^>]*data-facet="surface"[^>]*value="tool"[^>]*>[\s\S]*?<\/button>/)?.[0];
+    assert.match(facet, /data-facet-count>4<\/span>/);
+  });
+
+  test(`${locale}: primary links and repository map edges match their named repositories`, () => {
+    const rows = workRows(read(`${path.slice(1)}index.html`));
+    const byName = new Map(rows.map(([, , body]) => [body.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1], body]));
+    assert.deepEqual(Object.fromEntries([...byName].map(([name, row]) => [name, attr(row.match(/<a\b[^>]*>/)[0], "href")])), {
+      "StudyDeck AI": repoUrl("studydeck-backend"), "Food Court": repoUrl("food-court-ui"), Brújula: repoUrl("brujula-backend"),
+      Legajo: repoUrl("legajo-frontend"), "Profundiza UQ": repoUrl("profundiza-uq-backend"), Savia: repoUrl("savia-web"),
+      "Academic Triage": repoUrl("academic-triage-frontend"), Vale: repoUrl("vale"), "Saber Inverso": repoUrl("saber-inverso"),
+      NexRide: repoUrl("NexRide"), "writing-harness": repoUrl("writing-harness"), "doc-sentinel": repoUrl("doc-sentinel"),
+      "resume-maker": repoUrl("resume-maker"), "Enterprise Monitoring Stack": repoUrl("enterprise-monitoring-stack"),
+    });
+    const edgesFor = (name) => {
+      const row = byName.get(name);
+      const nodes = new Map([...row.matchAll(/<circle\b[^>]*>/g)].map(([tag]) => [`${attr(tag, "cx")} ${attr(tag, "cy")}`, attr(tag, "data-repository")]));
+      return [...row.matchAll(/<path\b[^>]*\sd="M(\d+ \d+) Q[\d.]+ [\d.]+ (\d+ \d+)"/g)]
+        .map(([, from, to]) => [nodes.get(from), nodes.get(to)]);
+    };
+    assert.deepEqual(edgesFor("Food Court"), foodServices.map((name) => ["food-court-ui", name]));
+    assert.deepEqual(edgesFor("Savia"), [["savia-web", "savia-backend"], ["savia-mobile", "savia-backend"], ["savia-backend", "savia-mcp"]]);
+  });
+
+  test(`${locale}: repository map accessible labels describe roles and connections`, () => {
+    const rows = workRows(read(`${path.slice(1)}index.html`));
+    const labelFor = (name) => {
+      const row = rows.find(([, , body]) => body.includes(`>${name}</h3>`));
+      return attr(row[2].match(/<svg\b[^>]*>/)[0], "aria-label");
+    };
+    const connects = locale === "en" ? "connects to" : "se conecta con";
+    const foodRoles = locale === "en" ? ["Identity", "Menu", "Orders", "Traceability"] : ["Identidad", "Menú", "Pedidos", "Trazabilidad"];
+    assert.equal(labelFor("Food Court"), `Web: food-court-ui; ${foodServices.map((name, i) => `${foodRoles[i]}: ${name}`).join("; ")}. food-court-ui ${connects} ${foodServices.join(", ")}.`);
+    const mobile = locale === "en" ? "Mobile" : "Móvil";
+    assert.equal(labelFor("Savia"), `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend; savia-mobile ${connects} savia-backend; savia-backend ${connects} savia-mcp.`);
+    assert.equal(labelFor("Saber Inverso"), "Web: saber-inverso");
+  });
+
   test(`${locale}: work index publishes a Markdown twin and linked structured data`, () => {
     const folder = path.slice(1);
     const html = read(`${folder}index.html`);
@@ -187,6 +310,8 @@ for (const locale of locales) {
     assert.ok(header);
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
     assert.ok(header.includes("data-nav-indicator"));
+    assert.deepEqual(commandProjects(home), projectNames.map((name, i) => ({ name, target: `#p${i + 1}`, stack: undefined })));
+    for (let i = 1; i <= 6; i++) assert.ok(new RegExp(`<li class="card" id="p${i}"`).test(home), `home card p${i}`);
   });
 }
 
