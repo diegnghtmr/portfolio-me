@@ -15,6 +15,8 @@ const read = (path) => readFileSync(join(dist, path), "utf8");
 const locales = ["en", "es"];
 // Card ids are stable per project (home anchors, projects.json); the ranking never reassigns them.
 const featuredIds = ["p4", "p1", "p7", "p3", "p2", "p5"];
+// projects.json ids identify the project and never follow home placement.
+const feedIds = ["p4", "p1", "academic-triage", "p3", "p2", "p5"];
 const atlasNames = [
   "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "NexRide",
   "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
@@ -182,6 +184,16 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
+test("projects.json keeps every previously published project id", () => {
+  const { projects } = JSON.parse(read("projects.json"));
+  const ids = Object.fromEntries(projects.map(({ name, id }) => [name, id]));
+  assert.deepEqual(ids, {
+    "StudyDeck AI": "p1", "Food Court": "p2", "Brújula": "p3", Legajo: "p4", "Profundiza UQ": "p5", "writing-harness": "p6",
+    Savia: "savia", "Academic Triage": "academic-triage", Vale: "vale", "Saber Inverso": "saber-inverso", "doc-sentinel": "doc-sentinel",
+    "resume-maker": "resume-maker", "Enterprise Monitoring Stack": "enterprise-monitoring-stack", NexRide: "nexride",
+  });
+});
+
 test("projects.json describes the top six with their featured card and repository metadata", () => {
   const { projects } = JSON.parse(read("projects.json"));
   const specializedRoles = new Map([
@@ -199,7 +211,7 @@ test("projects.json describes the top six with their featured card and repositor
     const [en, es] = featuredDescriptions[index];
     const [enKind, esKind] = [`System, ${repos.length} repos`, `Sistema, ${repos.length} repos`];
     return {
-      id: featuredIds[index], name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
+      id: feedIds[index], name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
       repositories: repos.map(([name, surface, programmingLanguage]) => ({ name, surface, url: repoUrl(name), ...(programmingLanguage ? { programmingLanguage } : {}) })),
       stack, url, live,
     };
@@ -388,6 +400,13 @@ for (const locale of locales) {
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
     assert.ok(header.includes("data-nav-indicator"));
     assert.deepEqual(commandProjects(home), projectNames.map((name, i) => ({ name, target: `#${featuredIds[i]}`, stack: undefined })));
+  });
+
+  test(`${locale}: retired home anchor #p6 still leads to the writing-harness case study`, () => {
+    const home = read(`${locale}/index.html`);
+    assert.match(home, new RegExp(`<span id="p6" hidden data-retired-card="${caseRoute(locale, "writing-harness")}"[^>]*></span>`));
+    assert.match(home, /location\.replace\(path\)/);
+    assert.equal([...home.matchAll(/\sid="p6"/g)].length, 1);
   });
 
   test(`${locale}: home cards follow the top-six ranking and keep principle evidence linked by project`, () => {
@@ -873,7 +892,7 @@ for (const slug of publishedSlugs) {
         const alternate = caseRoute(lang === "x-default" ? "en" : lang, slug);
         assert.ok(xml.includes(`hreflang="${lang}" href="${site}${alternate}"`), lang);
       }
-      if (project.id.startsWith("p")) {
+      if (featuredIds.includes(project.id)) {
         const home = read(`${locale}/index.html`);
         assert.match(home, new RegExp(`<li class="card" id="${project.id}"[^>]*>\\s*<a href="${path}"`));
       }

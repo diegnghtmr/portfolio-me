@@ -1,6 +1,6 @@
 // Machine-readable views of the shared, bilingual profile and project content.
 import { contact, experience, openSource, principles, projects, stack } from "../data/home";
-import { atlasProjects, primaryRepository, type Repository } from "../data/projects";
+import { atlasProjects, publishedProjectIds, primaryRepository, type Repository } from "../data/projects";
 import { caseStudyPath, localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, type Page } from "../i18n";
 import { en } from "../i18n/en";
 import { es } from "../i18n/es";
@@ -364,7 +364,7 @@ export function projectsJson(studies: CaseStudies) {
     projects: atlasProjects.map((project) => {
       const card = cards.get(project.slug);
       return {
-        id: card?.id ?? project.slug,
+        id: publishedProjectIds[project.slug] ?? project.slug,
         name: project.name,
         description: card ? { en: en[card.description], es: es[card.description] } : project.purpose,
         kind: card ? { en: en[card.kind], es: es[card.kind] } : project.surfaceLabel,

@@ -184,6 +184,13 @@ const projectCard = (project: Project & { featured: Featured }) => ({
   repositories: project.repositories,
 });
 
+/** projects.json ids published before the ranking; they identify the project, never its home slot. */
+export const publishedProjectIds: Readonly<Record<string, string>> = {
+  "studydeck-ai": "p1", "food-court": "p2", brujula: "p3", legajo: "p4", "profundiza-uq": "p5", "writing-harness": "p6",
+};
+/** Home card anchors whose project left the featured six; links to them still reach that case study. */
+export const retiredCardAnchors = [{ id: "p6", slug: "writing-harness" }] as const;
+
 export const featuredProjects = atlasProjects.flatMap((project) =>
   "featured" in project && featuredSlugs.has(project.slug) ? [projectCard(project)] : [],
 );

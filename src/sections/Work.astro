@@ -1,6 +1,6 @@
 ---
 import { projects } from "../data/home";
-import { atlasProjects } from "../data/projects";
+import { atlasProjects, retiredCardAnchors } from "../data/projects";
 import { caseStudyPath, t, workPath, type Locale } from "../i18n";
 import { getCaseStudies } from "../lib/case-studies";
 
@@ -28,6 +28,14 @@ const studies = await getCaseStudies();
       </li>
     ))}
   </ul>
+  {retiredCardAnchors.map(({ id, slug }) => <span {id} hidden data-retired-card={caseStudyPath(locale, slug)}></span>)}
+  <script is:inline>
+    // Old home anchors (#p6) still reach the case study of the project that left the featured six.
+    {
+    const followRetired = () => { const path = document.getElementById(location.hash.slice(1))?.dataset.retiredCard; if (path) location.replace(path); };
+    followRetired(); addEventListener("hashchange", followRetired);
+    }
+  </script>
 </section>
 
 <style>
