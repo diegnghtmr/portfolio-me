@@ -20,7 +20,7 @@ function repo(name: string, surface: "web" | "api" | "cli" | "infra", role: Repo
 }
 
 type Featured = {
-  id: `p${1 | 2 | 3 | 4 | 5 | 6}`;
+  id: `p${1 | 2 | 3 | 4 | 5 | 7}`; // Stable per project: anchors and projects.json ids; never reuse a retired id (p6 was writing-harness).
   description: MessageKey;
   kind: MessageKey;
   categories: readonly string[];
@@ -61,7 +61,7 @@ export const atlasProjects = [
     stackLayers: { frontend: ["React 19"], backend: ["Java 25"], tooling: ["OpenAPI"] },
     repositories: [repo("legajo-backend", "api", "api", "Java"), repo("legajo-frontend", "web", "web", "TypeScript")],
     primaryRepository: "legajo-frontend", edges: [["legajo-backend", "legajo-frontend"]],
-    featured: { id: "p1", description: "legajo", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, React 19", shape: "orbit", seed: 4, live: true },
+    featured: { id: "p4", description: "legajo", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, React 19", shape: "orbit", seed: 4, live: true },
   },
   {
     slug: "studydeck-ai", name: "StudyDeck AI", ...webApi,
@@ -70,7 +70,7 @@ export const atlasProjects = [
     stackLayers: { frontend: ["React", "TypeScript"], backend: ["Java 25", "Spring Boot"], data: ["PostgreSQL/pgvector"] },
     repositories: [repo("studydeck-backend", "api", "api", "Java"), repo("studydeck-frontend", "web", "web", "TypeScript")],
     primaryRepository: "studydeck-backend", edges: [["studydeck-backend", "studydeck-frontend"]],
-    featured: { id: "p2", description: "studydeck", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, pgvector, React 19", shape: "dunes", seed: 1 },
+    featured: { id: "p1", description: "studydeck", kind: "systemTwo", categories: ["api", "web"], stack: "Java 25, pgvector, React 19", shape: "dunes", seed: 1 },
   },
   {
     slug: "academic-triage", name: "Academic Triage", ...webApi,
@@ -79,7 +79,7 @@ export const atlasProjects = [
     stackLayers: { frontend: ["Angular 20"], backend: ["Java 21", "Spring Boot 3.5"], data: ["MariaDB 11"] },
     repositories: [repo("academic-triage-frontend", "web", "web", "TypeScript"), repo("academic-triage-system", "api", "api", "Java")],
     primaryRepository: "academic-triage-frontend", edges: [["academic-triage-frontend", "academic-triage-system"]],
-    featured: { id: "p3", description: "academicTriage", kind: "systemTwo", categories: ["api", "web"], stack: "Angular 20, Spring Boot 3.5", href: searchRepos("academic-triage"), shape: "sphere", seed: 6, live: true },
+    featured: { id: "p7", description: "academicTriage", kind: "systemTwo", categories: ["api", "web"], stack: "Angular 20, Spring Boot 3.5", href: searchRepos("academic-triage"), shape: "sphere", seed: 6, live: true },
   },
   {
     slug: "brujula", name: "Brújula", ...webApi,
@@ -88,7 +88,7 @@ export const atlasProjects = [
     stackLayers: { frontend: ["React", "TypeScript"], backend: ["Spring Modulith", "Keycloak"], tooling: ["OpenAPI"] },
     repositories: [repo("brujula-backend", "api", "api", "Java"), repo("brujula-frontend", "web", "web", "TypeScript")],
     primaryRepository: "brujula-backend", edges: [["brujula-backend", "brujula-frontend"]],
-    featured: { id: "p4", description: "brujula", kind: "systemTwo", categories: ["api", "web"], stack: "Spring Modulith, Keycloak", href: searchRepos("brujula"), shape: "wave", seed: 3 },
+    featured: { id: "p3", description: "brujula", kind: "systemTwo", categories: ["api", "web"], stack: "Spring Modulith, Keycloak", href: searchRepos("brujula"), shape: "wave", seed: 3 },
   },
   {
     slug: "food-court", name: "Food Court", ...webApi, surfaceLabel: { en: "Web + 4 services", es: "Web + 4 servicios" },
@@ -98,7 +98,7 @@ export const atlasProjects = [
     repositories: [repo("food-court-ui", "web"), repo("user-microservice", "api", "identity", "Java"), repo("food-court-microservice", "api", "menu", "Java"), repo("order-microservice", "api", "orders", "Java"), repo("traceability-microservice", "api", "traceability", "Java")],
     primaryRepository: "food-court-ui",
     edges: [["food-court-ui", "user-microservice"], ["food-court-ui", "food-court-microservice"], ["food-court-ui", "order-microservice"], ["food-court-ui", "traceability-microservice"]],
-    featured: { id: "p5", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: searchRepos("food-court"), shape: "ripple", seed: 2 },
+    featured: { id: "p2", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: searchRepos("food-court"), shape: "ripple", seed: 2 },
   },
   {
     slug: "profundiza-uq", name: "Profundiza UQ", ...webApi,
@@ -107,7 +107,7 @@ export const atlasProjects = [
     stackLayers: { frontend: ["React", "TypeScript"], backend: ["Go", "chi"], data: ["pgx", "PostgreSQL"] },
     repositories: [repo("profundiza-uq-backend", "api", "api", "Go"), repo("profundiza-uq-frontend", "web", "web", "TypeScript")],
     primaryRepository: "profundiza-uq-backend", edges: [["profundiza-uq-backend", "profundiza-uq-frontend"]],
-    featured: { id: "p6", description: "profundiza", kind: "systemTwo", categories: ["api", "web"], stack: "Go, pgx, React 19", shape: "capacity", seed: 5 },
+    featured: { id: "p5", description: "profundiza", kind: "systemTwo", categories: ["api", "web"], stack: "Go, pgx, React 19", shape: "capacity", seed: 5 },
   },
   {
     slug: "doc-sentinel", name: "doc-sentinel", ...toolOnly,

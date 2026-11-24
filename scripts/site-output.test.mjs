@@ -13,6 +13,8 @@ const dist = join(root, "dist");
 const site = "https://diegnghtmr.me";
 const read = (path) => readFileSync(join(dist, path), "utf8");
 const locales = ["en", "es"];
+// Card ids are stable per project (home anchors, projects.json); the ranking never reassigns them.
+const featuredIds = ["p4", "p1", "p7", "p3", "p2", "p5"];
 const atlasNames = [
   "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "NexRide",
   "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
@@ -197,7 +199,7 @@ test("projects.json describes the top six with their featured card and repositor
     const [en, es] = featuredDescriptions[index];
     const [enKind, esKind] = [`System, ${repos.length} repos`, `Sistema, ${repos.length} repos`];
     return {
-      id: `p${index + 1}`, name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
+      id: featuredIds[index], name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
       repositories: repos.map(([name, surface, programmingLanguage]) => ({ name, surface, url: repoUrl(name), ...(programmingLanguage ? { programmingLanguage } : {}) })),
       stack, url, live,
     };
@@ -385,17 +387,17 @@ for (const locale of locales) {
     assert.ok(header);
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
     assert.ok(header.includes("data-nav-indicator"));
-    assert.deepEqual(commandProjects(home), projectNames.map((name, i) => ({ name, target: `#p${i + 1}`, stack: undefined })));
+    assert.deepEqual(commandProjects(home), projectNames.map((name, i) => ({ name, target: `#${featuredIds[i]}`, stack: undefined })));
   });
 
   test(`${locale}: home cards follow the top-six ranking and keep principle evidence linked by project`, () => {
     const home = read(`${locale}/index.html`);
     const cards = [...home.matchAll(/<li class="card" id="(p\d)"[^>]*>\s*<a\b[^>]*>\s*<div\b[^>]*data-bayer="([^"]+)"[^>]*>\s*<\/div>\s*<h3\b[^>]*>([^<]+)([\s\S]*?)<\/h3>/g)];
     assert.deepEqual(cards.map(([, id, shape, name, titleSuffix]) => [id, shape, name.trim(), titleSuffix.includes('class="status"')]),
-      projectNames.map((name, i) => [`p${i + 1}`, ["orbit", "dunes", "sphere", "wave", "ripple", "capacity"][i], name, featuredContracts[i][4] ?? false]));
+      projectNames.map((name, i) => [featuredIds[i], ["orbit", "dunes", "sphere", "wave", "ripple", "capacity"][i], name, featuredContracts[i][4] ?? false]));
     const principles = home.match(/<section\b[^>]*aria-labelledby="principles-heading"[^>]*>[\s\S]*?<\/section>/)[0];
     assert.deepEqual([...principles.matchAll(/<a href="#(p\d)"[^>]*><span\b[^>]*><small[^>]*>[^<]*<\/small>([^<]+)<\/span>/g)]
-      .map(([, id, name]) => [id, name]), [["p4", "Brújula"], ["p2", "StudyDeck AI"], ["p6", "Profundiza UQ"]]);
+      .map(([, id, name]) => [id, name]), [["p3", "Brújula"], ["p1", "StudyDeck AI"], ["p5", "Profundiza UQ"]]);
   });
 }
 
