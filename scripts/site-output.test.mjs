@@ -508,15 +508,14 @@ test("S25: home and dossier defer sections after their first, and the footer", (
   }
 });
 
-test("S25: the footer lets the portrait script choose the sole image URL", () => {
+test("S25: the footer portrait has a static first frame per theme that works without the script", () => {
   for (const locale of locales) {
     const html = read(`${locale}/index.html`);
     const figure = html.match(/<figure\b[^>]*\bdata-portrait="[^"]+"[^>]*>[\s\S]*?<\/figure>/)?.[0];
     assert.ok(figure, locale);
-    const markup = figure.replace(/<noscript>[\s\S]*?<\/noscript>/g, "");
-    assert.equal([...markup.matchAll(/<img\b/g)].length, 1);
-    assert.doesNotMatch(markup, /<img\b[^>]*\bsrc="\/dither\/portrait-/);
-    assert.match(figure, /<noscript>\s*<img\b[^>]*\bsrc="\/dither\/portrait-dark-0\.png"/);
+    const images = [...figure.matchAll(/<img\b[^>]*>/g)].map(([tag]) => [attr(tag, "class")?.split(" ")[0], attr(tag, "src"), attr(tag, "loading")]);
+    assert.deepEqual(images, [["dark", "/dither/portrait-dark-0.png", "lazy"], ["light", "/dither/portrait-light-0.png", "lazy"]]);
+    assert.doesNotMatch(figure, /<noscript>/);
   }
 });
 

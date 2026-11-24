@@ -1,6 +1,6 @@
 const portrait = document.querySelector<HTMLElement>("[data-portrait]");
-const image = portrait?.querySelector<HTMLImageElement>("img");
-if (portrait?.dataset.portrait && image) {
+const images = { dark: portrait?.querySelector<HTMLImageElement>("img.dark"), light: portrait?.querySelector<HTMLImageElement>("img.light") };
+if (portrait?.dataset.portrait && images.dark && images.light) {
   const frames = JSON.parse(portrait.dataset.portrait) as Record<"dark" | "light", (string | null)[]>;
   const activeTheme = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
@@ -10,7 +10,9 @@ if (portrait?.dataset.portrait && image) {
   let target = 0;
   let timer = 0;
   const show = (fallback = false) => {
-    const active = frames[activeTheme()];
+    const theme = activeTheme();
+    const active = frames[theme];
+    const image = images[theme]!;
     const frame = active[index];
     const url = frame && (index === 0 || loaded.get(frame)) ? frame : fallback ? active[0] : null;
     if (url && image.getAttribute("src") !== url) image.src = url;
