@@ -1,6 +1,6 @@
 // Machine-readable views of the shared, bilingual profile and project content.
 import { contact, experience, openSource, principles, projects, stack } from "../data/home";
-import { atlasProjects, publishedFeedEntries, primaryRepository, type Repository } from "../data/projects";
+import { atlasProjects, publishedFeedEntries, rankedFeaturedProjects, primaryRepository, type Repository } from "../data/projects";
 import { caseStudyPath, localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, type Page } from "../i18n";
 import { en } from "../i18n/en";
 import { es } from "../i18n/es";
@@ -340,7 +340,7 @@ export function resume(locale: Locale) {
       { language: locale === "en" ? "English" : "Inglés" },
       { language: locale === "en" ? "French" : "Francés" },
     ],
-    projects: projects.map((project) => ({
+    projects: rankedFeaturedProjects.map((project) => ({
       name: project.name,
       description: m[project.description],
       url: project.href,

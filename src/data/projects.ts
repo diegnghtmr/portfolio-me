@@ -187,9 +187,15 @@ const projectCard = (project: Project & { featured: Featured }) => ({
 /** Home card anchors whose project left the featured six; links to them still reach that case study. */
 export const retiredCardAnchors = [{ id: "p6", slug: "writing-harness" }] as const;
 
-export const featuredProjects = atlasProjects.flatMap((project) =>
+/** The home's large showcase card: the most complex system, chosen by the owner; the other five follow the ranking. */
+const showcaseSlug: FeaturedEntry["slug"] = "food-court";
+export const rankedFeaturedProjects = atlasProjects.flatMap((project) =>
   "featured" in project && featuredSlugs.has(project.slug) ? [projectCard(project)] : [],
 );
+export const featuredProjects = [
+  ...rankedFeaturedProjects.filter((card) => card.slug === showcaseSlug),
+  ...rankedFeaturedProjects.filter((card) => card.slug !== showcaseSlug),
+];
 
 export function featuredProjectBySlug(slug: FeaturedEntry["slug"]) {
   const project = featuredProjects.find((card) => card.slug === slug);

@@ -20,6 +20,9 @@ const atlasNames = [
   "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
 ];
 const projectNames = atlasNames.slice(0, 6);
+// Home order: Food Court is the owner-chosen large showcase card; the other five keep the ranking.
+const homeOrder = [4, 0, 1, 2, 3, 5];
+const homeNames = homeOrder.map((i) => projectNames[i]);
 const workRoutes = { en: "/en/work/", es: "/es/trabajo/" };
 const workTitles = { en: "Work", es: "Trabajo" };
 const pageRoutes = ["/en/", "/es/", ...Object.values(workRoutes)];
@@ -114,7 +117,7 @@ for (const locale of locales) {
     assert.equal(byType("ProfilePage").inLanguage, locale);
     assert.equal(byType("ProfilePage").mainEntity["@id"], person["@id"]);
     const items = byType("ItemList").itemListElement;
-    assert.deepEqual(items.map(({ item, position }) => [item.name, position]), projectNames.map((name, i) => [name, i + 1]));
+    assert.deepEqual(items.map(({ item, position }) => [item.name, position]), homeNames.map((name, i) => [name, i + 1]));
 
     const meta = (attr, key) => html.match(new RegExp(`<meta ${attr}="${key}" content="([^"]*)"`))?.[1];
     const image = meta("property", "og:image");
@@ -390,7 +393,7 @@ for (const locale of locales) {
     assert.ok(header);
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
     assert.ok(header.includes("data-nav-indicator"));
-    assert.deepEqual(commandProjects(home), projectNames.map((name, i) => ({ name, target: `#${featuredIds[i]}`, stack: undefined })));
+    assert.deepEqual(commandProjects(home), homeOrder.map((i) => ({ name: projectNames[i], target: `#${featuredIds[i]}`, stack: undefined })));
   });
 
   test(`${locale}: retired home anchor #p6 still leads to the writing-harness case study`, () => {
@@ -402,11 +405,11 @@ for (const locale of locales) {
     assert.equal([...home.matchAll(/\sid="p6"/g)].length, 1);
   });
 
-  test(`${locale}: home cards follow the top-six ranking and keep principle evidence linked by project`, () => {
+  test(`${locale}: home cards show Food Court as the showcase, then the ranking, and keep principle evidence linked by project`, () => {
     const home = read(`${locale}/index.html`);
     const cards = [...home.matchAll(/<li class="card" id="(p\d)"[^>]*>\s*<a\b[^>]*>\s*<div\b[^>]*data-bayer="([^"]+)"[^>]*>\s*<\/div>\s*<h3\b[^>]*>([^<]+)([\s\S]*?)<\/h3>/g)];
     assert.deepEqual(cards.map(([, id, shape, name, titleSuffix]) => [id, shape, name.trim(), titleSuffix.includes('class="status"')]),
-      projectNames.map((name, i) => [featuredIds[i], ["orbit", "dunes", "sphere", "wave", "ripple", "capacity"][i], name, featuredContracts[i][4] ?? false]));
+      homeOrder.map((i) => [featuredIds[i], ["orbit", "dunes", "sphere", "wave", "ripple", "capacity"][i], projectNames[i], featuredContracts[i][4] ?? false]));
     const principles = home.match(/<section\b[^>]*aria-labelledby="principles-heading"[^>]*>[\s\S]*?<\/section>/)[0];
     assert.deepEqual([...principles.matchAll(/<a href="#(p\d)"[^>]*><span\b[^>]*><small[^>]*>[^<]*<\/small>([^<]+)<\/span>/g)]
       .map(([, id, name]) => [id, name]), [["p3", "Brújula"], ["p1", "StudyDeck AI"], ["p5", "Profundiza UQ"]]);
@@ -980,7 +983,7 @@ test("S23: ranking does not reassign home JSON-LD identities", () => {
     const { "@graph": graph } = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const items = graph.find((node) => node["@type"] === "ItemList").itemListElement;
     assert.deepEqual(items.map(({ position, item }) => [position, item.name, item["@id"]]),
-      projectNames.map((name, i) => [i + 1, name, `${page}#${stable[name]}`]));
+      homeNames.map((name, i) => [i + 1, name, `${page}#${stable[name]}`]));
   }
 });
 
