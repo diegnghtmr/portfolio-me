@@ -16,9 +16,9 @@ export const projectHref = (locale: Locale, project: Project, studies: CaseStudi
   ? caseStudyPath(locale, project.slug)
   : primaryRepository(project).url;
 
-export const atlasGroups = surfaces.map((surface) => ({
+export const primarySurfaceCounts = surfaces.map((surface) => ({
   surface,
-  projects: atlasProjects.filter((project) => project.primarySurface === surface) as readonly Project[],
+  count: atlasProjects.filter((project) => project.primarySurface === surface).length,
 }));
 
 export function facetOptions(locale: Locale) {

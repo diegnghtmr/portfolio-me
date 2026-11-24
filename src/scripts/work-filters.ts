@@ -14,20 +14,17 @@ function enhanceFilters(index: HTMLElement) {
   const chips = get("[data-filter-chips]");
   const status = get("[data-result-count]");
   const empty = get("[data-work-empty]");
+  const list = get("[data-work-list]");
   const panel = get("#atlas-facets");
   const toggle = get<HTMLButtonElement>("[data-filter-toggle]");
   const toggleLabel = get("[data-filter-label]");
   const clear = get<HTMLButtonElement>("[data-filter-clear]");
-  const rows = all("[data-project]").map((element) => ({ element, group: element.closest<HTMLElement>("[data-group]")!, values: {
+  const rows = all("[data-project]").map((element) => ({ element, primarySurface: element.dataset.primarySurface!, values: {
     surface: element.dataset.surface!.split(" "),
     repos: [element.dataset.repos!],
     stack: element.dataset.stack!.split(" "),
   } }));
-  const groups = all("[data-group]").map((element) => ({
-    element,
-    count: element.querySelector<HTMLElement>("[data-group-count]")!,
-    breakdown: get(`[data-breakdown="${element.dataset.group}"]`),
-  }));
+  const breakdown = all("[data-breakdown]");
   const options = all<HTMLButtonElement>("[data-facet]").map((button) => ({
     button,
     facet: button.dataset.facet as AtlasFacet,
@@ -63,13 +60,13 @@ function enhanceFilters(index: HTMLElement) {
       facet === except || chosen.length === 0 || chosen.some(({ value }) => row.values[facet].includes(value)),
     );
     let visible = 0;
-    const groupCounts = new Map<HTMLElement, number>();
+    const primaryCounts = new Map<string, number>();
     for (const row of rows) {
       const show = matches(row);
       row.element.hidden = !show;
       if (!show) continue;
       visible++;
-      groupCounts.set(row.group, (groupCounts.get(row.group) ?? 0) + 1);
+      primaryCounts.set(row.primarySurface, (primaryCounts.get(row.primarySurface) ?? 0) + 1);
     }
     for (const option of options) {
       const { facet, value, button, count } = option;
@@ -77,15 +74,11 @@ function enhanceFilters(index: HTMLElement) {
       // Respect other facets, but count every choice independently within this facet.
       setText(count, String(rows.filter((row) => row.values[facet].includes(value) && matches(row, facet)).length));
     }
-    for (const { element, count, breakdown } of groups) {
-      const size = groupCounts.get(element) ?? 0;
-      element.hidden = size === 0;
-      setText(count, m.projects(size));
-      setText(breakdown, String(size));
-    }
+    for (const count of breakdown) setText(count, String(primaryCounts.get(count.dataset.breakdown!) ?? 0));
     setText(status, visible === rows.length ? m.projects(visible) : m.results(visible, rows.length));
     setText(toggleLabel, m.filterToggle(selected.size));
     empty.hidden = visible !== 0;
+    list.hidden = visible === 0;
     active.hidden = selected.size === 0;
     chips.replaceChildren(...options.filter((option) => selected.has(option)).map((option, i) => {
       const chip = document.createElement("button");

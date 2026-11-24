@@ -13,8 +13,11 @@ const dist = join(root, "dist");
 const site = "https://diegnghtmr.me";
 const read = (path) => readFileSync(join(dist, path), "utf8");
 const locales = ["en", "es"];
-const projectNames = ["StudyDeck AI", "Food Court", "Brújula", "Legajo", "Profundiza UQ", "writing-harness"];
-const atlasNames = [...projectNames, "Savia", "Academic Triage", "Vale", "Saber Inverso", "doc-sentinel", "resume-maker", "Enterprise Monitoring Stack", "NexRide"];
+const atlasNames = [
+  "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "NexRide",
+  "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
+];
+const projectNames = atlasNames.slice(0, 6);
 const workRoutes = { en: "/en/work/", es: "/es/trabajo/" };
 const workTitles = { en: "Work", es: "Trabajo" };
 const pageRoutes = ["/en/", "/es/", ...Object.values(workRoutes)];
@@ -31,21 +34,21 @@ const github = "https://github.com/diegnghtmr";
 const repoUrl = (name) => `${github}/${name}`;
 const repoSearch = (name) => `${github}?tab=repositories&q=${name}`;
 const featuredDescriptions = [
-  ["Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.", "Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."],
-  ["Ordering platform split into identity, menu, order and traceability services plus a role-based UI.", "Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."],
-  ["Academic planning for Universidad del Quindío: curriculum graph, degree progress and semester simulation.", "Planeación académica para la Universidad del Quindío: grafo curricular, avance de carrera y simulación de semestres."],
   ["Text similarity and hierarchical clustering over scientific abstracts, with traces and dendrograms.", "Similitud de textos y agrupamiento jerárquico sobre resúmenes científicos, con trazas y dendrogramas."],
+  ["Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.", "Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."],
+  ["Students submit academic requests. Staff classify, prioritize and track them through closure.", "Los estudiantes envían solicitudes académicas. El personal las clasifica, prioriza y les da seguimiento hasta el cierre."],
+  ["Academic planning for Universidad del Quindío: curriculum graph, degree progress and semester simulation.", "Planeación académica para la Universidad del Quindío: grafo curricular, avance de carrera y simulación de semestres."],
+  ["Ordering platform split into identity, menu, order and traceability services plus a role-based UI.", "Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."],
   ["Elective enrollment with server-generated arrival order and per-group capacity under row-level locking.", "Inscripción a electivas con orden de llegada generado en el servidor y cupos por grupo bajo bloqueo de filas."],
-  ["Spanish writing skills plus a verifier that measures whether a text follows them. Runs on Node 22.6 with nothing installed.", "Skills de redacción en español y un verificador que mide si un texto las cumple. Corre en Node 22.6 sin instalar nada."],
 ];
 const foodServices = ["user-microservice", "food-court-microservice", "order-microservice", "traceability-microservice"];
 const featuredContracts = [
-  [["api", "web"], [["studydeck-backend", "api", "Java"], ["studydeck-frontend", "web", "TypeScript"]], ["Java 25", "pgvector", "React 19"], repoUrl("studydeck-backend")],
-  [["4 api", "web"], [["food-court-ui", "web"], ...foodServices.map((name) => [name, "api", "Java"])], ["Spring Boot", "React"], repoSearch("food-court")],
-  [["api", "web"], [["brujula-backend", "api", "Java"], ["brujula-frontend", "web", "TypeScript"]], ["Spring Modulith", "Keycloak"], repoSearch("brujula")],
   [["api", "web"], [["legajo-backend", "api", "Java"], ["legajo-frontend", "web", "TypeScript"]], ["Java 25", "React 19"], repoUrl("legajo-frontend"), true],
+  [["api", "web"], [["studydeck-backend", "api", "Java"], ["studydeck-frontend", "web", "TypeScript"]], ["Java 25", "pgvector", "React 19"], repoUrl("studydeck-backend")],
+  [["api", "web"], [["academic-triage-frontend", "web", "TypeScript"], ["academic-triage-system", "api", "Java"]], ["Angular 20", "Spring Boot 3.5"], repoSearch("academic-triage"), true],
+  [["api", "web"], [["brujula-backend", "api", "Java"], ["brujula-frontend", "web", "TypeScript"]], ["Spring Modulith", "Keycloak"], repoSearch("brujula")],
+  [["4 api", "web"], [["food-court-ui", "web"], ...foodServices.map((name) => [name, "api", "Java"])], ["Spring Boot", "React"], repoSearch("food-court")],
   [["api", "web"], [["profundiza-uq-backend", "api", "Go"], ["profundiza-uq-frontend", "web", "TypeScript"]], ["Go", "pgx", "React 19"], repoUrl("profundiza-uq-backend")],
-  [["cli"], [["writing-harness", "cli", "TypeScript"]], ["Node", "zero deps"], repoUrl("writing-harness")],
 ];
 const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
 const workRows = (html) => [...html.matchAll(/(<li\b[^>]*\sdata-project(?:\s[^>]*|)>)([\s\S]*?)<\/li>/g)];
@@ -100,7 +103,7 @@ for (const locale of locales) {
     assert.equal(byType("ProfilePage").inLanguage, locale);
     assert.equal(byType("ProfilePage").mainEntity["@id"], person["@id"]);
     const items = byType("ItemList").itemListElement;
-    assert.deepEqual(items.map((item) => item.item.name), projectNames);
+    assert.deepEqual(items.map(({ item, position }) => [item.name, position]), projectNames.map((name, i) => [name, i + 1]));
 
     const meta = (attr, key) => html.match(new RegExp(`<meta ${attr}="${key}" content="([^"]*)"`))?.[1];
     const image = meta("property", "og:image");
@@ -136,6 +139,7 @@ test("llms.txt follows the llmstxt.org shape and every site link resolves", () =
     assert.ok(own.includes(`${site}${path}`), path);
   }
   for (const url of own) assert.ok(resolves(url), url);
+  assert.deepEqual([...llms.matchAll(/^- \[(.+) \(EN\)\]\(/gm)].map(([, name]) => name), atlasNames);
   for (const file of ["llms-full.txt", "es/llms-full.txt"]) {
     const full = read(file);
     for (const name of projectNames) assert.ok(full.includes(name), `${file} ${name}`);
@@ -159,7 +163,7 @@ test("resume.json follows JSON Resume, per locale", () => {
 test("projects.json keeps the featured entries and adds the complete bilingual atlas", () => {
   const { projects } = JSON.parse(read("projects.json"));
   assert.deepEqual(projects.slice(0, 6).map(({ name }) => name), projectNames);
-  assert.deepEqual(new Set(projects.map(({ name }) => name)), new Set(atlasNames));
+  assert.deepEqual(projects.map(({ name }) => name), atlasNames);
   assert.equal(projects.length, 14);
   for (const project of projects) {
     assert.ok(project.description.en && project.description.es, project.name);
@@ -176,7 +180,7 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
-test("projects.json preserves the original six entries with additive repository metadata", () => {
+test("projects.json describes the top six with their featured card and repository metadata", () => {
   const { projects } = JSON.parse(read("projects.json"));
   const specializedRoles = new Map([
     ...foodServices.map((name, index) => [name, ["identity", "menu", "orders", "traceability"][index]]),
@@ -191,8 +195,7 @@ test("projects.json preserves the original six entries with additive repository 
     ...project, repositories: repositories.map(({ role, ...repository }) => repository),
   })), featuredContracts.map(([categories, repos, stack, url, live = false], index) => {
     const [en, es] = featuredDescriptions[index];
-    const [enKind, esKind] = index === 5 ? ["Headless, 1 repo", "Sin interfaz, 1 repo"]
-      : [`System, ${repos.length} repos`, `Sistema, ${repos.length} repos`];
+    const [enKind, esKind] = [`System, ${repos.length} repos`, `Sistema, ${repos.length} repos`];
     return {
       id: `p${index + 1}`, name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
       repositories: repos.map(([name, surface, programmingLanguage]) => ({ name, surface, url: repoUrl(name), ...(programmingLanguage ? { programmingLanguage } : {}) })),
@@ -238,11 +241,20 @@ for (const locale of locales) {
     }
   });
 
+  test(`${locale}: the work index renders all projects as one ranked list`, () => {
+    const html = read(`${path.slice(1)}index.html`);
+    const list = html.match(/<ol\b[^>]*class="atlas-projects"[^>]*>[\s\S]*?<\/ol>/)?.[0];
+    assert.ok(list, "a single ordered results list");
+    const rows = workRows(list);
+    assert.deepEqual(rows.map(([, , body]) => body.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1]), atlasNames);
+    assert.equal(workRows(html).length, rows.length);
+  });
+
   test(`${locale}: the work command menu searches all project names and stacks and targets their rows`, () => {
     const html = read(`${path.slice(1)}index.html`);
     const options = commandProjects(html);
     assert.equal(options.length, 14);
-    assert.deepEqual(new Set(options.map(({ name }) => name)), new Set(atlasNames));
+    assert.deepEqual(options.map(({ name }) => name), atlasNames);
     const rows = workRows(html);
     const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
     const items = graph.find((node) => node["@type"] === "ItemList").itemListElement.map(({ item }) => item);
@@ -258,14 +270,14 @@ for (const locale of locales) {
     assert.match(options.find(({ name }) => name === "Profundiza UQ").stack, /^Go\b/);
   });
 
-  test(`${locale}: Includes surface counts repositories, without moving Savia out of the web group`, () => {
+  test(`${locale}: Includes surface counts repositories and the results breakdown counts primary surfaces`, () => {
     const html = read(`${path.slice(1)}index.html`);
     const rows = workRows(html);
     const savia = rows.find(([, , body]) => /<h3\b[^>]*>Savia<\/h3>/.test(body));
     assert.ok(savia);
     assert.equal(attr(savia[1], "data-surface"), "web api tool");
-    const webGroup = html.match(/<section\b[^>]*data-group="web"[^>]*>[\s\S]*?<\/section>/)?.[0];
-    assert.ok(webGroup?.includes(savia[0]));
+    assert.deepEqual([...html.matchAll(/data-breakdown="(\w+)"[^>]*>(\d+)<\/strong>/g)].map(([, surface, count]) => [surface, Number(count)]),
+      [["web", 9], ["api", 1], ["tool", 3], ["infra", 1]]);
     const tools = rows.filter(([, tag]) => attr(tag, "data-surface").split(" ").includes("tool"));
     assert.deepEqual(tools.map(([, , body]) => body.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1]).sort(),
       ["Savia", "doc-sentinel", "resume-maker", "writing-harness"]);
@@ -356,12 +368,12 @@ for (const locale of locales) {
     assert.equal(byType("CollectionPage").url, `${site}${path}`);
     const items = byType("ItemList").itemListElement;
     assert.equal(items.length, 14);
-    assert.deepEqual(new Set(items.map(({ item }) => item.name)), new Set(atlasNames));
+    assert.deepEqual(items.map(({ item, position }) => [item.name, position]), atlasNames.map((name, i) => [name, i + 1]));
     assert.deepEqual(byType("BreadcrumbList").itemListElement.map(({ item }) => item), [`${site}/${locale}/`, `${site}${path}`]);
     assert.ok(html.includes(`<link rel="alternate" type="text/markdown" href="${path}index.md"`));
     const twin = read(`${folder}index.md`);
     const full = read(locale === "en" ? "llms-full.txt" : "es/llms-full.txt");
-    for (const name of atlasNames) assert.ok(twin.includes(name), name);
+    assert.deepEqual([...twin.matchAll(/^#{2,3} \[(.+)\]\(/gm)].map(([, name]) => name), atlasNames);
     assert.ok(full.includes(twin.trimEnd()));
     assert.ok(read("llms.txt").includes(`](${site}${path}index.md)`));
   });
@@ -374,7 +386,16 @@ for (const locale of locales) {
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
     assert.ok(header.includes("data-nav-indicator"));
     assert.deepEqual(commandProjects(home), projectNames.map((name, i) => ({ name, target: `#p${i + 1}`, stack: undefined })));
-    for (let i = 1; i <= 6; i++) assert.ok(new RegExp(`<li class="card" id="p${i}"`).test(home), `home card p${i}`);
+  });
+
+  test(`${locale}: home cards follow the top-six ranking and keep principle evidence linked by project`, () => {
+    const home = read(`${locale}/index.html`);
+    const cards = [...home.matchAll(/<li class="card" id="(p\d)"[^>]*>\s*<a\b[^>]*>\s*<div\b[^>]*data-bayer="([^"]+)"[^>]*>\s*<\/div>\s*<h3\b[^>]*>([^<]+)([\s\S]*?)<\/h3>/g)];
+    assert.deepEqual(cards.map(([, id, shape, name, titleSuffix]) => [id, shape, name.trim(), titleSuffix.includes('class="status"')]),
+      projectNames.map((name, i) => [`p${i + 1}`, ["orbit", "dunes", "sphere", "wave", "ripple", "capacity"][i], name, featuredContracts[i][4] ?? false]));
+    const principles = home.match(/<section\b[^>]*aria-labelledby="principles-heading"[^>]*>[\s\S]*?<\/section>/)[0];
+    assert.deepEqual([...principles.matchAll(/<a href="#(p\d)"[^>]*><span\b[^>]*><small[^>]*>[^<]*<\/small>([^<]+)<\/span>/g)]
+      .map(([, id, name]) => [id, name]), [["p4", "Brújula"], ["p2", "StudyDeck AI"], ["p6", "Profundiza UQ"]]);
   });
 }
 

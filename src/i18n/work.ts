@@ -13,7 +13,7 @@ type WorkMessages = {
   connects: (from: string, to: string) => string;
   github: string;
   surface: Record<Surface, string>;
-  groups: Record<Surface, string>;
+  genre: Record<Surface, string>;
   roles: Record<Repository["role"], string>;
   repoBuckets: Record<RepoBucket, string>;
   facet: Record<AtlasFacet, string>;
@@ -33,7 +33,7 @@ type WorkMessages = {
 
 const en: WorkMessages = {
   eyebrow: "Systems atlas",
-  intro: "Case studies grouped by their primary surface: apps, APIs, tools and infrastructure.",
+  intro: "Case studies ranked by relevance. Filter by surface, repository count or technology.",
   home: "Home",
   index: "Work index",
   searchHint: "Try a project name or technology.",
@@ -42,7 +42,7 @@ const en: WorkMessages = {
   connects: (from, to) => `${from} connects to ${to}`,
   github: "Opens the repository on GitHub",
   surface: { web: "Web apps", api: "APIs & services", tool: "Tools & CLIs", infra: "Infrastructure" },
-  groups: { web: "Products with a UI", api: "Services & APIs", tool: "Tools & CLIs", infra: "Infrastructure" },
+  genre: { web: "Products with a UI", api: "Services & APIs", tool: "Tools & CLIs", infra: "Infrastructure" },
   roles: { web: "Web", api: "API", identity: "Identity", menu: "Menu", orders: "Orders", traceability: "Traceability", mobile: "Mobile", mcp: "MCP", cli: "CLI", pipeline: "Build pipeline", infra: "Infrastructure" },
   repoBuckets: { single: "Single repo", multi: "Multi-repo" },
   facet: { surface: "Includes surface", repos: "Repositories", stack: "Stack" },
@@ -62,7 +62,7 @@ const en: WorkMessages = {
 
 const es: WorkMessages = {
   eyebrow: "Atlas de sistemas",
-  intro: "Casos de estudio agrupados por su superficie principal: aplicaciones, API, herramientas e infraestructura.",
+  intro: "Casos de estudio ordenados por relevancia. Filtra por superficie, número de repositorios o tecnología.",
   home: "Inicio",
   index: "Índice de trabajo",
   searchHint: "Prueba con el nombre de un proyecto o una tecnología.",
@@ -71,7 +71,7 @@ const es: WorkMessages = {
   connects: (from, to) => `${from} se conecta con ${to}`,
   github: "Abre el repositorio en GitHub",
   surface: { web: "Aplicaciones web", api: "API y servicios", tool: "Herramientas y CLI", infra: "Infraestructura" },
-  groups: { web: "Productos con interfaz", api: "Servicios y API", tool: "Herramientas y CLI", infra: "Infraestructura" },
+  genre: { web: "Productos con interfaz", api: "Servicios y API", tool: "Herramientas y CLI", infra: "Infraestructura" },
   roles: { web: "Web", api: "API", identity: "Identidad", menu: "Menú", orders: "Pedidos", traceability: "Trazabilidad", mobile: "Móvil", mcp: "MCP", cli: "CLI", pipeline: "Flujo de compilación", infra: "Infraestructura" },
   repoBuckets: { single: "Un repositorio", multi: "Varios repositorios" },
   facet: { surface: "Incluye superficie", repos: "Repositorios", stack: "Tecnologías" },

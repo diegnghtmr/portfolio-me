@@ -1,6 +1,6 @@
 import { siteHandle } from "../i18n";
 import type { MessageKey } from "../i18n/en";
-import { featuredProjects as projects } from "./projects";
+import { featuredProjectBySlug, featuredProjects as projects } from "./projects";
 
 export { projects };
 export type { CoverShape } from "./projects";
@@ -31,9 +31,9 @@ export const stack = [
 ] as const satisfies readonly (readonly StackGroup[])[];
 
 export const principles = [
-  { title: "contractFirst", text: "contractEvidence", project: projects[2] },
-  { title: "moduleBoundaries", text: "moduleEvidence", project: projects[0] },
-  { title: "concurrency", text: "concurrencyEvidence", project: projects[4] },
+  { title: "contractFirst", text: "contractEvidence", project: featuredProjectBySlug("brujula") },
+  { title: "moduleBoundaries", text: "moduleEvidence", project: featuredProjectBySlug("studydeck-ai") },
+  { title: "concurrency", text: "concurrencyEvidence", project: featuredProjectBySlug("profundiza-uq") },
 ] as const satisfies readonly { title: MessageKey; text: MessageKey; project: (typeof projects)[number] }[];
 
 export const openSource = [

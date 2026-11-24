@@ -6,7 +6,7 @@ import { workMessages } from "../i18n/work";
 import Base from "../layouts/Base.astro";
 import { getCaseStudies } from "../lib/case-studies";
 import { workJsonLd } from "../lib/profile";
-import { atlasFacets, atlasGroups, facetOptions, projectHref, projectSurfaces, repoBucket } from "../lib/work";
+import { atlasFacets, facetOptions, primarySurfaceCounts, projectHref, projectSurfaces, repoBucket } from "../lib/work";
 import "../styles/work.css";
 import "../styles/work-transition.css";
 
@@ -63,8 +63,8 @@ const studies = await getCaseStudies();
         <header class="results-header">
           <p class="atlas-count" role="status" aria-atomic="true" tabindex="-1" data-result-count>{m.projects(total)}</p>
           <ul class="atlas-breakdown" role="list" aria-label={m.breakdown}>
-            {atlasGroups.map(({ surface, projects }) => (
-              <li><strong data-breakdown={surface}>{projects.length}</strong> {m.surface[surface]}</li>
+            {primarySurfaceCounts.map(({ surface, count }) => (
+              <li><strong data-breakdown={surface}>{count}</strong> {m.surface[surface]}</li>
             ))}
           </ul>
           <div class="atlas-active" data-active-filters hidden>
@@ -76,40 +76,35 @@ const studies = await getCaseStudies();
           <h2 id="atlas-empty-title">{m.empty}</h2>
           <p>{m.emptyHint(total)}</p>
         </section>
-        {atlasGroups.map(({ surface, projects }) => (
-          <section class="atlas-group" data-group={surface} aria-labelledby={`atlas-${surface}`}>
-            <header class="atlas-group-head">
-              <h2 id={`atlas-${surface}`}>{m.groups[surface]}</h2>
-              <span class="group-count" data-group-count>{m.projects(projects.length)}</span>
-            </header>
-            <ul class="atlas-projects" role="list">
-              {projects.map((project) => {
-                const titleId = `${project.slug}-title`;
-                const hasCaseStudy = studies.has(project.slug);
-                const externalLabel = hasCaseStudy ? undefined : `${project.slug}-external`;
-                return (
-                  <li id={project.slug} data-project data-surface={projectSurfaces(project).join(" ")} data-repos={repoBucket(project)} data-stack={project.stackTags.join(" ")}>
-                    <a class="atlas-project" href={projectHref(locale, project, studies)} rel={hasCaseStudy ? undefined : "external"} aria-labelledby={[titleId, externalLabel].filter(Boolean).join(" ")}>
-                      <div class="atlas-repositories">
-                        <RepositoryMap {project} {locale} />
-                        <span>{m.repos(project.repositories.length)}</span>
-                      </div>
-                      <div class="atlas-project-body">
-                        <h3 id={titleId} style={hasCaseStudy ? `--project-transition: project-${project.slug}` : undefined}>{project.name}</h3>
-                        <p class="atlas-purpose">{project.purpose[locale]}</p>
-                        <p class="atlas-meta">
-                          {project.surfaceLabel[locale]}{project.stack.length > 0 && <><span aria-hidden="true"> · </span>{project.stack.join(", ")}</>}
-                        </p>
-                        {externalLabel && <span class="sr-only" id={externalLabel}>{m.github}</span>}
-                      </div>
-                      <span class="atlas-arrow" aria-hidden="true">{hasCaseStudy ? "→" : "↗"}</span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))}
+        <section aria-labelledby="atlas-list-heading" data-work-list>
+          <h2 id="atlas-list-heading" class="sr-only">{t(locale, "projects")}</h2>
+          <ol class="atlas-projects" role="list">
+            {atlasProjects.map((project) => {
+              const titleId = `${project.slug}-title`;
+              const hasCaseStudy = studies.has(project.slug);
+              const externalLabel = hasCaseStudy ? undefined : `${project.slug}-external`;
+              return (
+                <li id={project.slug} data-project data-primary-surface={project.primarySurface} data-surface={projectSurfaces(project).join(" ")} data-repos={repoBucket(project)} data-stack={project.stackTags.join(" ")}>
+                  <a class="atlas-project" href={projectHref(locale, project, studies)} rel={hasCaseStudy ? undefined : "external"} aria-labelledby={[titleId, externalLabel].filter(Boolean).join(" ")}>
+                    <div class="atlas-repositories">
+                      <RepositoryMap {project} {locale} />
+                      <span>{m.repos(project.repositories.length)}</span>
+                    </div>
+                    <div class="atlas-project-body">
+                      <h3 id={titleId} style={hasCaseStudy ? `--project-transition: project-${project.slug}` : undefined}>{project.name}</h3>
+                      <p class="atlas-purpose">{project.purpose[locale]}</p>
+                      <p class="atlas-meta">
+                        {project.surfaceLabel[locale]}{project.stack.length > 0 && <><span aria-hidden="true"> · </span>{project.stack.join(", ")}</>}
+                      </p>
+                      {externalLabel && <span class="sr-only" id={externalLabel}>{m.github}</span>}
+                    </div>
+                    <span class="atlas-arrow" aria-hidden="true">{hasCaseStudy ? "→" : "↗"}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
       </div>
     </div>
   </main>

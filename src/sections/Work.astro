@@ -17,30 +17,18 @@ const studies = await getCaseStudies();
     {projects.map((project) => (
       <li class="card" id={project.id} data-reveal tabindex="-1">
         <a href={studies.has(project.slug) ? caseStudyPath(locale, project.slug) : project.href} aria-labelledby={`${project.id}-title`}>
-          {'terminal' in project ? (
-            <div class="cover terminal">
-              <pre class="sr-only">$ node verify.mjs draft.md{'\n'}93 {t(locale, 'terminalRules')}{'\n'}16 {t(locale, 'terminalSkills')}{'\n'}0 {t(locale, 'terminalDependencies')}</pre>
-              <pre data-terminal aria-hidden="true"><span data-line>$ node verify.mjs draft.md</span>{'\n'}<span data-line><b>93</b> {t(locale, 'terminalRules')}</span>{'\n'}<span data-line><b>16</b> {t(locale, 'terminalSkills')}</span>{'\n'}<span data-line>0 {t(locale, 'terminalDependencies')}</span><span class="caret" aria-hidden="true"></span></pre>
-            </div>
-          ) : (
-            <div class="cover field" data-bayer={project.shape} data-seed={project.seed} aria-hidden="true">
-            </div>
-          )}
-          <h3 id={`${project.id}-title`}>{project.name} {'live' in project && <span class="status">{t(locale, 'live')}</span>}<span class="go" aria-hidden="true">→</span></h3>
+          <div class="cover field" data-bayer={project.shape} data-seed={project.seed} aria-hidden="true"></div>
+          <h3 id={`${project.id}-title`}>{project.name} {project.live && <span class="status">{t(locale, 'live')}</span>}<span class="go" aria-hidden="true">→</span></h3>
           <p class="description">{t(locale, project.description)}</p>
           <ul class="categories">
             {project.categories.map((category) => <li><i aria-hidden="true"></i>{category}</li>)}
           </ul>
-          <p class="card-foot"><span>{t(locale, project.kind)}</span><span class="font-mono">{'stackLabel' in project ? t(locale, project.stackLabel) : project.stack}</span></p>
+          <p class="card-foot"><span>{t(locale, project.kind)}</span><span class="font-mono">{project.stack}</span></p>
         </a>
       </li>
     ))}
   </ul>
 </section>
-
-<script>
-  import "../scripts/terminal";
-</script>
 
 <style>
   .work-head { grid-template-columns:1fr auto; align-items:end; }
@@ -54,17 +42,6 @@ const studies = await getCaseStudies();
   .card a:hover { transform:translateY(-3px); }
   .card a:active { transform:scale(.99); }
   .cover { position:relative; height:168px; flex:none; overflow:hidden; border-block-end:1px solid var(--hair); background:var(--surface); }
-  .terminal { padding:16px; transition:background-color 180ms ease; }
-  .terminal pre { color:var(--subtle); font:13px/1.7 var(--mono); white-space:pre-wrap; }
-  .terminal [data-line]:first-child { color:var(--text); }
-  .terminal b { color:var(--ink); font-weight:600; }
-  .terminal [data-terminal]:not([data-ready]) .caret { display:none; }
-  .caret { display:inline-block; width:.6em; height:1.1em; margin-inline-start:2px; vertical-align:-.15em; background:var(--gold); }
-  @media (prefers-reduced-motion:no-preference) {
-    .card a:is(:hover,:focus-visible) [data-terminal]:not([data-typing]) .caret { animation:blink 1s steps(1) 4; }
-  }
-  @keyframes blink { 50% { opacity:0; } }
-  .card a:is(:hover,:focus-visible) .terminal { background:color-mix(in srgb,var(--surface) 70%,var(--raised)); }
   h3 { display:flex; align-items:center; gap:8px; margin:16px 18px 6px; font-size:19px; font-weight:600; overflow-wrap:anywhere; }
   h3 .go { margin-inline-start:auto; opacity:0; transform:translateX(-4px); transition:opacity 180ms ease, transform 180ms var(--ease-out); }
   .card a:is(:hover,:focus-visible) .go { opacity:1; transform:none; }

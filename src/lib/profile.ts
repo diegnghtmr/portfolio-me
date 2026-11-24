@@ -6,7 +6,7 @@ import { en } from "../i18n/en";
 import { es } from "../i18n/es";
 import { workMessages } from "../i18n/work";
 import type { CaseStudies, CaseStudy } from "./case-studies";
-import { atlasGroups, projectHref, projectSurfaces } from "./work";
+import { projectHref, projectSurfaces } from "./work";
 
 export const site = "https://diegnghtmr.me";
 export const buildDate = new Date().toISOString().slice(0, 10);
@@ -108,7 +108,7 @@ export function workJsonLd(locale: Locale, studies: CaseStudies) {
         "@type": "ItemList",
         "@id": `${page}#projects`,
         numberOfItems: atlasProjects.length,
-        itemListElement: atlasGroups.flatMap((group) => group.projects).map((project, index) => ({
+        itemListElement: atlasProjects.map((project, index) => ({
           "@type": "ListItem",
           position: index + 1,
           item: {
@@ -117,7 +117,7 @@ export function workJsonLd(locale: Locale, studies: CaseStudies) {
             name: project.name,
             description: project.purpose[locale],
             url: absolute(projectHref(locale, project, studies)),
-            genre: m.groups[project.primarySurface],
+            genre: m.genre[project.primarySurface],
             ...(project.stack.length ? { keywords: project.stack.join(", ") } : {}),
             hasPart: project.repositories.map(sourceCode),
           },
@@ -198,7 +198,7 @@ export function homeMarkdown(locale: Locale) {
       m(project.description),
       "",
       bullet(m("projects"), `${m(project.kind)} (${project.categories.join(", ")})`),
-      bullet(m("stack").split(",")[0]!, "stackLabel" in project ? m(project.stackLabel) : project.stack),
+      bullet(m("stack").split(",")[0]!, project.stack),
       bullet(labels.repositories, project.repositories.map(({ name, url }) => `[${name}](${url})`).join(", ")),
       "",
     ]),
@@ -235,19 +235,15 @@ export function workMarkdown(locale: Locale, studies: CaseStudies) {
     "",
     m.projects(atlasProjects.length),
     "",
-    ...atlasGroups.flatMap(({ surface, projects }) => [
-      `## ${m.groups[surface]} (${m.projects(projects.length)})`,
+    ...atlasProjects.flatMap((project) => [
+      `## [${project.name}](${absolute(projectHref(locale, project, studies))})`,
       "",
-      ...projects.flatMap((project) => [
-        `### [${project.name}](${absolute(projectHref(locale, project, studies))})`,
-        "",
-        project.purpose[locale],
-        "",
-        bullet(m.facet.surface, project.surfaceLabel[locale]),
-        ...(project.stack.length ? [bullet(m.facet.stack, project.stack.join(", "))] : []),
-        bullet(m.facet.repos, project.repositories.map(({ name, url, role }) => `[${name}](${url}) (${m.roles[role]})`).join(", ")),
-        "",
-      ]),
+      project.purpose[locale],
+      "",
+      bullet(m.facet.surface, project.surfaceLabel[locale]),
+      ...(project.stack.length ? [bullet(m.facet.stack, project.stack.join(", "))] : []),
+      bullet(m.facet.repos, project.repositories.map(({ name, url, role }) => `[${name}](${url}) (${m.roles[role]})`).join(", ")),
+      "",
     ]),
   ].join("\n");
 }
@@ -359,37 +355,26 @@ const serializeRepository = ({ name, surface, url, role, programmingLanguage }: 
   name, surface, url, role, ...(programmingLanguage ? { programmingLanguage } : {}),
 });
 
-/** projects.json: the full bilingual atlas; preserve the original featured entries. */
+/** projects.json: the ranked bilingual atlas, with featured card metadata where present. */
 export function projectsJson(studies: CaseStudies) {
-  const caseStudy = (slug: string) => studies.has(slug) ? { caseStudy: absolute(caseStudyPath("en", slug)) } : {};
+  const cards = new Map(projects.map((card) => [card.slug, card]));
   return {
     owner: { name: siteName, github: contact.github, site: `${site}/` },
     allRepositories: contact.projects,
-    projects: [
-      ...projects.map((project) => ({
-        id: project.id,
+    projects: atlasProjects.map((project) => {
+      const card = cards.get(project.slug);
+      return {
+        id: card?.id ?? project.slug,
         name: project.name,
-        description: { en: en[project.description], es: es[project.description] },
-        kind: { en: en[project.kind], es: es[project.kind] },
-        categories: project.categories,
+        description: card ? { en: en[card.description], es: es[card.description] } : project.purpose,
+        kind: card ? { en: en[card.kind], es: es[card.kind] } : project.surfaceLabel,
+        categories: card?.categories ?? projectSurfaces(project).map((surface) => surface === "tool" ? "cli" : surface),
         repositories: project.repositories.map(serializeRepository),
-        stack: stackList(project.stack),
-        url: project.href,
-        live: "live" in project ? project.live : false,
-        ...caseStudy(project.slug),
-      })),
-      ...atlasProjects.flatMap((project) => "featured" in project ? [] : [{
-        id: project.slug,
-        name: project.name,
-        description: project.purpose,
-        kind: project.surfaceLabel,
-        categories: projectSurfaces(project).map((surface) => surface === "tool" ? "cli" : surface),
-        repositories: project.repositories.map(serializeRepository),
-        stack: project.stack,
-        url: primaryRepository(project).url,
-        live: false,
-        ...caseStudy(project.slug),
-      }]),
-    ],
+        stack: card ? stackList(card.stack) : project.stack,
+        url: card?.href ?? primaryRepository(project).url,
+        live: card?.live ?? false,
+        ...(studies.has(project.slug) ? { caseStudy: absolute(caseStudyPath("en", project.slug)) } : {}),
+      };
+    }),
   };
 }
