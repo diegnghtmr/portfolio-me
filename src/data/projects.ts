@@ -184,10 +184,6 @@ const projectCard = (project: Project & { featured: Featured }) => ({
   repositories: project.repositories,
 });
 
-/** projects.json ids published before the ranking; they identify the project, never its home slot. */
-export const publishedProjectIds: Readonly<Record<string, string>> = {
-  "studydeck-ai": "p1", "food-court": "p2", brujula: "p3", legajo: "p4", "profundiza-uq": "p5", "writing-harness": "p6",
-};
 /** Home card anchors whose project left the featured six; links to them still reach that case study. */
 export const retiredCardAnchors = [{ id: "p6", slug: "writing-harness" }] as const;
 
@@ -200,3 +196,17 @@ export function featuredProjectBySlug(slug: FeaturedEntry["slug"]) {
   if (!project) throw new Error(`${slug}: missing featured project`);
   return project;
 }
+
+// projects.json entries published before the relevance ranking (diegnghtmr.me, bcf8fdb).
+// They identify each project and its published facts; home placement must never change them.
+export const publishedFeedEntries = {
+  "studydeck-ai": {"id": "p1", "description": {"en": "Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.", "es": "Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."}, "kind": {"en": "System, 2 repos", "es": "Sistema, 2 repos"}, "categories": ["api", "web"], "stack": ["Java 25", "pgvector", "React 19"], "url": "https://github.com/diegnghtmr/studydeck-backend", "live": false},
+  "food-court": {"id": "p2", "description": {"en": "Ordering platform split into identity, menu, order and traceability services plus a role-based UI.", "es": "Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."}, "kind": {"en": "System, 5 repos", "es": "Sistema, 5 repos"}, "categories": ["4 api", "web"], "stack": ["Spring Boot", "React"], "url": "https://github.com/diegnghtmr?tab=repositories&q=food-court", "live": false},
+  "brujula": {"id": "p3", "description": {"en": "Academic planning for Universidad del Quindío: curriculum graph, degree progress and semester simulation.", "es": "Planeación académica para la Universidad del Quindío: grafo curricular, avance de carrera y simulación de semestres."}, "kind": {"en": "System, 2 repos", "es": "Sistema, 2 repos"}, "categories": ["api", "web"], "stack": ["Spring Modulith", "Keycloak"], "url": "https://github.com/diegnghtmr?tab=repositories&q=brujula", "live": false},
+  "legajo": {"id": "p4", "description": {"en": "Text similarity and hierarchical clustering over scientific abstracts, with traces and dendrograms.", "es": "Similitud de textos y agrupamiento jerárquico sobre resúmenes científicos, con trazas y dendrogramas."}, "kind": {"en": "System, 2 repos", "es": "Sistema, 2 repos"}, "categories": ["api", "web"], "stack": ["Java 25", "React 19"], "url": "https://github.com/diegnghtmr/legajo-frontend", "live": true},
+  "profundiza-uq": {"id": "p5", "description": {"en": "Elective enrollment with server-generated arrival order and per-group capacity under row-level locking.", "es": "Inscripción a electivas con orden de llegada generado en el servidor y cupos por grupo bajo bloqueo de filas."}, "kind": {"en": "System, 2 repos", "es": "Sistema, 2 repos"}, "categories": ["api", "web"], "stack": ["Go", "pgx", "React 19"], "url": "https://github.com/diegnghtmr/profundiza-uq-backend", "live": false},
+  "writing-harness": {"id": "p6", "description": {"en": "Spanish writing skills plus a verifier that measures whether a text follows them. Runs on Node 22.6 with nothing installed.", "es": "Skills de redacción en español y un verificador que mide si un texto las cumple. Corre en Node 22.6 sin instalar nada."}, "kind": {"en": "Headless, 1 repo", "es": "Sin interfaz, 1 repo"}, "categories": ["cli"], "stack": ["Node", "zero deps"], "url": "https://github.com/diegnghtmr/writing-harness", "live": false},
+} as const satisfies Record<string, {
+  id: string; description: Record<"en" | "es", string>; kind: Record<"en" | "es", string>;
+  categories: readonly string[]; stack: readonly string[]; url: string; live: boolean;
+}>;

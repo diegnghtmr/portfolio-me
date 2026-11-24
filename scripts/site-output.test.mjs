@@ -15,8 +15,6 @@ const read = (path) => readFileSync(join(dist, path), "utf8");
 const locales = ["en", "es"];
 // Card ids are stable per project (home anchors, projects.json); the ranking never reassigns them.
 const featuredIds = ["p4", "p1", "p7", "p3", "p2", "p5"];
-// projects.json ids identify the project and never follow home placement.
-const feedIds = ["p4", "p1", "academic-triage", "p3", "p2", "p5"];
 const atlasNames = [
   "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "NexRide",
   "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
@@ -37,14 +35,6 @@ const trainingBots = ["GPTBot", "ClaudeBot", "Google-Extended", "CCBot", "Appleb
 const github = "https://github.com/diegnghtmr";
 const repoUrl = (name) => `${github}/${name}`;
 const repoSearch = (name) => `${github}?tab=repositories&q=${name}`;
-const featuredDescriptions = [
-  ["Text similarity and hierarchical clustering over scientific abstracts, with traces and dendrograms.", "Similitud de textos y agrupamiento jerárquico sobre resúmenes científicos, con trazas y dendrogramas."],
-  ["Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.", "Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."],
-  ["Students submit academic requests. Staff classify, prioritize and track them through closure.", "Los estudiantes envían solicitudes académicas. El personal las clasifica, prioriza y les da seguimiento hasta el cierre."],
-  ["Academic planning for Universidad del Quindío: curriculum graph, degree progress and semester simulation.", "Planeación académica para la Universidad del Quindío: grafo curricular, avance de carrera y simulación de semestres."],
-  ["Ordering platform split into identity, menu, order and traceability services plus a role-based UI.", "Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."],
-  ["Elective enrollment with server-generated arrival order and per-group capacity under row-level locking.", "Inscripción a electivas con orden de llegada generado en el servidor y cupos por grupo bajo bloqueo de filas."],
-];
 const foodServices = ["user-microservice", "food-court-microservice", "order-microservice", "traceability-microservice"];
 const featuredContracts = [
   [["api", "web"], [["legajo-backend", "api", "Java"], ["legajo-frontend", "web", "TypeScript"]], ["Java 25", "React 19"], repoUrl("legajo-frontend"), true],
@@ -53,6 +43,23 @@ const featuredContracts = [
   [["api", "web"], [["brujula-backend", "api", "Java"], ["brujula-frontend", "web", "TypeScript"]], ["Spring Modulith", "Keycloak"], repoSearch("brujula")],
   [["4 api", "web"], [["food-court-ui", "web"], ...foodServices.map((name) => [name, "api", "Java"])], ["Spring Boot", "React"], repoSearch("food-court")],
   [["api", "web"], [["profundiza-uq-backend", "api", "Go"], ["profundiza-uq-frontend", "web", "TypeScript"]], ["Go", "pgx", "React 19"], repoUrl("profundiza-uq-backend")],
+];
+// projects.json entries as published before the relevance ranking (diegnghtmr.me at bcf8fdb).
+const publishedProjects = [
+{"id":"p1","name":"StudyDeck AI","description":{"en":"Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.","es":"Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"studydeck-backend","surface":"api","url":"https://github.com/diegnghtmr/studydeck-backend","role":"api","programmingLanguage":"Java"},{"name":"studydeck-frontend","surface":"web","url":"https://github.com/diegnghtmr/studydeck-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Java 25","pgvector","React 19"],"url":"https://github.com/diegnghtmr/studydeck-backend","live":false,"caseStudy":"https://diegnghtmr.me/en/work/studydeck-ai/"},
+{"id":"p2","name":"Food Court","description":{"en":"Ordering platform split into identity, menu, order and traceability services plus a role-based UI.","es":"Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."},"kind":{"en":"System, 5 repos","es":"Sistema, 5 repos"},"categories":["4 api","web"],"repositories":[{"name":"food-court-ui","surface":"web","url":"https://github.com/diegnghtmr/food-court-ui","role":"web"},{"name":"user-microservice","surface":"api","url":"https://github.com/diegnghtmr/user-microservice","role":"identity","programmingLanguage":"Java"},{"name":"food-court-microservice","surface":"api","url":"https://github.com/diegnghtmr/food-court-microservice","role":"menu","programmingLanguage":"Java"},{"name":"order-microservice","surface":"api","url":"https://github.com/diegnghtmr/order-microservice","role":"orders","programmingLanguage":"Java"},{"name":"traceability-microservice","surface":"api","url":"https://github.com/diegnghtmr/traceability-microservice","role":"traceability","programmingLanguage":"Java"}],"stack":["Spring Boot","React"],"url":"https://github.com/diegnghtmr?tab=repositories&q=food-court","live":false,"caseStudy":"https://diegnghtmr.me/en/work/food-court/"},
+{"id":"p3","name":"Brújula","description":{"en":"Academic planning for Universidad del Quindío: curriculum graph, degree progress and semester simulation.","es":"Planeación académica para la Universidad del Quindío: grafo curricular, avance de carrera y simulación de semestres."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"brujula-backend","surface":"api","url":"https://github.com/diegnghtmr/brujula-backend","role":"api","programmingLanguage":"Java"},{"name":"brujula-frontend","surface":"web","url":"https://github.com/diegnghtmr/brujula-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Spring Modulith","Keycloak"],"url":"https://github.com/diegnghtmr?tab=repositories&q=brujula","live":false,"caseStudy":"https://diegnghtmr.me/en/work/brujula/"},
+{"id":"p4","name":"Legajo","description":{"en":"Text similarity and hierarchical clustering over scientific abstracts, with traces and dendrograms.","es":"Similitud de textos y agrupamiento jerárquico sobre resúmenes científicos, con trazas y dendrogramas."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"legajo-backend","surface":"api","url":"https://github.com/diegnghtmr/legajo-backend","role":"api","programmingLanguage":"Java"},{"name":"legajo-frontend","surface":"web","url":"https://github.com/diegnghtmr/legajo-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Java 25","React 19"],"url":"https://github.com/diegnghtmr/legajo-frontend","live":true,"caseStudy":"https://diegnghtmr.me/en/work/legajo/"},
+{"id":"p5","name":"Profundiza UQ","description":{"en":"Elective enrollment with server-generated arrival order and per-group capacity under row-level locking.","es":"Inscripción a electivas con orden de llegada generado en el servidor y cupos por grupo bajo bloqueo de filas."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"profundiza-uq-backend","surface":"api","url":"https://github.com/diegnghtmr/profundiza-uq-backend","role":"api","programmingLanguage":"Go"},{"name":"profundiza-uq-frontend","surface":"web","url":"https://github.com/diegnghtmr/profundiza-uq-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Go","pgx","React 19"],"url":"https://github.com/diegnghtmr/profundiza-uq-backend","live":false,"caseStudy":"https://diegnghtmr.me/en/work/profundiza-uq/"},
+{"id":"p6","name":"writing-harness","description":{"en":"Spanish writing skills plus a verifier that measures whether a text follows them. Runs on Node 22.6 with nothing installed.","es":"Skills de redacción en español y un verificador que mide si un texto las cumple. Corre en Node 22.6 sin instalar nada."},"kind":{"en":"Headless, 1 repo","es":"Sin interfaz, 1 repo"},"categories":["cli"],"repositories":[{"name":"writing-harness","surface":"cli","url":"https://github.com/diegnghtmr/writing-harness","role":"cli","programmingLanguage":"TypeScript"}],"stack":["Node","zero deps"],"url":"https://github.com/diegnghtmr/writing-harness","live":false,"caseStudy":"https://diegnghtmr.me/en/work/writing-harness/"},
+{"id":"savia","name":"Savia","description":{"en":"Personal finance across web, mobile, API and MCP. In progress.","es":"Finanzas personales con web, móvil, API y MCP. En desarrollo."},"kind":{"en":"Web + mobile + API + MCP","es":"Web + móvil + API + MCP"},"categories":["web","api","cli"],"repositories":[{"name":"savia-web","surface":"web","url":"https://github.com/diegnghtmr/savia-web","role":"web"},{"name":"savia-mobile","surface":"web","url":"https://github.com/diegnghtmr/savia-mobile","role":"mobile"},{"name":"savia-backend","surface":"api","url":"https://github.com/diegnghtmr/savia-backend","role":"api"},{"name":"savia-mcp","surface":"cli","url":"https://github.com/diegnghtmr/savia-mcp","role":"mcp"}],"stack":["NestJS/Fastify","Next.js","Expo"],"url":"https://github.com/diegnghtmr/savia-web","live":false,"caseStudy":"https://diegnghtmr.me/en/work/savia/"},
+{"id":"academic-triage","name":"Academic Triage","description":{"en":"Academic request triage over a Java backend contract.","es":"Clasificación de solicitudes académicas sobre un contrato de backend en Java."},"kind":{"en":"Web + API","es":"Web + API"},"categories":["web","api"],"repositories":[{"name":"academic-triage-frontend","surface":"web","url":"https://github.com/diegnghtmr/academic-triage-frontend","role":"web","programmingLanguage":"TypeScript"},{"name":"academic-triage-system","surface":"api","url":"https://github.com/diegnghtmr/academic-triage-system","role":"api","programmingLanguage":"Java"}],"stack":["Angular 20","Java 21","Spring Boot 3.5","MariaDB 11"],"url":"https://github.com/diegnghtmr/academic-triage-frontend","live":false,"caseStudy":"https://diegnghtmr.me/en/work/academic-triage/"},
+{"id":"vale","name":"Vale","description":{"en":"Academic schedule planner with calendar export.","es":"Planificador de horarios académicos con exportación al calendario."},"kind":{"en":"Web app","es":"Aplicación web"},"categories":["web"],"repositories":[{"name":"vale","surface":"web","url":"https://github.com/diegnghtmr/vale","role":"web","programmingLanguage":"TypeScript"}],"stack":["TypeScript","React","Vite","FullCalendar"],"url":"https://github.com/diegnghtmr/vale","live":false,"caseStudy":"https://diegnghtmr.me/en/work/vale/"},
+{"id":"saber-inverso","name":"Saber Inverso","description":{"en":"Estimates Saber 11 scores from a UQ program and weighted admission score, with uncertainty.","es":"Estima puntajes de Saber 11 a partir de un programa de la UQ y su puntaje ponderado de admisión, con incertidumbre."},"kind":{"en":"Web app","es":"Aplicación web"},"categories":["web"],"repositories":[{"name":"saber-inverso","surface":"web","url":"https://github.com/diegnghtmr/saber-inverso","role":"web"}],"stack":["Astro","TypeScript","Python","FastAPI"],"url":"https://github.com/diegnghtmr/saber-inverso","live":false,"caseStudy":"https://diegnghtmr.me/en/work/saber-inverso/"},
+{"id":"doc-sentinel","name":"doc-sentinel","description":{"en":"CLI that strips document traces and detects prompt injection.","es":"CLI que elimina rastros de documentos y detecta inyecciones de instrucciones."},"kind":{"en":"CLI","es":"CLI"},"categories":["cli"],"repositories":[{"name":"doc-sentinel","surface":"cli","url":"https://github.com/diegnghtmr/doc-sentinel","role":"cli","programmingLanguage":"Python"}],"stack":["Python"],"url":"https://github.com/diegnghtmr/doc-sentinel","live":false,"caseStudy":"https://diegnghtmr.me/en/work/doc-sentinel/"},
+{"id":"resume-maker","name":"resume-maker","description":{"en":"Build pipeline for publishing résumé PDFs.","es":"Flujo de compilación para publicar hojas de vida en PDF."},"kind":{"en":"Build pipeline","es":"Flujo de compilación"},"categories":["cli"],"repositories":[{"name":"resume-maker","surface":"cli","url":"https://github.com/diegnghtmr/resume-maker","role":"pipeline"}],"stack":["LaTeX"],"url":"https://github.com/diegnghtmr/resume-maker","live":false,"caseStudy":"https://diegnghtmr.me/en/work/resume-maker/"},
+{"id":"enterprise-monitoring-stack","name":"Enterprise Monitoring Stack","description":{"en":"Team project for containerized monitoring with redundant storage.","es":"Proyecto en equipo para monitoreo en contenedores con almacenamiento redundante."},"kind":{"en":"Infrastructure","es":"Infraestructura"},"categories":["infra"],"repositories":[{"name":"enterprise-monitoring-stack","surface":"infra","url":"https://github.com/diegnghtmr/enterprise-monitoring-stack","role":"infra"}],"stack":["Docker","RAID 1","LVM","Netdata"],"url":"https://github.com/diegnghtmr/enterprise-monitoring-stack","live":false,"caseStudy":"https://diegnghtmr.me/en/work/enterprise-monitoring-stack/"},
+{"id":"nexride","name":"NexRide","description":{"en":"Ride dispatch backend with pickup suggestions and composite scoring.","es":"Backend de asignación de viajes con sugerencias de recogida y una puntuación compuesta."},"kind":{"en":"API","es":"API"},"categories":["api"],"repositories":[{"name":"NexRide","surface":"api","url":"https://github.com/diegnghtmr/NexRide","role":"api","programmingLanguage":"TypeScript"}],"stack":["TypeScript","NestJS 11","PostgreSQL/PostGIS","Redis"],"url":"https://github.com/diegnghtmr/NexRide","live":false,"caseStudy":"https://diegnghtmr.me/en/work/nexride/"}
 ];
 const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
 const workRows = (html) => [...html.matchAll(/(<li\b[^>]*\sdata-project(?:\s[^>]*|)>)([\s\S]*?)<\/li>/g)];
@@ -184,18 +191,13 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
-test("projects.json keeps every previously published project id", () => {
+test("projects.json keeps every previously published entry unchanged; the ranking changes only the order", () => {
   const { projects } = JSON.parse(read("projects.json"));
-  const ids = Object.fromEntries(projects.map(({ name, id }) => [name, id]));
-  assert.deepEqual(ids, {
-    "StudyDeck AI": "p1", "Food Court": "p2", "Brújula": "p3", Legajo: "p4", "Profundiza UQ": "p5", "writing-harness": "p6",
-    Savia: "savia", "Academic Triage": "academic-triage", Vale: "vale", "Saber Inverso": "saber-inverso", "doc-sentinel": "doc-sentinel",
-    "resume-maker": "resume-maker", "Enterprise Monitoring Stack": "enterprise-monitoring-stack", NexRide: "nexride",
-  });
-});
-
-test("projects.json describes the top six with their featured card and repository metadata", () => {
-  const { projects } = JSON.parse(read("projects.json"));
+  // Snapshot of projects.json as published before the ranking (diegnghtmr.me at bcf8fdb).
+  const published = publishedProjects;
+  assert.deepEqual(projects.map(({ id }) => id).sort(), published.map(({ id }) => id).sort());
+  for (const entry of published) assert.deepEqual(projects.find(({ id }) => id === entry.id), entry, entry.id);
+  assert.deepEqual(projects.map(({ name }) => name), atlasNames);
   const specializedRoles = new Map([
     ...foodServices.map((name, index) => [name, ["identity", "menu", "orders", "traceability"][index]]),
     ["savia-mobile", "mobile"], ["savia-mcp", "mcp"], ["resume-maker", "pipeline"],
@@ -205,17 +207,6 @@ test("projects.json describes the top six with their featured card and repositor
       assert.equal(role, specializedRoles.get(name) ?? surface, name);
     }
   }
-  assert.deepEqual(projects.slice(0, 6).map(({ repositories, caseStudy, ...project }) => ({
-    ...project, repositories: repositories.map(({ role, ...repository }) => repository),
-  })), featuredContracts.map(([categories, repos, stack, url, live = false], index) => {
-    const [en, es] = featuredDescriptions[index];
-    const [enKind, esKind] = [`System, ${repos.length} repos`, `Sistema, ${repos.length} repos`];
-    return {
-      id: feedIds[index], name: projectNames[index], description: { en, es }, kind: { en: enKind, es: esKind }, categories,
-      repositories: repos.map(([name, surface, programmingLanguage]) => ({ name, surface, url: repoUrl(name), ...(programmingLanguage ? { programmingLanguage } : {}) })),
-      stack, url, live,
-    };
-  }));
 });
 
 for (const locale of locales) {
@@ -404,8 +395,8 @@ for (const locale of locales) {
 
   test(`${locale}: retired home anchor #p6 still leads to the writing-harness case study`, () => {
     const home = read(`${locale}/index.html`);
-    assert.match(home, new RegExp(`<span id="p6" hidden data-retired-card="${caseRoute(locale, "writing-harness")}"[^>]*></span>`));
-    assert.match(home, /location\.replace\(path\)/);
+    assert.match(home, new RegExp(`<p class="retired-card" id="p6"[^>]*><a href="${caseRoute(locale, "writing-harness")}" data-retired-card[^>]*>writing-harness `));
+    assert.match(home, /decodeURIComponent\(id\)[\s\S]*location\.replace\(link\.href\)/);
     assert.equal([...home.matchAll(/\sid="p6"/g)].length, 1);
   });
 
@@ -892,9 +883,10 @@ for (const slug of publishedSlugs) {
         const alternate = caseRoute(lang === "x-default" ? "en" : lang, slug);
         assert.ok(xml.includes(`hreflang="${lang}" href="${site}${alternate}"`), lang);
       }
-      if (featuredIds.includes(project.id)) {
+      const cardId = featuredIds[projectNames.indexOf(project.name)];
+      if (cardId) {
         const home = read(`${locale}/index.html`);
-        assert.match(home, new RegExp(`<li class="card" id="${project.id}"[^>]*>\\s*<a href="${path}"`));
+        assert.match(home, new RegExp(`<li class="card" id="${cardId}"[^>]*>\\s*<a href="${path}"`));
       }
       const work = read(`${workRoutes[locale].slice(1)}index.html`);
       const row = workRows(work).find(([, tag]) => attr(tag, "id") === slug);
@@ -924,4 +916,27 @@ function assertNoEditorialPlaceholders(output) {
 
 test("published pages and agent outputs do not expose editorial placeholders", () => {
   assertNoEditorialPlaceholders(dist);
+});
+
+test("S23: ranking does not reassign home JSON-LD identities", () => {
+  const stable = { Legajo: "p4", "StudyDeck AI": "p1", "Academic Triage": "p7", Brújula: "p3", "Food Court": "p2", "Profundiza UQ": "p5" };
+  for (const locale of locales) {
+    const page = `${site}/${locale}/`;
+    const html = read(`${locale}/index.html`);
+    const { "@graph": graph } = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const items = graph.find((node) => node["@type"] === "ItemList").itemListElement;
+    assert.deepEqual(items.map(({ position, item }) => [position, item.name, item["@id"]]),
+      projectNames.map((name, i) => [i + 1, name, `${page}#${stable[name]}`]));
+  }
+});
+
+test("S23: localized dossiers link to the next project in ranking order and wrap", () => {
+  const order = ["legajo", "studydeck-ai", "academic-triage", "brujula", "food-court", "profundiza-uq",
+    "doc-sentinel", "nexride", "savia", "writing-harness", "vale", "saber-inverso", "resume-maker", "enterprise-monitoring-stack"];
+  for (const locale of locales) {
+    for (const [i, slug] of order.entries()) {
+      const html = read(`${caseRoute(locale, slug).slice(1)}index.html`);
+      assert.equal(html.match(/<a class="case-next" href="([^"]+)"/)?.[1], caseRoute(locale, order[(i + 1) % order.length]), `${locale} ${slug}`);
+    }
+  }
 });

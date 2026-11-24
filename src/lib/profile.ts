@@ -1,6 +1,6 @@
 // Machine-readable views of the shared, bilingual profile and project content.
 import { contact, experience, openSource, principles, projects, stack } from "../data/home";
-import { atlasProjects, publishedProjectIds, primaryRepository, type Repository } from "../data/projects";
+import { atlasProjects, publishedFeedEntries, primaryRepository, type Repository } from "../data/projects";
 import { caseStudyPath, localePath, pagePath, siteHandle, siteName, t, workPath, type Locale, type Page } from "../i18n";
 import { en } from "../i18n/en";
 import { es } from "../i18n/es";
@@ -355,24 +355,24 @@ const serializeRepository = ({ name, surface, url, role, programmingLanguage }: 
   name, surface, url, role, ...(programmingLanguage ? { programmingLanguage } : {}),
 });
 
-/** projects.json: the ranked bilingual atlas, with featured card metadata where present. */
+/** projects.json: the ranked bilingual atlas. Previously published entries keep their id and facts. */
 export function projectsJson(studies: CaseStudies) {
-  const cards = new Map(projects.map((card) => [card.slug, card]));
+  const published: Readonly<Record<string, (typeof publishedFeedEntries)[keyof typeof publishedFeedEntries]>> = publishedFeedEntries;
   return {
     owner: { name: siteName, github: contact.github, site: `${site}/` },
     allRepositories: contact.projects,
     projects: atlasProjects.map((project) => {
-      const card = cards.get(project.slug);
+      const entry = published[project.slug];
       return {
-        id: publishedProjectIds[project.slug] ?? project.slug,
+        id: entry?.id ?? project.slug,
         name: project.name,
-        description: card ? { en: en[card.description], es: es[card.description] } : project.purpose,
-        kind: card ? { en: en[card.kind], es: es[card.kind] } : project.surfaceLabel,
-        categories: card?.categories ?? projectSurfaces(project).map((surface) => surface === "tool" ? "cli" : surface),
+        description: entry?.description ?? project.purpose,
+        kind: entry?.kind ?? project.surfaceLabel,
+        categories: entry?.categories ?? projectSurfaces(project).map((surface) => surface === "tool" ? "cli" : surface),
         repositories: project.repositories.map(serializeRepository),
-        stack: card ? stackList(card.stack) : project.stack,
-        url: card?.href ?? primaryRepository(project).url,
-        live: card?.live ?? false,
+        stack: entry?.stack ?? project.stack,
+        url: entry?.url ?? primaryRepository(project).url,
+        live: entry?.live ?? false,
         ...(studies.has(project.slug) ? { caseStudy: absolute(caseStudyPath("en", project.slug)) } : {}),
       };
     }),

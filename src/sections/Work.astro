@@ -28,17 +28,22 @@ const studies = await getCaseStudies();
       </li>
     ))}
   </ul>
-  {retiredCardAnchors.map(({ id, slug }) => <span {id} hidden data-retired-card={caseStudyPath(locale, slug)}></span>)}
+  {retiredCardAnchors.map(({ id, slug }) => (
+    <p class="retired-card" {id}><a href={caseStudyPath(locale, slug)} data-retired-card>{atlasProjects.find((project) => project.slug === slug)?.name} <span aria-hidden="true">→</span></a></p>
+  ))}
   <script is:inline>
     // Old home anchors (#p6) still reach the case study of the project that left the featured six.
     {
-    const followRetired = () => { const path = document.getElementById(location.hash.slice(1))?.dataset.retiredCard; if (path) location.replace(path); };
+    const followRetired = () => { let id = location.hash.slice(1); try { id = decodeURIComponent(id); } catch {} const link = document.getElementById(id)?.querySelector("[data-retired-card]"); if (link) location.replace(link.href); };
     followRetired(); addEventListener("hashchange", followRetired);
     }
   </script>
 </section>
 
 <style>
+  /* Retired card anchors stay out of view until a link targets them; without JavaScript they show a real link. */
+  .retired-card:not(:target) { visibility:hidden; height:0; overflow:hidden; }
+  .retired-card:target { margin-top:16px; scroll-margin-block-start:84px; }
   .work-head { grid-template-columns:1fr auto; align-items:end; }
   .work-head a { color:var(--ink); font-size:14px; font-weight:600; }
   .bento { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
