@@ -1,30 +1,31 @@
 const portrait = document.querySelector<HTMLElement>("[data-portrait]");
-if (portrait?.dataset.portrait) {
+const image = portrait?.querySelector<HTMLImageElement>("img");
+if (portrait?.dataset.portrait && image) {
   const frames = JSON.parse(portrait.dataset.portrait) as Record<"dark" | "light", (string | null)[]>;
-  const images = {
-    dark: portrait.querySelector<HTMLImageElement>("img.dark"),
-    light: portrait.querySelector<HTMLImageElement>("img.light"),
-  };
+  const activeTheme = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-  const decoded = new Map<string, boolean>();
-  const preload = () => {
-    for (const url of [...frames.dark, ...frames.light]) {
-      if (!url || decoded.has(url)) continue;
-      decoded.set(url, false);
-      const image = new Image();
-      image.onload = () => { decoded.set(url, true); show(); };
-      image.src = url;
-    }
-  };
+  const loaded = new Map<string, boolean>();
+  let started = false;
   let index = 0;
   let target = 0;
   let timer = 0;
-  function show() {
-    const theme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
-    const image = images[theme];
-    const url = frames[theme][index];
-    if (image && url && (index === 0 || decoded.get(url)) && image.getAttribute("src") !== url) image.src = url;
-  }
+  const show = (fallback = false) => {
+    const active = frames[activeTheme()];
+    const frame = active[index];
+    const url = frame && (index === 0 || loaded.get(frame)) ? frame : fallback ? active[0] : null;
+    if (url && image.getAttribute("src") !== url) image.src = url;
+  };
+  const preload = () => {
+    started = true;
+    show(true);
+    for (const url of frames[activeTheme()].slice(1)) {
+      if (!url || loaded.has(url)) continue;
+      loaded.set(url, false);
+      const frame = new Image();
+      frame.onload = () => { loaded.set(url, true); show(); };
+      frame.src = url;
+    }
+  };
   const go = (to: number) => {
     target = to;
     clearTimeout(timer);
@@ -44,9 +45,9 @@ if (portrait?.dataset.portrait) {
       preload();
     }, { rootMargin: "320px" });
     observer.observe(portrait);
-  }
+  } else preload();
   portrait.addEventListener("pointerenter", () => { preload(); go(5); });
   portrait.addEventListener("pointerleave", () => go(0));
-  addEventListener("themechange", show);
+  addEventListener("themechange", () => { if (started) preload(); });
   reduced.addEventListener("change", () => go(target));
 }

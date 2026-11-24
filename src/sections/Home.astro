@@ -11,7 +11,7 @@ import Work from "./Work.astro";
 const { locale } = Astro.props as { locale: Locale };
 ---
 
-<main id="main" tabindex="-1">
+<main class="home-sections" id="main" tabindex="-1">
   <Hero {locale} />
   <Proof {locale} />
   <Work {locale} />

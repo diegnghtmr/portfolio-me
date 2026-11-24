@@ -97,9 +97,10 @@ function mount(host: HTMLElement, shape: Shape) {
     }
     ctx.putImageData(img, 0, 0);
   };
-  const size = () => {
-    const cols = Math.max(1, Math.floor(host.clientWidth / cell));
-    const rows = Math.max(1, Math.floor(host.clientHeight / cell));
+  const size = (width: number, height: number) => {
+    if (!width || !height) return;
+    const cols = Math.max(1, Math.floor(width / cell));
+    const rows = Math.max(1, Math.floor(height / cell));
     if (img?.width === cols && img.height === rows) return;
     canvas.width = cols; canvas.height = rows;
     canvas.style.width = `${cols * cell}px`; canvas.style.height = `${rows * cell}px`;
@@ -117,9 +118,17 @@ function mount(host: HTMLElement, shape: Shape) {
     if (active() && !frame) frame = requestAnimationFrame(tick);
     else if (!active() && frame) { cancelAnimationFrame(frame); frame = 0; }
   };
-  // ResizeObserver's first callback sizes the canvas after layout, without forcing it at load.
-  if (typeof ResizeObserver !== "undefined") new ResizeObserver(size).observe(host);
-  else { size(); addEventListener("resize", size); }
+  // Use sizes already measured by layout; reading the host after another canvas
+  // has been resized in the same delivery would force style/layout again.
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(([entry]) => {
+      if (entry) size(entry.contentRect.width, entry.contentRect.height);
+    }).observe(host);
+  } else {
+    const measure = () => size(host.clientWidth, host.clientHeight);
+    measure();
+    addEventListener("resize", measure);
+  }
   if (typeof IntersectionObserver !== "undefined") {
     new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? false; sync(); }).observe(host);
   }
@@ -142,7 +151,19 @@ function mount(host: HTMLElement, shape: Shape) {
   });
 }
 
-document.querySelectorAll<HTMLElement>("[data-bayer]").forEach((host) => {
+const fields = document.querySelectorAll<HTMLElement>("[data-bayer]");
+const activate = (host: HTMLElement) => {
   const shape = host.dataset.bayer;
   if (shape === "tide" || (shape && Object.hasOwn(shapes, shape))) mount(host, shape as Shape);
-});
+};
+if (typeof IntersectionObserver === "undefined") fields.forEach(activate);
+else {
+  const near = new IntersectionObserver((entries) => {
+    for (const { isIntersecting, target } of entries) {
+      if (!isIntersecting || !(target instanceof HTMLElement)) continue;
+      near.unobserve(target);
+      activate(target);
+    }
+  }, { rootMargin: "160px 0px" });
+  fields.forEach((host) => near.observe(host));
+}

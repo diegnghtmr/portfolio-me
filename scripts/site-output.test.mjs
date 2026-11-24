@@ -461,6 +461,65 @@ test("vercel.json sets markdown headers, Vary and the root redirect by language"
   assert.equal(spanish.permanent, false);
 });
 
+test("S25: only the dither PNGs and SVG favicon get the non-immutable asset cache policy", () => {
+  const { headers } = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
+  const cacheHeaders = (path) => headers.filter(({ source }) => new RegExp(`^${source}$`).test(path))
+    .flatMap((rule) => rule.headers).filter(({ key }) => key.toLowerCase() === "cache-control")
+    .map(({ value }) => value);
+  const policy = "public, max-age=86400, stale-while-revalidate=604800";
+  for (const file of readdirSync(join(dist, "dither")).filter((file) => file.endsWith(".png"))) {
+    assert.deepEqual(cacheHeaders(`/dither/${file}`), [policy], file);
+  }
+  assert.deepEqual(cacheHeaders("/favicon.svg"), [policy]);
+  for (const path of ["/favicon.ico", "/dither/a.jpg", "/en/", "/en/index.md"]) {
+    assert.deepEqual(cacheHeaders(path), [], path);
+  }
+});
+
+test("S25: the hero retains intrinsically sized, decorative poster images for both themes", () => {
+  for (const locale of locales) {
+    const figure = read(`${locale}/index.html`).match(/<figure\b[^>]*class="[^"]*\bhero-poster\b[^"]*"[^>]*>[\s\S]*?<\/figure>/)?.[0];
+    assert.ok(figure, locale);
+    assert.match(figure, /aria-hidden="true"/);
+    assert.deepEqual([...figure.matchAll(/<img\b[^>]*>/g)].map(([tag]) =>
+      [attr(tag, "src"), attr(tag, "width"), attr(tag, "height"), attr(tag, "alt")]), [
+      ["/dither/hero-poster-dark.png", "150", "110", ""],
+      ["/dither/hero-poster-light.png", "150", "110", ""],
+    ]);
+  }
+});
+
+test("S25: home and dossier defer sections after their first, and the footer", () => {
+  for (const locale of locales) {
+    const home = read(`${locale}/index.html`);
+    const dossier = read(`${caseRoute(locale, "writing-harness")}index.html`);
+    assert.match(home, /<main\b[^>]*class="home-sections"[^>]*id="main"/);
+    assert.match(home, /\.home-sections\s*>\s*section:not\(:first-child\)/);
+    for (const id of ["demonstration", "architecture", "decisions", "next-project"]) {
+      const chapter = [...dossier.matchAll(/<section\b[^>]*>/g)].map(([tag]) => tag).find((tag) => attr(tag, "id") === id);
+      assert.match(attr(chapter ?? "", "class"), /\bdefer-render\b/, id);
+    }
+    assert.doesNotMatch(dossier.match(/<section\b[^>]*id="problem"[^>]*>/)?.[0] ?? "", /defer-render/);
+    for (const html of [home, dossier]) {
+      assert.match(html, /<footer\b[^>]*class="[^"]*\bdefer-render\b/);
+      assert.match(html, /content-visibility:\s*auto\b/);
+      assert.match(html, /contain-intrinsic-(?:block-)?size:\s*auto\b/);
+    }
+  }
+});
+
+test("S25: the footer lets the portrait script choose the sole image URL", () => {
+  for (const locale of locales) {
+    const html = read(`${locale}/index.html`);
+    const figure = html.match(/<figure\b[^>]*\bdata-portrait="[^"]+"[^>]*>[\s\S]*?<\/figure>/)?.[0];
+    assert.ok(figure, locale);
+    const markup = figure.replace(/<noscript>[\s\S]*?<\/noscript>/g, "");
+    assert.equal([...markup.matchAll(/<img\b/g)].length, 1);
+    assert.doesNotMatch(markup, /<img\b[^>]*\bsrc="\/dither\/portrait-/);
+    assert.match(figure, /<noscript>\s*<img\b[^>]*\bsrc="\/dither\/portrait-dark-0\.png"/);
+  }
+});
+
 const dossierSlugs = (output, locale, extension) => {
   const folder = join(output, workRoutes[locale]);
   return readdirSync(folder, { withFileTypes: true })

@@ -166,6 +166,13 @@
   padding-block-start: calc(var(--unit) * 3);
   border-block-start: 1px solid var(--hair);
 }
+/* Estimates apply only until a chapter is laid out for the first time. */
+#demonstration.case-chapter { --deferred-block: 640px; }
+#architecture.case-chapter { --deferred-block: 1000px; }
+#decisions.case-chapter { --deferred-block: 1060px; }
+#results.case-chapter { --deferred-block: 185px; }
+#limitations.case-chapter { --deferred-block: 140px; }
+.case-end > #next-project { --deferred-block: 145px; }
 .case-chapter > h2, .case-end h2 {
   margin-block-end: calc(var(--unit) * 2);
   font-size: 28px;
@@ -502,6 +509,11 @@
   .case-layout { margin-block-start: calc(var(--unit) * 3); }
   .case-contents a { padding-inline: var(--unit); }
   .case-chapter + .case-chapter, .case-end { margin-block-start: calc(var(--unit) * 5); padding-block-start: calc(var(--unit) * 2); }
+  #architecture.case-chapter { --deferred-block: 1400px; }
+  #decisions.case-chapter { --deferred-block: 1470px; }
+  #results.case-chapter { --deferred-block: 290px; }
+  #limitations.case-chapter { --deferred-block: 195px; }
+  .case-end > #next-project { --deferred-block: 160px; }
   .case-gallery { grid-template-columns: minmax(0, 1fr); }
   .repo-map-labeled { --map-gap: calc(var(--unit) * 3); }
   .map-node { padding-inline: var(--unit); }

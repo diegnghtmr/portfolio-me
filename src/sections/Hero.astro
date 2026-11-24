@@ -30,9 +30,9 @@ const { locale } = Astro.props as { locale: Locale };
   h1 { margin-block-end:20px; font-size:56px; }
   p { max-width:34ch; margin-block-end:16px; font-size:20px; line-height:1.5; }
   .ctas { display:flex; flex-wrap:wrap; gap:12px; }
-  .hero-art { position:relative; height:440px; overflow:hidden; }
-  .shader { position:absolute; inset:0; visibility:hidden; }
-  [data-mounted] .shader { visibility:visible; }
+  .hero-art { position:relative; height:440px; overflow:hidden; container-type:size; }
+  .shader { position:absolute; inset:0; visibility:hidden; opacity:0; transition:opacity 160ms ease-out; }
+  [data-mounted] .shader { visibility:visible; opacity:1; }
   .shader-label { display:none; }
   [data-mounted] .shader-label { display:block; }
   @media (max-width:900px) {

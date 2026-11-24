@@ -122,6 +122,21 @@
     [data-reveal]:focus-within { transition: none; }
   }
 
+  @media screen {
+    .defer-render, .home-sections > section:not(:first-child) {
+      content-visibility: auto;
+      contain-intrinsic-block-size: auto var(--deferred-block, 500px);
+    }
+    .home-sections > #work { --deferred-block: 1310px; }
+    .home-sections > #oss { --deferred-block: 645px; }
+    .home-sections > #contact { --deferred-block: 460px; }
+    @media (max-width: 900px) {
+      .home-sections > section:not(:first-child) { --deferred-block: 680px; }
+      .home-sections > #work { --deferred-block: 2450px; }
+      .home-sections > #oss { --deferred-block: 970px; }
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after { transition: none !important; animation: none !important; }
