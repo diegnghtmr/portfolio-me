@@ -92,11 +92,11 @@ if (blocks.length !== 3 || preamble?.trim() || !problem?.trim() || !architecture
             <h2 id="problem-title">{m.problem}</h2>
             <div class="case-prose" set:html={problem}></div>
           </section>
-          <section class="case-chapter defer-render" id="demonstration" aria-labelledby="demonstration-title" tabindex="-1">
+          <section class="case-chapter" id="demonstration" aria-labelledby="demonstration-title" tabindex="-1">
             <h2 id="demonstration-title">{m.demonstration}</h2>
             <CaseDemonstration {locale} {demonstration} />
           </section>
-          <section class="case-chapter defer-render" id="architecture" aria-labelledby="architecture-title" tabindex="-1">
+          <section class="case-chapter" id="architecture" aria-labelledby="architecture-title" tabindex="-1">
             <h2 id="architecture-title">{m.architecture}</h2>
             <div class="case-prose" set:html={architecture}></div>
             {diagram ? <ArchitectureDiagram architecture={diagram} {project} {locale} /> : project.repositories.length > 1 && <figure class="case-repo-map">
@@ -112,11 +112,11 @@ if (blocks.length !== 3 || preamble?.trim() || !problem?.trim() || !architecture
               </ul>
             </div>
           </section>
-          <section class="case-chapter defer-render" id="decisions" aria-labelledby="decisions-title" tabindex="-1">
+          <section class="case-chapter" id="decisions" aria-labelledby="decisions-title" tabindex="-1">
             <h2 id="decisions-title">{m.decisions}</h2>
             <CaseDecisions {locale} {decisions} />
           </section>
-          {results && <section class="case-chapter defer-render" id="results" aria-labelledby="results-title" tabindex="-1">
+          {results && <section class="case-chapter" id="results" aria-labelledby="results-title" tabindex="-1">
             <h2 id="results-title">{m.results}</h2>
             <dl class="case-results">
               {results.map(({ label, detail, url }) => (
@@ -127,12 +127,12 @@ if (blocks.length !== 3 || preamble?.trim() || !problem?.trim() || !architecture
               ))}
             </dl>
           </section>}
-          {limitations && <section class="case-chapter defer-render" id="limitations" aria-labelledby="limitations-title" tabindex="-1">
+          {limitations && <section class="case-chapter" id="limitations" aria-labelledby="limitations-title" tabindex="-1">
             <h2 id="limitations-title">{m.limitations}</h2>
             <ul class="case-limits case-prose">{limitations.map((item) => <li>{item}</li>)}</ul>
           </section>}
           <div class="case-end">
-            {next && <section class="defer-render" id="next-project" aria-labelledby="next-title" tabindex="-1">
+            {next && <section id="next-project" aria-labelledby="next-title" tabindex="-1">
               <h2 id="next-title">{m.next}</h2>
               <a class="case-next" href={caseStudyPath(locale, next.project.slug)}>
                 <div><RepositoryMap project={next.project} {locale} decorative /></div>

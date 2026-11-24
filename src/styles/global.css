@@ -122,18 +122,12 @@
     [data-reveal]:focus-within { transition: none; }
   }
 
+  /* Deferred rendering only for blocks after every in-page anchor target: skipped content
+     ahead of a #hash target would move it once rendered and mislead the scroll spy. */
   @media screen {
-    .defer-render, .home-sections > section:not(:first-child) {
+    .defer-render {
       content-visibility: auto;
       contain-intrinsic-block-size: auto var(--deferred-block, 500px);
-    }
-    .home-sections > #work { --deferred-block: 1310px; }
-    .home-sections > #oss { --deferred-block: 645px; }
-    .home-sections > #contact { --deferred-block: 460px; }
-    @media (max-width: 900px) {
-      .home-sections > section:not(:first-child) { --deferred-block: 680px; }
-      .home-sections > #work { --deferred-block: 2450px; }
-      .home-sections > #oss { --deferred-block: 970px; }
     }
   }
 

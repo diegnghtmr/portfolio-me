@@ -49,7 +49,9 @@ if (main && typeof IntersectionObserver !== "undefined") {
     initial = false;
   });
   const start = () => {
-    if (reduced.matches) return;
+    // A #hash load scrolls after this runs (smooth fragment scroll), so the starting
+    // viewport is unknown: keep the whole page as painted instead of arming reveals.
+    if (reduced.matches || location.hash.length > 1) return;
     for (const item of items) {
       if (!item.hasAttribute("data-count")) {
         const parent = item.parentElement;

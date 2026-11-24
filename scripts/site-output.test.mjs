@@ -397,6 +397,8 @@ for (const locale of locales) {
     const home = read(`${locale}/index.html`);
     assert.match(home, new RegExp(`<p class="retired-card" id="p6"[^>]*><a href="${caseRoute(locale, "writing-harness")}" data-retired-card[^>]*>writing-harness `));
     assert.match(home, /decodeURIComponent\(id\)[\s\S]*location\.replace\(link\.href\)/);
+    // Only the retired anchor itself redirects; #work contains it and must not.
+    assert.match(home, /target\?\.matches\("\.retired-card"\)/);
     assert.equal([...home.matchAll(/\sid="p6"/g)].length, 1);
   });
 
@@ -489,19 +491,13 @@ test("S25: the hero retains intrinsically sized, decorative poster images for bo
   }
 });
 
-test("S25: home and dossier defer sections after their first, and the footer", () => {
+test("S25: only the footer defers rendering; in-page anchor targets never do", () => {
   for (const locale of locales) {
     const home = read(`${locale}/index.html`);
     const dossier = read(`${caseRoute(locale, "writing-harness")}index.html`);
-    assert.match(home, /<main\b[^>]*class="home-sections"[^>]*id="main"/);
-    assert.match(home, /\.home-sections\s*>\s*section:not\(:first-child\)/);
-    for (const id of ["demonstration", "architecture", "decisions", "next-project"]) {
-      const chapter = [...dossier.matchAll(/<section\b[^>]*>/g)].map(([tag]) => tag).find((tag) => attr(tag, "id") === id);
-      assert.match(attr(chapter ?? "", "class"), /\bdefer-render\b/, id);
-    }
-    assert.doesNotMatch(dossier.match(/<section\b[^>]*id="problem"[^>]*>/)?.[0] ?? "", /defer-render/);
     for (const html of [home, dossier]) {
-      assert.match(html, /<footer\b[^>]*class="[^"]*\bdefer-render\b/);
+      assert.deepEqual([...html.matchAll(/<[a-z]+\b[^>]*\bclass="[^"]*\bdefer-render\b[^"]*"[^>]*>/g)].map(([tag]) => tag.match(/^<([a-z]+)/)[1]), ["footer"]);
+      assert.doesNotMatch(html, /home-sections\s*>\s*section:not\(:first-child\)\s*[,{]/);
       assert.match(html, /content-visibility:\s*auto\b/);
       assert.match(html, /contain-intrinsic-(?:block-)?size:\s*auto\b/);
     }

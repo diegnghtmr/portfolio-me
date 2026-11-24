@@ -34,7 +34,7 @@ const studies = await getCaseStudies();
   <script is:inline>
     // Old home anchors (#p6) still reach the case study of the project that left the featured six.
     {
-    const followRetired = () => { let id = location.hash.slice(1); try { id = decodeURIComponent(id); } catch {} const link = document.getElementById(id)?.querySelector("[data-retired-card]"); if (link) location.replace(link.href); };
+    const followRetired = () => { let id = location.hash.slice(1); try { id = decodeURIComponent(id); } catch {} const target = document.getElementById(id); const link = target?.matches(".retired-card") ? target.querySelector("[data-retired-card]") : null; if (link) location.replace(link.href); };
     followRetired(); addEventListener("hashchange", followRetired);
     }
   </script>
