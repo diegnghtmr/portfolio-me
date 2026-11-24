@@ -11,10 +11,14 @@ const { architecture, locale, project } = Astro.props;
 const m = caseStudyMessages[locale];
 const description = describeArchitecture(architecture).join("\n");
 const title = m.diagramTitle(architecture.system);
-const layouts = [{ name: "wide", ...layoutArchitecture(architecture, false) }, { name: "narrow", ...layoutArchitecture(architecture, true) }];
+const narrow = await layoutArchitecture(architecture, "narrow");
+// Judge the routed result, not node count: detached nodes do not create turns.
+// Limit both route complexity and the depth of the 1:1 mobile diagram.
+const useNarrow = narrow.bends <= 60 && narrow.height <= 1800;
+const wide = await layoutArchitecture(architecture, useNarrow ? "wide" : "wide-scroll");
+const layouts = [{ name: "wide", ...wide }, ...(useNarrow ? [{ name: "narrow", ...narrow }] : [])];
 const surfaces = new Map(project.repositories.map(({ name, surface }) => [name, surface]));
 const category = ({ kind, repo }: Architecture["nodes"][number]) => kind === "store" ? "data" : kind === "external" ? "external" : repo ? surfaces.get(repo) : "api";
-const names = new Map(architecture.nodes.map(({ id, name }) => [id, name]));
 const legend = ["container", "store", "external"] as const;
 
 function cylinder(w: number, h: number) {
@@ -25,49 +29,42 @@ function cylinder(w: number, h: number) {
 
 <figure class="case-arch">
   <h3>{m.diagram}</h3>
-  <div class="arch-plot">
+  <div class:list={["arch-plot", { "arch-plot-responsive": useNarrow }]}>
     {layouts.map(({ name, width, height, boundary, systemLines, boxes, routes }) => {
       const id = `${locale}-${project.slug}-arch-${name}`;
-      const keyed = routes.filter(({ label }) => !label);
-      return <div class:list={["arch-layout", `arch-layout-${name}`]}>
-        <svg class="arch-diagram" style={`--arch-width: ${width}px`} viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img"
-          aria-labelledby={`${id}-title`} aria-describedby={`${id}-desc`} focusable="false">
-          <title id={`${id}-title`}>{title}</title>
-          <desc id={`${id}-desc`}>{description}</desc>
-          <defs>
-            <marker id={`${id}-arrow`} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
-              <path class="arch-arrow" d="M0 0L8 4L0 8Z" />
-            </marker>
-          </defs>
-          <rect class="arch-boundary arch-stroke arch-corner" x={boundary.x} y={boundary.y} width={boundary.w} height={boundary.h} />
-          {routes.map(({ points }) => <path class="arch-line arch-stroke" d={points.map(({ x, y }, i) => `${i === 0 ? "M" : "L"}${x} ${y}`).join("")} marker-end={`url(#${id}-arrow)`} />)}
-          {systemLines.map(({ x, y, text }) => <text class="arch-system" {x} {y}>{text}</text>)}
-          {boxes.map(({ node, x, y, w, h, lines, markerY }) => (
-            <g data-node-kind={node.kind} data-node-id={node.id} transform={`translate(${x} ${y})`}>
-              {node.kind === "store" ? <>
-                <path class="arch-panel arch-stroke" d={cylinder(w, h)} />
-                <path class="arch-lid arch-stroke" d={`M0 10C0 16 ${w / 4} 20 ${w / 2} 20S${w} 16 ${w} 10`} />
-              </> : <rect class:list={["arch-panel", "arch-stroke", "arch-corner", { "arch-external": node.kind === "external" }]} width={w} height={h} stroke-dasharray={node.kind === "external" ? "4 4" : undefined} />}
-              <rect class="arch-mark" data-category={category(node)} x="16" y={markerY} width="6" height="6" />
-              {lines.map(({ x, y, style, text }) => <text class={`arch-${style}`} {x} {y}>{text}</text>)}
-            </g>
-          ))}
-          {routes.map(({ label, badge, reference }) => label ? (
-            <g class="arch-edge-label" text-anchor="middle">
-              {label.map(({ x, y, style, text }) => <text class={`arch-${style}`} {x} {y}>{text}</text>)}
-            </g>
-          ) : badge && <g class="arch-edge-badge">
-            <circle class="arch-badge arch-stroke" cx={badge.x} cy={badge.y} r="9" />
-            <text class="arch-reference" x={badge.x} y={badge.y + 4} text-anchor="middle">{reference}</text>
-          </g>)}
-        </svg>
-        {keyed.length > 0 && <ul role="list" class="arch-flows" aria-label={m.diagramFlows}>
-          {keyed.map(({ edge, reference, badge }) => <li>
-            {badge && <span class="arch-flow-number" aria-hidden="true">{reference}</span>}
-            <span><span class="arch-flow-route">{names.get(edge.from)} → {names.get(edge.to)}</span><br />
-              {edge.protocol && <><strong>{edge.protocol}</strong> · </>}{edge.verb}</span>
-          </li>)}
-        </ul>}
+      return <div class:list={["arch-layout", `arch-layout-${name}`]} style={`--arch-width: ${width}px`}>
+        <div class="arch-frame" role="region" tabindex="0" aria-label={title}>
+          <svg class="arch-diagram" viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img"
+            aria-labelledby={`${id}-title`} aria-describedby={`${id}-desc`} focusable="false">
+            <title id={`${id}-title`}>{title}</title>
+            <desc id={`${id}-desc`}>{description}</desc>
+            <defs>
+              <marker id={`${id}-arrow`} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="arch-arrow" d="M0 0L8 4L0 8Z" />
+              </marker>
+            </defs>
+            <rect class="arch-boundary arch-stroke arch-corner" x={boundary.x} y={boundary.y} width={boundary.w} height={boundary.h} />
+            {routes.map(({ points }) => <path class="arch-line arch-stroke" d={points.map(({ x, y }, i) => `${i === 0 ? "M" : "L"}${x} ${y}`).join("")} marker-end={`url(#${id}-arrow)`} />)}
+            {systemLines.map(({ x, y, text }) => <text class="arch-system" {x} {y}>{text}</text>)}
+            {boxes.map(({ node, x, y, w, h, lines, markerY }) => (
+              <g data-node-kind={node.kind} data-node-id={node.id} transform={`translate(${x} ${y})`}>
+                {node.kind === "store" ? <>
+                  <path class="arch-panel arch-stroke" d={cylinder(w, h)} />
+                  <path class="arch-lid arch-stroke" d={`M0 10C0 16 ${w / 4} 20 ${w / 2} 20S${w} 16 ${w} 10`} />
+                </> : <rect class:list={["arch-panel", "arch-stroke", "arch-corner", { "arch-external": node.kind === "external" }]} width={w} height={h} stroke-dasharray={node.kind === "external" ? "4 4" : undefined} />}
+                <rect class="arch-mark" data-category={category(node)} x="16" y={markerY} width="6" height="6" />
+                {lines.map(({ x, y, style, text }) => <text class={`arch-${style}`} {x} {y}>{text}</text>)}
+              </g>
+            ))}
+            {routes.map(({ labelBox: { x, y, w, h }, lines }) => (
+              <g text-anchor="middle">
+                <rect class="arch-label-box arch-stroke" {x} {y} width={w} height={h} rx="3" />
+                {lines.map(({ x, y, style, text }) => <text class={`arch-${style}`} {x} {y}>{text}</text>)}
+              </g>
+            ))}
+          </svg>
+          <span class="arch-scroll-hint" aria-hidden="true"></span>
+        </div>
       </div>;
     })}
   </div>

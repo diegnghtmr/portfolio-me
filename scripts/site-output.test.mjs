@@ -343,6 +343,7 @@ for (const locale of locales) {
       [["food-court-ui", "Web"], ...foodServices.map((name, i) => [name, foodRoles[i]])]);
     check("savia", `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend.`,
       [["savia-web", "Web"], ["savia-backend", "API"]], [["savia-mobile", mobile], ["savia-mcp", "MCP"]]);
+    for (const slug of publishedSlugs) assertDiagramGeometry(chapter(slug), locale, slug);
     assert.equal(mapFor("writing-harness"), undefined);
     assert.match(chapter("writing-harness"), /<a href="https:\/\/github\.com\/diegnghtmr\/writing-harness"[^>]*><strong>writing-harness<\/strong>/);
   });
@@ -587,6 +588,60 @@ test("the Markdown twin serializes evidence destinations without raw spaces", (t
   assert.equal(destination, "https://example.com/technical%20notes/caf%C3%A9%20%28v2%29.html?mode=quick%20test#section%20one");
 });
 
+function assertDiagramGeometry(html, locale, slug) {
+  const context = `${locale} ${slug}`;
+  const svgs = [...html.matchAll(/<svg\b[^>]*class="arch-diagram"[^>]*>[\s\S]*?<\/svg>/g)];
+  const frames = [...html.matchAll(/(<div\b[^>]*class="arch-frame"[^>]*>)\s*<svg\b[^>]*class="arch-diagram"/g)];
+  const dense = ["food-court", "enterprise-monitoring-stack"].includes(slug);
+  const variants = dense ? ["wide"] : ["wide", "narrow"];
+  assert.equal(svgs.length, variants.length, `${context}: dense diagrams must omit the narrow variant`);
+  assert.deepEqual(frames.map(([, tag]) => [attr(tag, "role"), attr(tag, "tabindex"), attr(tag, "aria-label")]),
+    svgs.map(([svg]) => ["region", "0", svg.match(/<title\b[^>]*>([^<]+)<\/title>/)[1]]), `${context}: diagram frames must be focusable and named`);
+  assert.deepEqual(svgs.map(([svg]) => svg.match(/aria-labelledby="[^"]+-arch-(wide|narrow)-title"/)[1]), variants, context);
+  for (const [i, [svg]] of svgs.entries()) {
+    const labels = [...svg.matchAll(/<rect\b[^>]*class="arch-label-box\b[^>]*>/g)].map(([tag]) =>
+      ["x", "y", "width", "height"].map((name) => Number(attr(tag, name))));
+    assert.equal(labels.length, [...svg.matchAll(/marker-end="url\(/g)].length, `${context}: one inline box per flow`);
+    const nodeGroups = [...svg.matchAll(/(<g\b[^>]*data-node-kind="(\w+)"[^>]*>)([\s\S]*?)<\/g>/g)];
+    const boxes = nodeGroups.map(([, tag, kind, body]) => {
+      const xy = attr(tag, "transform").match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
+      if (kind === "store") {
+        const [, width, bottom] = body.match(/S([\d.]+) 4 \1 10V([\d.]+)C/);
+        return [...xy, Number(width), Number(bottom) + 10];
+      }
+      const panel = body.match(/<rect\b[^>]*class="arch-panel\b[^>]*>/)[0];
+      return [...xy, Number(attr(panel, "width")), Number(attr(panel, "height"))];
+    });
+    assert.ok(boxes.length >= 2 && [...boxes, ...labels].every((rect) => rect.every(Number.isFinite)), context);
+    const boundary = svg.match(/<rect\b[^>]*class="arch-boundary\b[^>]*>/)[0];
+    const right = Number(attr(boundary, "x")) + Number(attr(boundary, "width"));
+    const bottom = Number(attr(boundary, "y")) + Number(attr(boundary, "height"));
+    const externals = boxes.filter((_, index) => nodeGroups[index][2] === "external");
+    if (dense || (i === 0 && externals.length && externals.every(([x]) => x >= right))) {
+      assert.ok([...boxes, ...labels].every(([, y, , h]) => y + h <= bottom + 1e-6), `${context}: side-by-side diagrams must end at the system boundary's bottom edge`);
+    }
+    for (const [x, y, w, h] of labels) for (const [nx, ny, nw, nh] of boxes) {
+      assert.ok(x + w <= nx || nx + nw <= x || y + h <= ny || ny + nh <= y, `${context}: flow label intersects node`);
+    }
+    if (i === 0) {
+      const ids = [...svg.matchAll(/<g\b[^>]*data-node-id="([^"]+)"/g)].map(([, id]) => id);
+      const column = (id) => boxes[ids.indexOf(id)][0];
+      const chains = {
+        "food-court": [["frontend", "orders", "catalog", "catalog-db"], ["frontend", "orders", "traceability", "trace-db"], ["frontend", "orders", "identity", "user-db"], ["frontend", "orders", "orders-db"]],
+        "studydeck-ai": [["frontend", "backend", "postgres"]],
+        savia: [["web", "backend", "postgres"], ["web", "backend", "files"]],
+      };
+      for (const chain of chains[slug] ?? []) for (let j = 1; j < chain.length; j++) {
+        assert.ok(column(chain[j - 1]) < column(chain[j]), `${context}: ${chain[j - 1]} → ${chain[j]} must advance left to right`);
+      }
+      if (slug === "savia") {
+        for (const peer of ["mobile", "mcp"]) assert.equal(column(peer), column("web"), `${context}: ${peer} in first column`);
+        for (const dependency of ["auth", "jwt-keys"]) assert.ok(column(dependency) > right, `${context}: ${dependency} right of the system boundary`);
+      }
+    }
+  }
+}
+
 const architectureEvidence = "https://example.com/fixture/architecture";
 const fixtureArchitecture = {
   system: "Fixture system", caption: "A fixture for the container diagram.",
@@ -639,7 +694,7 @@ test("architecture renders accessible responsive SVGs with a store and an extern
       const external = svg.match(/<g\b[^>]*data-node-kind="external"[^>]*>/)?.[0];
       assert.ok(boundary && store && external);
       assert.match(store, /<path\b[^>]*d="M[^\"]*C/);
-      const [, x, y] = attr(external, "transform").match(/translate\((\d+) (\d+)\)/).map(Number);
+      const [, x, y] = attr(external, "transform").match(/translate\(([-\d.]+) ([-\d.]+)\)/).map(Number);
       assert.ok(x > Number(attr(boundary, "x")) + Number(attr(boundary, "width")) || y > Number(attr(boundary, "y")) + Number(attr(boundary, "height")));
       assert.match(svg, /stroke-dasharray="4 4"/);
       assert.match(svg, /marker-end="url\(#[^)]+\)"/);

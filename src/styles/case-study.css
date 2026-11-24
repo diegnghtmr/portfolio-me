@@ -268,35 +268,59 @@
 }
 .case-arch h3 { margin-block-end: calc(var(--unit) * 2); font-weight: 600; }
 .arch-plot { container-type: inline-size; }
-.arch-layout-wide { display: none; }
-.arch-diagram { inline-size: 100%; block-size: auto; margin-inline: auto; font: 400 13px var(--sans); }
-.arch-layout-narrow .arch-diagram { max-inline-size: 352px; }
+.arch-layout { position: relative; }
+.arch-plot-responsive .arch-layout-wide { display: none; }
+.arch-frame {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: auto;
+  container: arch-frame / scroll-state;
+}
+.arch-frame:focus-visible { outline: 2px solid var(--case-gold); outline-offset: 3px; }
+.arch-diagram { display: block; inline-size: var(--arch-width); max-inline-size: none; block-size: auto; margin-inline: auto; font: 400 13px var(--sans); }
+.arch-scroll-hint {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: clamp(0px, calc(var(--arch-width) - 100cqi), 24px);
+  background: linear-gradient(to right, transparent, var(--raised));
+  pointer-events: none;
+}
+/* Keep a static edge hint as a fallback; where supported, hide it at the end. */
+@supports (container-type: scroll-state) {
+  .arch-scroll-hint { visibility: hidden; }
+  @container arch-frame scroll-state(scrollable: right) {
+    .arch-scroll-hint { visibility: visible; }
+  }
+}
+@media (forced-colors: active) {
+  .arch-scroll-hint { display: none; }
+}
 @media (width > 860px) {
   @container (width >= 800px) {
-    .arch-layout-wide { display: block; }
+    .arch-plot-responsive .arch-layout-wide { display: block; }
     .arch-layout-narrow { display: none; }
-    .arch-diagram { max-inline-size: var(--arch-width); }
   }
 }
 .arch-stroke { stroke-width: 1px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
 .arch-corner { rx: var(--r); }
 .arch-boundary, .arch-panel, .arch-lid { stroke: var(--control); }
-.arch-boundary, .arch-external, .arch-badge { fill: var(--surface); }
+.arch-boundary, .arch-external, .arch-label-box { fill: var(--surface); }
+.arch-label-box { stroke: var(--control); }
 .arch-panel:not(.arch-external) { fill: var(--raised); }
 .arch-lid, .arch-line { fill: none; }
-.arch-line, .arch-badge { stroke: var(--subtle); }
+.arch-line { stroke: var(--subtle); }
 .arch-arrow, .arch-tech, .arch-kind, .arch-verb, .arch-mark { fill: var(--subtle); }
-.arch-system, .arch-name, .arch-does, .arch-protocol, .arch-reference { fill: var(--text); }
+.arch-system, .arch-name, .arch-does, .arch-protocol { fill: var(--text); }
 .arch-system { font: 600 16px var(--mono); }
 .arch-name { font: 600 15px var(--mono); }
 .arch-kind, .arch-protocol { font: 600 13px var(--mono); }
-.arch-reference { font: 600 13px var(--mono); }
 .arch-mark[data-category="web"] { fill: var(--cat-web); }
 .arch-mark[data-category="api"] { fill: var(--cat-api); }
 .arch-mark[data-category="cli"] { fill: var(--cat-mcp); }
 .arch-mark[data-category="infra"] { fill: var(--cat-infra); }
 .arch-mark[data-category="data"] { fill: var(--cat-data); }
-.arch-legend, .arch-flows {
+.arch-legend {
   display: flex;
   flex-wrap: wrap;
   gap: var(--unit) calc(var(--unit) * 2);
@@ -305,19 +329,6 @@
   font: 500 12px/1.5 var(--sans);
 }
 .arch-legend li { display: flex; align-items: center; gap: calc(var(--unit) / 2); }
-.arch-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-.arch-flows li {
-  display: flex;
-  align-items: start;
-  gap: var(--unit);
-  padding: var(--unit);
-  border: 1px solid var(--hair);
-  border-radius: var(--r);
-  background: var(--surface);
-}
-.arch-flow-number { flex: none; min-inline-size: 2ch; color: var(--ink); font: 600 12px/1.5 var(--mono); }
-.arch-flow-route { color: var(--text); }
-.arch-flows strong { font: 600 12px/1.5 var(--mono); }
 .case-arch figcaption {
   margin-block-start: calc(var(--unit) * 1.5);
   padding-block-start: calc(var(--unit) * 1.5);
