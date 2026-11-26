@@ -78,8 +78,8 @@ decisions:
         chosen: true
     consequence: El despacho funciona sin un servicio externo de mapas y otro proveedor puede usar la misma interfaz. La estimación no incorpora la red vial ni el tráfico.
     evidence:
-      - label: ADR-001 en el README
-        url: https://github.com/diegnghtmr/NexRide/blob/main/README.md#L252-L254
+      - label: ADR-001 en la referencia de despacho
+        url: https://github.com/diegnghtmr/NexRide/blob/main/docs/dispatch-reference.md#design-decisions
       - label: Proveedor de distancias
         url: https://github.com/diegnghtmr/NexRide/blob/main/src/dispatch/infrastructure/providers/haversine-distance.provider.ts
   - question: ¿Qué debe exponer el módulo de despacho al controlador HTTP?

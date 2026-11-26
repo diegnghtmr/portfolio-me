@@ -78,8 +78,8 @@ decisions:
         chosen: true
     consequence: Dispatch runs without an external maps service, and a replacement can use the same interface. The estimate does not account for street layout or traffic.
     evidence:
-      - label: ADR-001 in the README
-        url: https://github.com/diegnghtmr/NexRide/blob/main/README.md#L252-L254
+      - label: ADR-001 in the dispatch reference
+        url: https://github.com/diegnghtmr/NexRide/blob/main/docs/dispatch-reference.md#design-decisions
       - label: Distance provider
         url: https://github.com/diegnghtmr/NexRide/blob/main/src/dispatch/infrastructure/providers/haversine-distance.provider.ts
   - question: What should the dispatch module expose to its HTTP controller?
