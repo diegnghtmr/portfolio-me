@@ -11,6 +11,8 @@ type Line = Point & { text: string; style: Style };
 // Astro calls this module when generating pages, not in a client script.
 const elk = new ELK({ algorithms: ["layered"] });
 const padding = 14;
+const boundaryInset = 18;
+const titlePitch = 20;
 const labelInset = 5;
 const labelPitch = 16;
 const mono = (size: number) => () => size * .61;
@@ -136,7 +138,8 @@ export async function layoutArchitecture({ nodes, edges, system }: Architecture,
       edges.some(({ from, to }) => (to === id && !external.has(from)) || (from === id && !external.has(to)))));
   const below = !narrow && external.size > 0 && !right;
   const compact = !narrow && (finalColumn >= 3 || right);
-  const boxes = nodes.map((node) => makeBox(node, compact ? 176 : 232));
+  const nodeWidth = compact ? 176 : 232;
+  const boxes = nodes.map((node) => makeBox(node, nodeWidth));
   const flow = edges.map((edge, i) => {
     // Place external dependencies downstream of the compound node, even for
     // inbound flows. Restore the semantic direction before drawing the arrow.
@@ -192,8 +195,9 @@ export async function layoutArchitecture({ nodes, edges, system }: Architecture,
       }
       return { id: nodeId(node.id), width: w, height: h, ports, layoutOptions };
     });
-  const title = wrap(system, narrow ? 200 : 232, mono(16));
-  const graph: ElkNode = {
+  const titleAdvance = mono(16);
+  let title = wrap(system, narrow ? 200 : 232, titleAdvance);
+  const graph = (titleHeight: number): ElkNode => ({
     id: "diagram",
     layoutOptions: {
       ...options,
@@ -210,16 +214,26 @@ export async function layoutArchitecture({ nodes, edges, system }: Architecture,
         ...options,
         "elk.hierarchyHandling": below ? "SEPARATE_CHILDREN" : "INCLUDE_CHILDREN",
         ...(below ? { "elk.portConstraints": "FIXED_SIDE" } : {}),
-        "elk.padding": `[top=${28 + title.length * 20},left=18,bottom=18,right=18]`,
+        "elk.padding": `[top=${28 + titleHeight},left=${boundaryInset},bottom=${boundaryInset},right=${boundaryInset}]`,
       },
     }, ...children(true), ...(narrow ? flow.filter(({ internal }) => !internal).map(({ inlineNode }) => inlineNode) : [])],
     edges: flow.flatMap(({ outer }) => outer),
+  });
+  const place = async (lineCount: number) => {
+    const result = await elk.layout(structuredClone(graph(lineCount * titlePitch)));
+    const compound = result.children?.find(({ id }) => id === "system");
+    if (!compound) throw new Error("ELK did not place the architecture boundary");
+    return { result, compound, boundary: shape(compound) };
   };
-  const result = await elk.layout(graph);
-  const compound = result.children?.find(({ id }) => id === "system");
-  if (!compound) throw new Error("ELK did not place the architecture boundary");
-  const boundary = shape(compound);
-  const systemLines = title.map((text, i): Line => ({ text, style: "system", x: boundary.x + 18, y: boundary.y + 27 + i * 20 }));
+  let { result, compound, boundary } = await place(title.length);
+  if (title.some((line) => measure(line, titleAdvance) > boundary.w - 2 * boundaryInset)) {
+    // At least one internal node fits between the boundary insets. Use its
+    // width as a lower bound that still holds after ELK reserves more height.
+    const fitted = wrap(system, nodeWidth, titleAdvance);
+    if (fitted.length !== title.length) ({ result, compound, boundary } = await place(fitted.length));
+    title = fitted;
+  }
+  const systemLines = title.map((text, i): Line => ({ text, style: "system", x: boundary.x + boundaryInset, y: boundary.y + 27 + i * titlePitch }));
   const zero = { x: 0, y: 0 };
   const located = new Map<string, Rect>();
   for (const [items, origin] of [[compound.children, boundary], [result.children, zero]] as const) {

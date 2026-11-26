@@ -9,7 +9,7 @@ import type { Architecture } from "../lib/case-studies";
 interface Props { architecture: Architecture; locale: Locale; project: Project }
 const { architecture, locale, project } = Astro.props;
 const m = caseStudyMessages[locale];
-const description = describeArchitecture(architecture).join("\n");
+const description = describeArchitecture(architecture, locale).join("\n");
 const title = m.diagramTitle(architecture.system);
 const narrow = await layoutArchitecture(architecture, "narrow");
 // Judge the routed result, not node count: detached nodes do not create turns.
