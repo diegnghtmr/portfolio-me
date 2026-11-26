@@ -678,35 +678,85 @@ test("the Markdown twin serializes evidence destinations without raw spaces", (t
   assert.equal(destination, "https://example.com/technical%20notes/caf%C3%A9%20%28v2%29.html?mode=quick%20test#section%20one");
 });
 
+const diagramSvgs = (html) => html.match(/<svg\b[^>]*class="arch-diagram"[^>]*>[\s\S]*?<\/svg>/g) ?? [];
+
+function diagramNodes(svg) {
+  return [...svg.matchAll(/(<g\b[^>]*data-node-kind="(\w+)"[^>]*>)([\s\S]*?)<\/g>/g)].map(([, tag, kind, body]) => {
+    const id = attr(tag, "data-node-id");
+    const xy = attr(tag, "transform").match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
+    if (kind === "store") {
+      const [, width, bottom] = body.match(/S([\d.]+) 4 \1 10V([\d.]+)C/);
+      return { id, kind, bounds: [...xy, Number(width), Number(bottom) + 10] };
+    }
+    const panel = body.match(/<rect\b[^>]*class="arch-panel\b[^>]*>/)[0];
+    return { id, kind, bounds: [...xy, Number(attr(panel, "width")), Number(attr(panel, "height"))] };
+  });
+}
+
+function assertDirectedRoutes(svg, edges) {
+  const context = attr(svg, "aria-labelledby");
+  const marker = svg.match(/<marker\b[^>]*>/)?.[0];
+  assert.equal(attr(marker, "id"), context.replace(/-title$/, "-arrow"), context);
+  assert.equal(attr(marker, "orient"), "auto", context);
+  const nodes = new Map(diagramNodes(svg).map(({ id, bounds }) => [id, bounds]));
+  const touches = ([x, y], [nx, ny, w, h]) => {
+    const tolerance = 1e-6;
+    return x >= nx - tolerance && x <= nx + w + tolerance && y >= ny - tolerance && y <= ny + h + tolerance &&
+      [x - nx, x - nx - w, y - ny, y - ny - h].some((distance) => Math.abs(distance) <= tolerance);
+  };
+  const paths = svg.match(/<path\b[^>]*class="arch-line\b[^>]*>/g) ?? [];
+  assert.equal(paths.length, edges.length, context);
+  for (const [i, { from, to }] of edges.entries()) {
+    const path = paths[i];
+    const flow = `${context}: ${from} → ${to}`;
+    assert.equal(attr(path, "marker-end"), `url(#${attr(marker, "id")})`, flow);
+    assert.equal(attr(path, "marker-start"), undefined, flow);
+    const points = [...attr(path, "d").matchAll(/[ML]([-\d.]+) ([-\d.]+)/g)].map(([, x, y]) => [Number(x), Number(y)]);
+    assert.ok(points.length >= 2, flow);
+    assert.ok(touches(points[0], nodes.get(from)), `${flow}: first point must touch source bounds`);
+    assert.ok(touches(points.at(-1), nodes.get(to)), `${flow}: last point must touch target bounds`);
+  }
+}
+
+function assertTitleBounds(svg, system) {
+  const context = attr(svg, "aria-labelledby");
+  const boundary = svg.match(/<rect\b[^>]*class="arch-boundary\b[^>]*>/)[0];
+  const [left, top, width, height] = ["x", "y", "width", "height"].map((name) => Number(attr(boundary, name)));
+  const title = [...svg.matchAll(/(<text\b[^>]*class="arch-system"[^>]*>)([^<]+)<\/text>/g)];
+  assert.equal(title.map(([, , line]) => line).join(" "), system, context);
+  const firstInsideNode = Math.min(...diagramNodes(svg).filter(({ kind }) => kind !== "external").map(({ bounds }) => bounds[1]));
+  for (const [, tag, line] of title) {
+    const [x, y] = ["x", "y"].map((name) => Number(attr(tag, name)));
+    // The 16px monospace title advances about 0.6em per glyph. The
+    // browser screenshot probe also checks the measured glyph bounds.
+    assert.ok(x >= left && x + [...line].length * 9.6 <= left + width, `${context}: ${line} exceeds the system boundary width`);
+    assert.ok(y - 16 >= top && y + 4 <= Math.min(top + height, firstInsideNode), `${context}: title padding must clear the nodes`);
+  }
+}
+
 function assertDiagramGeometry(html, locale, slug) {
   const context = `${locale} ${slug}`;
-  const svgs = [...html.matchAll(/<svg\b[^>]*class="arch-diagram"[^>]*>[\s\S]*?<\/svg>/g)];
+  const svgs = diagramSvgs(html);
   const frames = [...html.matchAll(/(<div\b[^>]*class="arch-frame"[^>]*>)\s*<svg\b[^>]*class="arch-diagram"/g)];
   const dense = ["food-court", "enterprise-monitoring-stack"].includes(slug);
   const variants = dense ? ["wide"] : ["wide", "narrow"];
   assert.equal(svgs.length, variants.length, `${context}: dense diagrams must omit the narrow variant`);
   assert.deepEqual(frames.map(([, tag]) => [attr(tag, "role"), attr(tag, "tabindex"), attr(tag, "aria-label")]),
-    svgs.map(([svg]) => ["region", "0", svg.match(/<title\b[^>]*>([^<]+)<\/title>/)[1]]), `${context}: diagram frames must be focusable and named`);
-  assert.deepEqual(svgs.map(([svg]) => svg.match(/aria-labelledby="[^"]+-arch-(wide|narrow)-title"/)[1]), variants, context);
-  for (const [i, [svg]] of svgs.entries()) {
+    svgs.map((svg) => ["region", "0", svg.match(/<title\b[^>]*>([^<]+)<\/title>/)[1]]), `${context}: diagram frames must be focusable and named`);
+  assert.deepEqual(svgs.map((svg) => svg.match(/aria-labelledby="[^"]+-arch-(wide|narrow)-title"/)[1]), variants, context);
+  const edges = [...caseSource(slug, locale).matchAll(/^    - from: ([\w-]+)\n      to: ([\w-]+)$/gm)].map(([, from, to]) => ({ from, to }));
+  for (const [i, svg] of svgs.entries()) {
+    assertDirectedRoutes(svg, edges);
     const labels = [...svg.matchAll(/<rect\b[^>]*class="arch-label-box\b[^>]*>/g)].map(([tag]) =>
       ["x", "y", "width", "height"].map((name) => Number(attr(tag, name))));
-    assert.equal(labels.length, [...svg.matchAll(/marker-end="url\(/g)].length, `${context}: one inline box per flow`);
-    const nodeGroups = [...svg.matchAll(/(<g\b[^>]*data-node-kind="(\w+)"[^>]*>)([\s\S]*?)<\/g>/g)];
-    const boxes = nodeGroups.map(([, tag, kind, body]) => {
-      const xy = attr(tag, "transform").match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
-      if (kind === "store") {
-        const [, width, bottom] = body.match(/S([\d.]+) 4 \1 10V([\d.]+)C/);
-        return [...xy, Number(width), Number(bottom) + 10];
-      }
-      const panel = body.match(/<rect\b[^>]*class="arch-panel\b[^>]*>/)[0];
-      return [...xy, Number(attr(panel, "width")), Number(attr(panel, "height"))];
-    });
+    assert.equal(labels.length, edges.length, `${context}: one inline box per flow`);
+    const nodes = diagramNodes(svg);
+    const boxes = nodes.map(({ bounds }) => bounds);
     assert.ok(boxes.length >= 2 && [...boxes, ...labels].every((rect) => rect.every(Number.isFinite)), context);
     const boundary = svg.match(/<rect\b[^>]*class="arch-boundary\b[^>]*>/)[0];
     const right = Number(attr(boundary, "x")) + Number(attr(boundary, "width"));
     const bottom = Number(attr(boundary, "y")) + Number(attr(boundary, "height"));
-    const externals = boxes.filter((_, index) => nodeGroups[index][2] === "external");
+    const externals = nodes.filter(({ kind }) => kind === "external").map(({ bounds }) => bounds);
     if (dense || (i === 0 && externals.length && externals.every(([x]) => x >= right))) {
       assert.ok([...boxes, ...labels].every(([, y, , h]) => y + h <= bottom + 1e-6), `${context}: side-by-side diagrams must end at the system boundary's bottom edge`);
     }
@@ -714,8 +764,7 @@ function assertDiagramGeometry(html, locale, slug) {
       assert.ok(x + w <= nx || nx + nw <= x || y + h <= ny || ny + nh <= y, `${context}: flow label intersects node`);
     }
     if (i === 0) {
-      const ids = [...svg.matchAll(/<g\b[^>]*data-node-id="([^"]+)"/g)].map(([, id]) => id);
-      const column = (id) => boxes[ids.indexOf(id)][0];
+      const column = (id) => nodes.find((node) => node.id === id).bounds[0];
       const chains = {
         "food-court": [["frontend", "orders", "catalog", "catalog-db"], ["frontend", "orders", "traceability", "trace-db"], ["frontend", "orders", "identity", "user-db"], ["frontend", "orders", "orders-db"]],
         "studydeck-ai": [["frontend", "backend", "postgres"]],
@@ -767,18 +816,27 @@ test("architecture renders accessible responsive SVGs with a store and an extern
     const figure = html.match(/<figure class="case-arch"[^>]*>[\s\S]*?<\/figure>/)?.[0];
     assert.ok(figure);
     assert.ok(html.indexOf('class="case-repos"') > html.indexOf(figure));
-    const svgs = [...figure.matchAll(/<svg\b[^>]*role="img"[^>]*>[\s\S]*?<\/svg>/g)];
+    const svgs = diagramSvgs(figure);
     assert.equal(svgs.length, 2);
     const data = locale === "en" ? fixtureArchitecture : spanish;
-    for (const [svg] of svgs) {
+    const description = locale === "en" ? [
+      "writing-harness (CLI, Node; inside the system boundary): Checks writing",
+      "Rule files (Data store; inside the system boundary): Stores rules",
+      "Shell runner (External dependency; outside the system boundary): Runs checks",
+      "writing-harness → Rule files (Files): Reads guidelines",
+      "Shell runner → writing-harness: Starts the CLI",
+    ] : [
+      "writing-harness (CLI, Node; dentro del límite del sistema): Verifica textos",
+      "Rule files (Data store; dentro del límite del sistema): Stores rules",
+      "Shell runner (External dependency; fuera del límite del sistema): Runs checks",
+      "writing-harness → Rule files (Files): Lee las guías",
+      "Shell runner → writing-harness: Starts the CLI",
+    ];
+    for (const svg of svgs) {
+      assertDirectedRoutes(svg, data.edges);
       assert.match(svg, /aria-labelledby="([^"]+)"[\s\S]*<title id="\1">[^<]+<\/title>/);
       const desc = svg.match(/aria-describedby="([^"]+)"[\s\S]*<desc id="\1">([^<]+)<\/desc>/)?.[2];
-      assert.ok(desc);
-      for (const { name, does } of data.nodes) assert.ok(desc.includes(name) && desc.includes(does));
-      for (const { from, to, protocol, verb } of data.edges) {
-        const name = (id) => data.nodes.find((node) => node.id === id).name;
-        assert.ok(desc.split("\n").some((line) => line.includes(`${name(from)} → ${name(to)}`) && line.includes(verb) && (!protocol || line.includes(protocol))));
-      }
+      assert.equal(desc, description.join("\n"), `${locale}: boundary membership and directed flow text`);
       const boundary = svg.match(/<rect\b[^>]*class="arch-boundary[^>]*>/)?.[0];
       const store = svg.match(/<g\b[^>]*data-node-kind="store"[^>]*>[\s\S]*?<\/g>/)?.[0];
       const external = svg.match(/<g\b[^>]*data-node-kind="external"[^>]*>/)?.[0];
@@ -787,8 +845,12 @@ test("architecture renders accessible responsive SVGs with a store and an extern
       const [, x, y] = attr(external, "transform").match(/translate\(([-\d.]+) ([-\d.]+)\)/).map(Number);
       assert.ok(x > Number(attr(boundary, "x")) + Number(attr(boundary, "width")) || y > Number(attr(boundary, "y")) + Number(attr(boundary, "height")));
       assert.match(svg, /stroke-dasharray="4 4"/);
-      assert.match(svg, /marker-end="url\(#[^)]+\)"/);
     }
+    const twin = fixture.read(`${caseRoute(locale, "writing-harness")}index.md`);
+    const heading = locale === "en" ? "Architecture" : "Arquitectura";
+    assert.ok(twin.includes(`### ${heading}\n\n${description.map((line) => `- ${line}`).join("\n")}\n\n`), locale);
+    assert.ok(fixture.read(locale === "en" ? "llms-full.txt" : "es/llms-full.txt").includes(twin.trimEnd()));
+    assert.ok(!twin.includes(architectureEvidence));
     assert.ok(!figure.includes(architectureEvidence));
     assert.match(figure, /<figcaption class="case-caption">A fixture for the container diagram\.<\/figcaption>/);
     const fallbackHtml = fixture.read(`${caseRoute(locale, "studydeck-ai")}index.html`);
@@ -801,10 +863,26 @@ test("architecture renders accessible responsive SVGs with a store and an extern
     assert.equal(attr(graphic, "aria-label"), `API: studydeck-backend; Web: studydeck-frontend. studydeck-backend ${connects} studydeck-frontend.`);
     assert.doesNotMatch(fallbackHtml, /class="case-arch"/);
   }
-  const twin = fixture.read(writingDossier("md"));
-  assert.match(twin, /### Architecture\n\n- writing-harness \(CLI, Node\): Checks writing\n- Rule files \(Data store\): Stores rules\n- Shell runner \(External dependency\): Runs checks\n- writing-harness → Rule files \(Files\): Reads guidelines\n- Shell runner → writing-harness: Starts the CLI/);
-  assert.ok(fixture.read("llms-full.txt").includes(twin.trimEnd()));
-  assert.ok(!twin.includes(architectureEvidence));
+});
+
+test("S26: long system title clears the boundary and nodes in both SVG variants", (t) => {
+  const system = "Gestión de solicitudes académicas";
+  const real = diagramSvgs(read(`${caseRoute("es", "academic-triage")}index.html`));
+  assert.equal(real.length, 2);
+  for (const svg of real) assertTitleBounds(svg, system);
+
+  // One container with a dependency to its right leaves the smallest
+  // compact system boundary; the real title must still fit inside it.
+  const data = structuredClone(fixtureArchitecture);
+  data.system = system;
+  data.nodes.splice(1, 1);
+  data.nodes[1].col = 1;
+  data.edges.shift();
+  const fixture = archFixture(t, data, data);
+  assertBuilt(fixture);
+  const svgs = diagramSvgs(fixture.read(writingDossier("html")));
+  assert.equal(svgs.length, 2);
+  for (const svg of svgs) assertTitleBounds(svg, system);
 });
 
 const extraFixtureNodes = (count) => Array.from({ length: count }, (_, i) => ({

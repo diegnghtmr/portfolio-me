@@ -42,7 +42,7 @@ export async function caseStudyMarkdown(locale: Locale, { project, entries }: Ca
     "", `## ${m.problem}`, "", problem, "",
     `## ${m.demonstration}`, "", ...demoLines, "",
     `## ${m.architecture}`, "", architecture, "",
-    ...(diagram ? [`### ${m.diagramText}`, "", ...describeArchitecture(diagram).map(listItem), ""] : []),
+    ...(diagram ? [`### ${m.diagramText}`, "", ...describeArchitecture(diagram, locale).map(listItem), ""] : []),
     `### ${m.repositories}`, "",
     ...project.repositories.map(({ name, url, role }) => `- ${link(name, url)} (${w.roles[role]})`),
     "", `## ${m.decisions}`, "",
