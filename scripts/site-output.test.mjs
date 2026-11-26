@@ -409,7 +409,7 @@ for (const locale of locales) {
     const home = read(`${locale}/index.html`);
     const cards = [...home.matchAll(/<li class="card" id="(p\d)"[^>]*>\s*<a\b[^>]*>\s*<div\b[^>]*data-bayer="([^"]+)"[^>]*>\s*<\/div>\s*<h3\b[^>]*>([^<]+)([\s\S]*?)<\/h3>/g)];
     assert.deepEqual(cards.map(([, id, shape, name, titleSuffix]) => [id, shape, name.trim(), titleSuffix.includes('class="status"')]),
-      homeOrder.map((i) => [featuredIds[i], ["orbit", "dunes", "sphere", "wave", "ripple", "capacity"][i], projectNames[i], featuredContracts[i][4] ?? false]));
+      homeOrder.map((i) => [featuredIds[i], ["orbit", "dunes", "triage", "wave", "ripple", "capacity"][i], projectNames[i], featuredContracts[i][4] ?? false]));
     const principles = home.match(/<section\b[^>]*aria-labelledby="principles-heading"[^>]*>[\s\S]*?<\/section>/)[0];
     assert.deepEqual([...principles.matchAll(/<a href="#(p\d)"[^>]*><span\b[^>]*><small[^>]*>[^<]*<\/small>([^<]+)<\/span>/g)]
       .map(([, id, name]) => [id, name]), [["p3", "Brújula"], ["p1", "StudyDeck AI"], ["p5", "Profundiza UQ"]]);

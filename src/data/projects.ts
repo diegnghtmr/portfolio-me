@@ -3,7 +3,7 @@ import type { MessageKey } from "../i18n/en";
 
 export const surfaces = ["web", "api", "tool", "infra"] as const;
 export type Surface = (typeof surfaces)[number];
-export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "sphere" | "capacity";
+export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "sphere" | "capacity" | "triage";
 export const stackFacets = { java: "Java", typescript: "TypeScript", go: "Go", node: "Node" } as const;
 export type StackFacet = keyof typeof stackFacets;
 export const stackLayerOrder = ["frontend", "backend", "data", "tooling", "infra"] as const;
@@ -29,6 +29,7 @@ type Featured = {
   live?: boolean;
   shape: CoverShape;
   seed: number;
+  rings?: number;
 };
 
 export interface Project {
@@ -79,7 +80,7 @@ export const atlasProjects = [
     stackLayers: { frontend: ["Angular 20"], backend: ["Java 21", "Spring Boot 3.5"], data: ["MariaDB 11"] },
     repositories: [repo("academic-triage-frontend", "web", "web", "TypeScript"), repo("academic-triage-system", "api", "api", "Java")],
     primaryRepository: "academic-triage-frontend", edges: [["academic-triage-frontend", "academic-triage-system"]],
-    featured: { id: "p7", description: "academicTriage", kind: "systemTwo", categories: ["api", "web"], stack: "Angular 20, Spring Boot 3.5", href: searchRepos("academic-triage"), shape: "sphere", seed: 6, live: true },
+    featured: { id: "p7", description: "academicTriage", kind: "systemTwo", categories: ["api", "web"], stack: "Angular 20, Spring Boot 3.5", href: searchRepos("academic-triage"), shape: "triage", seed: 6, live: true },
   },
   {
     slug: "brujula", name: "Brújula", ...webApi,
@@ -98,7 +99,7 @@ export const atlasProjects = [
     repositories: [repo("food-court-ui", "web"), repo("user-microservice", "api", "identity", "Java"), repo("food-court-microservice", "api", "menu", "Java"), repo("order-microservice", "api", "orders", "Java"), repo("traceability-microservice", "api", "traceability", "Java")],
     primaryRepository: "food-court-ui",
     edges: [["food-court-ui", "user-microservice"], ["food-court-ui", "food-court-microservice"], ["food-court-ui", "order-microservice"], ["food-court-ui", "traceability-microservice"]],
-    featured: { id: "p2", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: searchRepos("food-court"), shape: "ripple", seed: 2 },
+    featured: { id: "p2", description: "foodCourt", kind: "systemFive", categories: ["4 api", "web"], stack: "Spring Boot, React", href: searchRepos("food-court"), shape: "ripple", seed: 2, rings: 24 },
   },
   {
     slug: "profundiza-uq", name: "Profundiza UQ", ...webApi,

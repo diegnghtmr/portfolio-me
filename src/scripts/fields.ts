@@ -1,7 +1,7 @@
 import type { CoverShape } from "../data/home";
 
 type Shape = CoverShape | "tide";
-type Sample = (u: number, v: number, time: number, aspect: number) => number;
+type Sample = (u: number, v: number, time: number, aspect: number, rings?: number) => number;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const shapes: Record<CoverShape, Sample> = {
   sphere(u, v, t, a) {
@@ -15,9 +15,28 @@ const shapes: Record<CoverShape, Sample> = {
     const y = .55 + .12 * Math.sin(u * 9 + t * .8) + .05 * Math.sin(u * 23 - t * 1.3);
     return clamp((v - y) * 4 + .5);
   },
-  ripple(u, v, t, a) {
+  ripple(u, v, t, a, rings = 38) {
     const d = Math.hypot((u - .5) * a, v - .5);
-    return .5 + .5 * Math.sin(d * 38 - t * 2) * Math.max(0, 1 - d * 1.6);
+    const wave = Math.sin(d * rings - t * 2), fade = Math.max(0, 1 - d * 1.6);
+    // Showcase (custom rings): rings fade into the dark surface instead of a mid-tone checkerboard.
+    return rings === 38 ? .5 + .5 * wave * fade : (.5 + .5 * wave) * fade;
+  },
+  // Mixed requests on the left converge into three priority lanes on the right.
+  triage(u, v, t) {
+    if (u < .08 || u > .92) return 0;
+    const spread = clamp((u - .22) / .47);
+    const sorted = spread * spread * (3 - 2 * spread);
+    let tone = 0;
+    for (let lane = 0; lane < 3; lane++) {
+      const priority = .25 + lane * .25;
+      const incoming = .5 + .14 * Math.sin(u * 18 + lane * 2.1);
+      const distance = Math.abs(v - (incoming + (priority - incoming) * sorted));
+      const phase = u * 4 - t * .23 + lane * .27;
+      const rail = distance < .012 ? .15 + sorted * .2 : 0;
+      const request = Math.abs(phase - Math.round(phase)) < .11 && distance < .045 ? 1 - lane * .16 : 0;
+      tone = Math.max(tone, rail, request);
+    }
+    return tone;
   },
   dunes(u, v, t) {
     const tone = Math.sin(u * 6 + Math.sin(v * 5 + t * .3) * 1.5) * .5 + .5;
@@ -74,6 +93,8 @@ function mount(host: HTMLElement, shape: Shape) {
   const tide = shape === "tide";
   const cell = tide ? 4 : 3;
   const fps = tide ? 24 : 20;
+  const frequency = shape === "ripple" ? Number(host.dataset.rings) : NaN;
+  const rings = Number.isFinite(frequency) && frequency > 0 ? frequency : undefined;
   const anchor = host.closest("a");
   let frame = 0, last = 0, t = Number(host.dataset.seed ?? 0), visible = true;
   let mouse = false, focus = false, wakeUntil = 0, px = .5, py = .5;
@@ -92,7 +113,7 @@ function mount(host: HTMLElement, shape: Shape) {
     const aspect = width / height;
     let offset = 0;
     for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-      const color = sample(x / width, y / height, t, aspect) > (bayer[(y & 7) * 8 + (x & 7)] ?? 1) ? front : back;
+      const color = sample(x / width, y / height, t, aspect, rings) > (bayer[(y & 7) * 8 + (x & 7)] ?? 1) ? front : back;
       data[offset++] = color[0]; data[offset++] = color[1]; data[offset++] = color[2]; data[offset++] = 255;
     }
     ctx.putImageData(img, 0, 0);

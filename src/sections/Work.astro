@@ -17,7 +17,7 @@ const studies = await getCaseStudies();
     {projects.map((project) => (
       <li class="card" id={project.id} data-reveal tabindex="-1">
         <a href={studies.has(project.slug) ? caseStudyPath(locale, project.slug) : project.href} aria-labelledby={`${project.id}-title`}>
-          <div class="cover field" data-bayer={project.shape} data-seed={project.seed} aria-hidden="true"></div>
+          <div class="cover field" data-bayer={project.shape} data-seed={project.seed} data-rings={project.rings} aria-hidden="true"></div>
           <h3 id={`${project.id}-title`}>{project.name} {project.live && <span class="status">{t(locale, 'live')}</span>}<span class="go" aria-hidden="true">→</span></h3>
           <p class="description">{t(locale, project.description)}</p>
           <ul class="categories">
