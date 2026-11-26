@@ -75,10 +75,10 @@ Reference design language: docs/reference/DESIGN-dither-layer.md (copied from ~/
 - T40 S26(3) Architecture diagram advisories (boundary text alternative, title overflow, arrow-direction test) — worker — done (9ce8673; 14 diagrams unchanged, byte-identical shots)
 - T41 S26(4) Repo hygiene: MIT licenses, READMEs, CI across project repos — workers — pending
 - T42 S27(1) Audit The Knowledge Bay: run it, reproduce crashes, inventory bugs and code-quality issues — worker — done (.runtime/kb/AUDIT.md; 57/62 Java tests, ESLint 18 errors, blank-screen crash, restart data loss, concurrent publish loss; 80 baseline shots)
-- T43 S27(1) Fix The Knowledge Bay (bugs, crashes, quality) keeping the design — workers A-E in worktrees on quality/base d28bd46, then F (CI, deploy, visual gate) — in progress
+- T43 S27(1) Fix The Knowledge Bay (bugs, crashes, quality) keeping the design — workers — done (PR #1 merged 9618aa6; 109 server, 31 client, 10 packaged e2e, lint 0, 80 shots compared)
 - T44 S27(2) Audit and run RosterEdge for its case study (AUDIT.md per L62) — worker — done (.runtime/roster/AUDIT.md; baseline 63/100)
-- T46 S27(3) Improve RosterEdge: fix defects, add tests, CI and quality gates — workers U1+U3, U2+U4, U5+U7, U6 in worktrees, then U8 — in progress
-- T45 S27(2) Add The Knowledge Bay and RosterEdge to the portfolio (data, case studies, screenshots, ranking) — pending
+- T46 S27(3) Improve RosterEdge: fix defects, add tests, CI and quality gates — workers — done (PR #3 merged 03ad591; 30 backend, 39 frontend, 13 smoke)
+- T45 S27(2) Add The Knowledge Bay and RosterEdge to the portfolio (data, case studies, screenshots, ranking) — workers — done (6e517db, 38aa215; 136/136)
 - T47 S28 Per-project case-study covers for the 9 non-home projects (+ The Knowledge Bay with T45b) — worker — done (130/130; .runtime/s28 contact sheets)
 
 ## Log
@@ -145,3 +145,4 @@ Reference design language: docs/reference/DESIGN-dither-layer.md (copied from ~/
 - L61 User added S27 (The Knowledge Bay hardening + add The Knowledge Bay and RosterEdge to the portfolio). Repos found: the-knowledge-bay (2025-03 to 2025-06), roster-edge (2025-08 to 2025-11).
 - L62 User: "mejora ambos con test y con todo lo que debe tener de calidad para que podamos subirlos tambien el el portfolio" — RosterEdge is improved too (T46); both need tests, CI and quality gates before T45.
 - L63 User chose (ask_user_choice) "Una figura propia para cada proyecto" after the parent noticed every non-home case study used the hero sphere as default cover (same issue as L60).
+- L64 User chose (ask_user_choice) "Dejar la home como está": The Knowledge Bay (82/100) ranks 4th in the work index but the home keeps its current six (Food Court showcase + Legajo, StudyDeck AI, Academic Triage, Brújula, Profundiza UQ). T45 done: RosterEdge 6e517db (75, 8th), The Knowledge Bay 38aa215 (82, 4th); T43 PR #1 merged 9618aa6; T46 PR #3 merged 03ad591.
