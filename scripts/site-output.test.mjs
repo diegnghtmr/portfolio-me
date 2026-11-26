@@ -16,8 +16,8 @@ const locales = ["en", "es"];
 // Card ids are stable per project (home anchors, projects.json); the ranking never reassigns them.
 const featuredIds = ["p4", "p1", "p7", "p3", "p2", "p5"];
 const atlasNames = [
-  "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "NexRide",
-  "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
+  "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "RosterEdge",
+  "NexRide", "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
 ];
 const projectNames = atlasNames.slice(0, 6);
 // Home order: Food Court is the owner-chosen large showcase card; the other five keep the ranking.
@@ -30,7 +30,7 @@ const caseDir = join(root, "src/content/case-studies");
 // The production contract must not shrink if a locale file goes missing.
 const publishedSlugs = [
   "academic-triage", "brujula", "doc-sentinel", "enterprise-monitoring-stack", "food-court", "legajo", "nexride",
-  "profundiza-uq", "resume-maker", "saber-inverso", "savia", "studydeck-ai", "vale", "writing-harness",
+  "profundiza-uq", "resume-maker", "roster-edge", "saber-inverso", "savia", "studydeck-ai", "vale", "writing-harness",
 ];
 const caseRoute = (locale, slug) => `${workRoutes[locale]}${slug}/`;
 const caseRoutes = publishedSlugs.flatMap((slug) => locales.map((locale) => caseRoute(locale, slug)));
@@ -178,7 +178,7 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   const { projects } = JSON.parse(read("projects.json"));
   assert.deepEqual(projects.slice(0, 6).map(({ name }) => name), projectNames);
   assert.deepEqual(projects.map(({ name }) => name), atlasNames);
-  assert.equal(projects.length, 14);
+  assert.equal(projects.length, 15);
   for (const project of projects) {
     assert.ok(project.description.en && project.description.es, project.name);
     assert.ok(project.kind.en && project.kind.es, project.name);
@@ -194,11 +194,16 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
-test("projects.json keeps every previously published entry unchanged; the ranking changes only the order", () => {
+test("projects.json keeps every previously published entry unchanged and only adds RosterEdge", () => {
   const { projects } = JSON.parse(read("projects.json"));
   // Snapshot of projects.json as published before the ranking (diegnghtmr.me at bcf8fdb).
   const published = publishedProjects;
-  assert.deepEqual(projects.map(({ id }) => id).sort(), published.map(({ id }) => id).sort());
+  assert.deepEqual(projects.map(({ id }) => id).sort(), [...published.map(({ id }) => id), "roster-edge"].sort());
+  const roster = projects.find(({ id }) => id === "roster-edge");
+  assert.deepEqual(roster.repositories, [{ name: "roster-edge", url: repoUrl("roster-edge"), surface: "web", role: "web" }]);
+  assert.equal(roster.url, repoUrl("roster-edge"));
+  assert.equal(roster.caseStudy, `${site}${caseRoute("en", "roster-edge")}`);
+  assert.equal(roster.live, false);
   for (const entry of published) assert.deepEqual(projects.find(({ id }) => id === entry.id), entry, entry.id);
   assert.deepEqual(projects.map(({ name }) => name), atlasNames);
   const specializedRoles = new Map([
@@ -216,7 +221,7 @@ for (const locale of locales) {
   const path = workRoutes[locale];
   const other = locale === "en" ? "es" : "en";
   const pageTitle = workTitles[locale];
-  test(`${locale}: work index has localized metadata, navigation and 14 linked repository maps`, () => {
+  test(`${locale}: work index has localized metadata, navigation and 15 linked repository maps`, () => {
     const html = read(`${path.slice(1)}index.html`);
     assert.match(html, new RegExp(`<html lang="${locale}"`));
     assert.ok(html.includes(`<title>${pageTitle} | diegnghtmr</title>`));
@@ -233,7 +238,7 @@ for (const locale of locales) {
     const tools = header.match(/class="nav-tools[^>]*>[\s\S]*/)?.[0];
     assert.match(tools, new RegExp(`data-search-trigger[\\s\\S]*href="${workRoutes[other]}"[\\s\\S]*data-theme-toggle[\\s\\S]*data-menu-toggle`));
     const rows = [...html.matchAll(/<li\b[^>]*data-project(?:[\s=>])[^]*?<\/li>/g)];
-    assert.equal(rows.length, 14);
+    assert.equal(rows.length, 15);
     for (const [row] of rows) {
       const links = [...row.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
       assert.equal(links.length, 1);
@@ -261,7 +266,7 @@ for (const locale of locales) {
   test(`${locale}: the work command menu searches all project names and stacks and targets their rows`, () => {
     const html = read(`${path.slice(1)}index.html`);
     const options = commandProjects(html);
-    assert.equal(options.length, 14);
+    assert.equal(options.length, 15);
     assert.deepEqual(options.map(({ name }) => name), atlasNames);
     const rows = workRows(html);
     const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
@@ -285,7 +290,12 @@ for (const locale of locales) {
     assert.ok(savia);
     assert.equal(attr(savia[1], "data-surface"), "web api tool");
     assert.deepEqual([...html.matchAll(/data-breakdown="(\w+)"[^>]*>(\d+)<\/strong>/g)].map(([, surface, count]) => [surface, Number(count)]),
-      [["web", 9], ["api", 1], ["tool", 3], ["infra", 1]]);
+      [["web", 10], ["api", 1], ["tool", 3], ["infra", 1]]);
+    const roster = rows.find(([, tag]) => attr(tag, "id") === "roster-edge");
+    assert.ok(roster);
+    assert.equal(attr(roster[1], "data-surface"), "web");
+    assert.equal(attr(roster[1], "data-repos"), "single");
+    assert.equal(attr(roster[1], "data-stack"), "java typescript");
     const tools = rows.filter(([, tag]) => attr(tag, "data-surface").split(" ").includes("tool"));
     assert.deepEqual(tools.map(([, , body]) => body.match(/<h3\b[^>]*>([^<]+)<\/h3>/)[1]).sort(),
       ["Savia", "doc-sentinel", "resume-maker", "writing-harness"]);
@@ -301,6 +311,7 @@ for (const locale of locales) {
       Legajo: repoUrl("legajo-frontend"), "Profundiza UQ": repoUrl("profundiza-uq-backend"), Savia: repoUrl("savia-web"),
       "Academic Triage": repoUrl("academic-triage-frontend"), Vale: repoUrl("vale"), "Saber Inverso": repoUrl("saber-inverso"),
       NexRide: repoUrl("NexRide"), "writing-harness": repoUrl("writing-harness"), "doc-sentinel": repoUrl("doc-sentinel"),
+      RosterEdge: repoUrl("roster-edge"),
       "resume-maker": repoUrl("resume-maker"), "Enterprise Monitoring Stack": repoUrl("enterprise-monitoring-stack"),
     };
     const bySlug = new Map(rows.map(([, tag, body]) => [attr(tag, "id"), body]));
@@ -375,7 +386,7 @@ for (const locale of locales) {
     const byType = (type) => graph.find((node) => node["@type"] === type);
     assert.equal(byType("CollectionPage").url, `${site}${path}`);
     const items = byType("ItemList").itemListElement;
-    assert.equal(items.length, 14);
+    assert.equal(items.length, 15);
     assert.deepEqual(items.map(({ item, position }) => [item.name, position]), atlasNames.map((name, i) => [name, i + 1]));
     assert.deepEqual(byType("BreadcrumbList").itemListElement.map(({ item }) => item), [`${site}/${locale}/`, `${site}${path}`]);
     assert.ok(html.includes(`<link rel="alternate" type="text/markdown" href="${path}index.md"`));
@@ -388,7 +399,7 @@ for (const locale of locales) {
 
   test(`${locale}: home Work links to the localized index without replacing section anchors`, () => {
     const home = read(`${locale}/index.html`);
-    assert.match(home, new RegExp(`<a\\b[^>]*href="${path}"[^>]*>${locale === "en" ? "All 14 projects" : "Los 14 proyectos"}`));
+    assert.match(home, new RegExp(`<a\\b[^>]*href="${path}"[^>]*>${locale === "en" ? "All 15 projects" : "Los 15 proyectos"}`));
     const header = home.match(/<header\b[^>]*data-site-nav[^>]*>[\s\S]*?<\/header>/)?.[0];
     assert.ok(header);
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
@@ -531,7 +542,7 @@ function assertDossierInventory(output, expected) {
   }
 }
 
-test("production publishes exactly the 14 pinned dossiers in HTML and Markdown in both locales", () => {
+test("production publishes exactly the 15 pinned dossiers in HTML and Markdown in both locales", () => {
   assertDossierInventory(dist, publishedSlugs);
   const catalog = JSON.parse(read("projects.json")).projects;
   assert.deepEqual(catalog.flatMap(({ caseStudy }) => caseStudy ? [caseStudy] : []).sort(),
@@ -768,6 +779,7 @@ function assertDiagramGeometry(html, locale, slug) {
       const chains = {
         "food-court": [["frontend", "orders", "catalog", "catalog-db"], ["frontend", "orders", "traceability", "trace-db"], ["frontend", "orders", "identity", "user-db"], ["frontend", "orders", "orders-db"]],
         "studydeck-ai": [["frontend", "backend", "postgres"]],
+        "roster-edge": [["frontend", "backend", "postgres"]],
         savia: [["web", "backend", "postgres"], ["web", "backend", "files"]],
       };
       for (const chain of chains[slug] ?? []) for (let j = 1; j < chain.length; j++) {
@@ -1067,7 +1079,7 @@ test("S23: ranking does not reassign home JSON-LD identities", () => {
 
 test("S23: localized dossiers link to the next project in ranking order and wrap", () => {
   const order = ["legajo", "studydeck-ai", "academic-triage", "brujula", "food-court", "profundiza-uq",
-    "doc-sentinel", "nexride", "savia", "writing-harness", "vale", "saber-inverso", "resume-maker", "enterprise-monitoring-stack"];
+    "doc-sentinel", "roster-edge", "nexride", "savia", "writing-harness", "vale", "saber-inverso", "resume-maker", "enterprise-monitoring-stack"];
   for (const locale of locales) {
     for (const [i, slug] of order.entries()) {
       const html = read(`${caseRoute(locale, slug).slice(1)}index.html`);

@@ -117,6 +117,13 @@ export const atlasProjects = [
     stackLayers: { tooling: ["Python"] },
   },
   {
+    slug: "roster-edge", name: "RosterEdge", ...webApi,
+    purpose: { en: "Team management, match scheduling, and season reports for sports clubs.", es: "Gestión de equipos, programación de partidos e informes de temporada para clubes deportivos." },
+    stack: ["React 19", "TypeScript", "Java 21", "Spring Boot 3.5", "PostgreSQL", "Flyway"], stackTags: ["java", "typescript"],
+    stackLayers: { frontend: ["React 19", "TypeScript"], backend: ["Java 21", "Spring Boot 3.5"], data: ["PostgreSQL", "Flyway"] },
+    repositories: [repo("roster-edge", "web")], primaryRepository: "roster-edge",
+  },
+  {
     slug: "nexride", name: "NexRide", ...apiOnly,
     purpose: { en: "Ride dispatch backend with pickup suggestions and composite scoring.", es: "Backend de asignación de viajes con sugerencias de recogida y una puntuación compuesta." },
     stack: ["TypeScript", "NestJS 11", "PostgreSQL/PostGIS", "Redis"], stackTags: ["typescript", "node"], repositories: [repo("NexRide", "api", "api", "TypeScript")], primaryRepository: "NexRide",
