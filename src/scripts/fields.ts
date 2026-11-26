@@ -1,16 +1,18 @@
-import type { CoverShape } from "../data/home";
+import type { CaseCoverShape, CoverShape } from "../data/projects";
 
-type Shape = CoverShape | "tide";
+type ArtShape = CoverShape | CaseCoverShape;
+type Shape = ArtShape | "tide";
 type Sample = (u: number, v: number, time: number, aspect: number, rings?: number) => number;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
-const shapes: Record<CoverShape, Sample> = {
-  sphere(u, v, t, a) {
-    const r = .38, x = (u - .5) * a, y = v - .5;
-    const d = x * x + y * y;
-    if (d > r * r) return 0;
-    const z = Math.sqrt(r * r - d);
-    return clamp((x * Math.cos(t * .4) * .6 - y * .55 + z * .6) * .95 / r + .08);
-  },
+const stroke = (offset: number, width: number) => 1 - clamp(Math.abs(offset) / width);
+// Keep compact motifs from flattening out in the wide, shallow mobile cover.
+const insetX = (u: number, aspect: number) => .5 + (u - .5) * (1 + .3 * clamp((aspect - 1.4) / 1.4));
+const growth = [[.15, .94, -.31], [.28, 1, .28], [.45, .83, -.25], [.53, .92, .33]] as const;
+const week = [
+  [[.2, .38], [.61, .8]], [[.32, .57]], [[.16, .32], [.49, .73]],
+  [[.24, .47], [.68, .84]], [[.38, .66]],
+] as const;
+const shapes: Record<ArtShape, Sample> = {
   wave(u, v, t) {
     const y = .55 + .12 * Math.sin(u * 9 + t * .8) + .05 * Math.sin(u * 23 - t * 1.3);
     return clamp((v - y) * 4 + .5);
@@ -65,6 +67,127 @@ const shapes: Record<CoverShape, Sample> = {
     }
     return Math.min(1, sum);
   },
+
+  // doc-sentinel: a scan band picks out traces in a skewed document plane.
+  scan(u, v, t, a) {
+    const x = insetX(u, a) - (v - .5) * .24;
+    if (x < .23 || x > .77 || v < .14 || v > .86) return 0;
+    const sweep = .49 + .17 * Math.sin(t * .7) + (x - .5) * .32;
+    const row = Math.floor((v - .21) / .105);
+    const trace = x > .29 && x < .58 + (row * 7 % 4) * .039
+      ? .31 * stroke(v - (.235 + row * .105), .018) : 0;
+    const band = .79 * stroke(v - sweep, .045) + .23 * stroke(v - sweep - .068, .022);
+    return clamp(.12 + trace + band);
+  },
+  // RosterEdge: home and away slots lock into a shared set of fixtures.
+  fixtures(u, v, t) {
+    const lane = Math.round((v - .25) / .25);
+    if (lane < 0 || lane > 2) return 0;
+    const y = .25 + lane * .25, x = Math.abs(u - .5);
+    const selected = .5 + .5 * Math.cos(t * .8 - lane * 2.1);
+    const slotY = y + (lane - 1) * .034;
+    const tab = x > .254 && x < .396 && Math.abs(v - slotY) < .055 ? .38 + .38 * selected : 0;
+    const join = x < .312 ? .53 * stroke(v - (x > .17 ? slotY : y), .022) : 0;
+    const elbow = v >= Math.min(y, slotY) && v <= Math.max(y, slotY) ? .58 * stroke(x - .17, .017) : 0;
+    const spine = v > .24 && v < .76 ? .58 * stroke(x, .025) : 0;
+    const match = x < .045 && Math.abs(v - y) < .041 ? .49 + .44 * selected : 0;
+    return Math.max(tab, join, elbow, spine, match);
+  },
+  // NexRide: three approaches converge on a suggested pickup, then share one route.
+  pickup(u, v, t) {
+    if (u > .89) return 0;
+    const hub = .64, hubY = .54;
+    const packet = .16 * Math.cos(u * 19 - t * 1.8);
+    if (u > hub + .015) return (.54 + packet) * stroke(v - hubY, .038);
+    let routes = 0;
+    for (let k = 0; k < 3; k++) {
+      const start = .11 + (k === 1 ? .07 : k * .013);
+      if (u < start) continue;
+      const progress = clamp((u - start) / (hub - start));
+      const turn = clamp((progress - .17) / .78);
+      const bend = turn * turn * (3 - 2 * turn);
+      const y = .19 + k * .31;
+      routes = Math.max(routes, (.72 - k * .075 + packet) * stroke(v - (y + (hubY - y) * bend), .039));
+    }
+    return Math.max(routes, .98 * stroke(Math.abs(hub - u) * 1.5 + Math.abs(v - hubY), .065));
+  },
+  // Savia: a rising flow divides into tapered branches.
+  sapflow(u, v, t, a) {
+    const height = (.89 - v) / .78;
+    if (height < 0 || height > 1) return 0;
+    const x = insetX(u, a);
+    const stem = .46 + height * .085 + .04 * Math.sin(height * 5 - t * .32);
+    const sap = .8 + .17 * Math.sin(height * 17 - t * 1.35);
+    let tone = sap * stroke(x - stem, .062 - height * .028);
+    for (const [root, tip, spread] of growth) {
+      if (height < root || height > tip) continue;
+      const rise = (height - root) / (tip - root);
+      const branch = stem + spread * rise * (.76 + .24 * rise);
+      tone = Math.max(tone, sap * stroke(x - branch, .058 * (1 - rise) + .014));
+    }
+    return tone;
+  },
+  // writing-harness: ragged fragments settle into measured lines of prose.
+  typeset(u, v, t) {
+    const line = Math.round((v - .22) / .14);
+    if (line < 0 || line > 4) return 0;
+    const start = .12 + (line * 7 % 4) * .028;
+    const end = line === 4 ? .63 : .88 - (line * 3 % 5) * .023;
+    if (u < start || u > end) return 0;
+    const ragged = 1 - clamp((u - start) * 2.7);
+    const center = .22 + line * .14 + .045 * ragged * Math.sin(u * 17 + line * 2.3 - t * .7);
+    const texture = .78 - .54 * ragged * Math.sin(u * 73 - line * 2.4 + t * .55) ** 4;
+    return texture * stroke(v - center, .046);
+  },
+  // Vale: offset blocks fit into a week without overlaps.
+  timetable(u, v, t) {
+    const column = (u - .12) / .152, day = Math.floor(column), offset = column - day;
+    const meetings = week[day];
+    if (!meetings || offset < .1 || offset > .9) return 0;
+    const time = v - .074 * (offset - .5);
+    for (const [start, end] of meetings) {
+      if (time < start || time > end) continue;
+      const weight = .53 + .18 * Math.cos(t * .65 + day + start * 7);
+      return time < start + .033 ? .92 : weight + .11 * offset;
+    }
+    return 0;
+  },
+  // Saber Inverso: two distributions split at the same sloped target.
+  distribution(u, v, t) {
+    const x = (u - .5) / .39, y = v - .5 - x * .19;
+    const side = y < 0 ? -1 : 1;
+    const density = .3 * Math.exp(-3.9 * (x - side * .23) ** 2);
+    const distance = Math.abs(y) - .024;
+    if (distance < 0 || distance > density) return 0;
+    const contour = .1 * Math.cos((distance / density) * 14 - t * .72);
+    const taper = 1 - clamp((Math.abs(x) - .84) / .24);
+    return taper * clamp(.94 - .68 * distance / density + contour);
+  },
+  // resume-maker: three typesetting plates stack into one export.
+  folio(u, v, t, a) {
+    const layer = Math.round((v - .27) / .23);
+    if (layer < 0 || layer > 2) return 0;
+    const y = v - (.27 + layer * .23);
+    const x = insetX(u, a) - (.42 + layer * .075) - y * .6;
+    if (Math.abs(y) > .077 || Math.abs(x) > .257) return 0;
+    const margin = x < -.192 || y > .05 ? .22 : 0;
+    return .37 + layer * .08 + margin + .16 * Math.sin(x * 6 - t * .73 + layer * .9);
+  },
+  // Enterprise Monitoring Stack: paired storage platters flank a telemetry pulse.
+  mirrors(u, v, t, a) {
+    const x = insetX(u, a) - .5;
+    const diskX = (Math.abs(x) - .222) / .169;
+    const face = Math.hypot(diskX, (v - .43) / .212);
+    const base = Math.hypot(diskX, (v - .56) / .212);
+    const pulse = .51 - .12 * stroke(x + .021, .043) + .075 * stroke(x - .022, .032);
+    const signal = Math.abs(x) < .088 ? (.84 + .12 * Math.sin(t * 1.1)) * stroke(v - pulse, .048) : 0;
+    if (face < 1) {
+      const etched = .2 * stroke(face - .67, .085) + .25 * stroke(face - .91, .095);
+      return Math.max(signal, .3 + etched + .17 * stroke(v - (.34 + .068 * Math.sin(t * .9)), .087));
+    }
+    if (base < 1) return Math.max(signal, .23 + .52 * stroke(base - .94, .16));
+    return signal;
+  },
 };
 
 // Expand the 2×2 threshold seed recursively without storing four different matrices.
@@ -96,8 +219,11 @@ function mount(host: HTMLElement, shape: Shape) {
   const frequency = shape === "ripple" ? Number(host.dataset.rings) : NaN;
   const rings = Number.isFinite(frequency) && frequency > 0 ? frequency : undefined;
   const anchor = host.closest("a");
-  let frame = 0, last = 0, t = Number(host.dataset.seed ?? 0), visible = true;
-  let mouse = false, focus = false, wakeUntil = 0, px = .5, py = .5;
+  const caseHero = host.classList.contains("case-cover") ? host.closest<HTMLElement>(".case-hero") : null;
+  const pointerTarget = caseHero ? host : anchor;
+  const seed = Number(host.dataset.seed ?? 0);
+  let frame = 0, last = 0, t = seed, visible = true;
+  let mouse = false, focus = caseHero?.contains(document.activeElement) ?? false, wakeUntil = 0, px = .5, py = .5;
   let img: ImageData | undefined;
   const style = getComputedStyle(document.documentElement);
   let back = ink(style, "--surface"), front = ink(style, tide ? "--mid" : "--ink");
@@ -154,14 +280,26 @@ function mount(host: HTMLElement, shape: Shape) {
     new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? false; sync(); }).observe(host);
   }
   document.addEventListener("visibilitychange", sync);
-  reduced.addEventListener("change", sync);
+  reduced.addEventListener("change", () => {
+    if (caseHero && reduced.matches) { t = seed; draw(); }
+    sync();
+  });
   addEventListener("themechange", () => {
     back = ink(style, "--surface"); front = ink(style, tide ? "--mid" : "--ink"); draw();
   });
-  anchor?.addEventListener("pointerenter", (event) => { mouse = event.pointerType !== "touch"; sync(); });
-  anchor?.addEventListener("pointerleave", () => { mouse = false; sync(); });
+  pointerTarget?.addEventListener("pointerenter", (event) => { mouse = event.pointerType !== "touch"; sync(); });
+  pointerTarget?.addEventListener("pointerleave", () => { mouse = false; sync(); });
   anchor?.addEventListener("focus", () => { focus = true; sync(); });
   anchor?.addEventListener("blur", () => { focus = false; sync(); });
+  // The decorative canvas is not a tab stop. The existing hero links provide keyboard activation.
+  if (caseHero) {
+    caseHero.addEventListener("focusin", () => { focus = true; sync(); });
+    caseHero.addEventListener("focusout", (event) => {
+      if (event.relatedTarget instanceof Node && caseHero.contains(event.relatedTarget)) return;
+      focus = false;
+      sync();
+    });
+  }
   if (tide) host.closest("#contact")?.addEventListener("pointermove", (event) => {
     if (!(event instanceof PointerEvent) || event.pointerType !== "mouse" || reduced.matches) return;
     const rect = host.getBoundingClientRect();

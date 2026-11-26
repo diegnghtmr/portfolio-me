@@ -3,7 +3,9 @@ import type { MessageKey } from "../i18n/en";
 
 export const surfaces = ["web", "api", "tool", "infra"] as const;
 export type Surface = (typeof surfaces)[number];
-export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "sphere" | "capacity" | "triage";
+export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "capacity" | "triage";
+export type CaseCoverShape = "scan" | "fixtures" | "pickup" | "sapflow" | "typeset" | "timetable" | "distribution" | "folio" | "mirrors";
+type CaseCover = { shape: CaseCoverShape; seed: number };
 export const stackFacets = { java: "Java", typescript: "TypeScript", go: "Go", node: "Node" } as const;
 export type StackFacet = keyof typeof stackFacets;
 export const stackLayerOrder = ["frontend", "backend", "data", "tooling", "infra"] as const;
@@ -32,7 +34,7 @@ type Featured = {
   rings?: number;
 };
 
-export interface Project {
+interface ProjectDetails {
   slug: string;
   name: string;
   purpose: Localized;
@@ -45,8 +47,18 @@ export interface Project {
   /** Primary and edge endpoints reference repository names. */
   primaryRepository: string;
   edges?: readonly (readonly [from: string, to: string])[];
-  featured?: Featured;
 }
+
+const homeProjectSlugs = [
+  "legajo", "studydeck-ai", "academic-triage", "brujula", "food-court", "profundiza-uq",
+] as const;
+type HomeProjectSlug = (typeof homeProjectSlugs)[number];
+
+/** Featured projects reuse their home shape and seed. All others need case-study artwork. */
+export type Project = ProjectDetails & (
+  | { slug: HomeProjectSlug; featured: Featured; cover?: never }
+  | { featured?: never; cover: CaseCover }
+);
 
 const webApi = { primarySurface: "web", surfaceLabel: { en: "Web + API", es: "Web + API" } } as const;
 const webOnly = { primarySurface: "web", surfaceLabel: { en: "Web app", es: "Aplicación web" } } as const;
@@ -115,6 +127,7 @@ export const atlasProjects = [
     purpose: { en: "CLI that strips document traces and detects prompt injection.", es: "CLI que elimina rastros de documentos y detecta inyecciones de instrucciones." },
     stack: ["Python"], stackTags: [], repositories: [repo("doc-sentinel", "cli", "cli", "Python")], primaryRepository: "doc-sentinel",
     stackLayers: { tooling: ["Python"] },
+    cover: { shape: "scan", seed: 7 },
   },
   {
     slug: "roster-edge", name: "RosterEdge", ...webApi,
@@ -122,12 +135,14 @@ export const atlasProjects = [
     stack: ["React 19", "TypeScript", "Java 21", "Spring Boot 3.5", "PostgreSQL", "Flyway"], stackTags: ["java", "typescript"],
     stackLayers: { frontend: ["React 19", "TypeScript"], backend: ["Java 21", "Spring Boot 3.5"], data: ["PostgreSQL", "Flyway"] },
     repositories: [repo("roster-edge", "web")], primaryRepository: "roster-edge",
+    cover: { shape: "fixtures", seed: 8 },
   },
   {
     slug: "nexride", name: "NexRide", ...apiOnly,
     purpose: { en: "Ride dispatch backend with pickup suggestions and composite scoring.", es: "Backend de asignación de viajes con sugerencias de recogida y una puntuación compuesta." },
     stack: ["TypeScript", "NestJS 11", "PostgreSQL/PostGIS", "Redis"], stackTags: ["typescript", "node"], repositories: [repo("NexRide", "api", "api", "TypeScript")], primaryRepository: "NexRide",
     stackLayers: { backend: ["TypeScript", "NestJS 11"], data: ["PostgreSQL/PostGIS", "Redis"] },
+    cover: { shape: "pickup", seed: 9 },
   },
   {
     slug: "savia", name: "Savia", ...webApi, surfaceLabel: { en: "Web + mobile + API + MCP", es: "Web + móvil + API + MCP" },
@@ -137,30 +152,35 @@ export const atlasProjects = [
     repositories: [repo("savia-web", "web"), repo("savia-mobile", "web", "mobile"), repo("savia-backend", "api"), repo("savia-mcp", "cli", "mcp")],
     primaryRepository: "savia-web",
     edges: [["savia-web", "savia-backend"]],
+    cover: { shape: "sapflow", seed: 10 },
   },
   {
     slug: "writing-harness", name: "writing-harness", ...toolOnly, surfaceLabel: { en: "CLI / skills", es: "CLI / skills" },
     purpose: { en: "Spanish writing rules for AI agents, with checks for prose in code.", es: "Reglas de redacción en español para agentes de IA, con verificaciones de prosa en el código." },
     stack: ["Node", "TypeScript"], stackTags: ["node", "typescript"], repositories: [repo("writing-harness", "cli", "cli", "TypeScript")], primaryRepository: "writing-harness",
     stackLayers: { tooling: ["Node", "TypeScript"] },
+    cover: { shape: "typeset", seed: 11 },
   },
   {
     slug: "vale", name: "Vale", ...webOnly,
     purpose: { en: "Academic schedule planner with calendar export.", es: "Planificador de horarios académicos con exportación al calendario." },
     stack: ["TypeScript", "React", "Vite", "FullCalendar"], stackTags: ["typescript"], repositories: [repo("vale", "web", "web", "TypeScript")], primaryRepository: "vale",
     stackLayers: { frontend: ["TypeScript", "React", "FullCalendar"], tooling: ["Vite"] },
+    cover: { shape: "timetable", seed: 12 },
   },
   {
     slug: "saber-inverso", name: "Saber Inverso", ...webOnly,
     purpose: { en: "Estimates Saber 11 scores from a UQ program and weighted admission score, with uncertainty.", es: "Estima puntajes de Saber 11 a partir de un programa de la UQ y su puntaje ponderado de admisión, con incertidumbre." },
     stack: ["Astro", "TypeScript", "Python", "FastAPI"], stackTags: ["typescript"], repositories: [repo("saber-inverso", "web")], primaryRepository: "saber-inverso",
     stackLayers: { frontend: ["Astro", "TypeScript"], backend: ["Python", "FastAPI"] },
+    cover: { shape: "distribution", seed: 13 },
   },
   {
     slug: "resume-maker", name: "resume-maker", ...toolOnly, surfaceLabel: { en: "Build pipeline", es: "Flujo de compilación" },
     purpose: { en: "Build pipeline for publishing résumé PDFs.", es: "Flujo de compilación para publicar hojas de vida en PDF." },
     stack: ["LaTeX"], stackTags: [], repositories: [repo("resume-maker", "cli", "pipeline")], primaryRepository: "resume-maker",
     stackLayers: { tooling: ["LaTeX"] },
+    cover: { shape: "folio", seed: 14 },
   },
   {
     slug: "enterprise-monitoring-stack", name: "Enterprise Monitoring Stack", primarySurface: "infra",
@@ -169,6 +189,7 @@ export const atlasProjects = [
     stack: ["Docker", "RAID 1", "LVM", "Netdata"], stackTags: [], repositories: [repo("enterprise-monitoring-stack", "infra")],
     stackLayers: { infra: ["Docker", "RAID 1", "LVM", "Netdata"] },
     primaryRepository: "enterprise-monitoring-stack",
+    cover: { shape: "mirrors", seed: 15 },
   },
 ] as const satisfies readonly Project[];
 
@@ -180,9 +201,7 @@ export function repositoryByName(project: Project, name: string): Repository {
 
 export const primaryRepository = (project: Project) => repositoryByName(project, project.primaryRepository);
 type FeaturedEntry = Extract<(typeof atlasProjects)[number], { featured: Featured }>;
-const featuredSlugs: ReadonlySet<FeaturedEntry["slug"]> = new Set([
-  "legajo", "studydeck-ai", "academic-triage", "brujula", "food-court", "profundiza-uq",
-]);
+const featuredSlugs: ReadonlySet<FeaturedEntry["slug"]> = new Set(homeProjectSlugs);
 
 const projectCard = (project: Project & { featured: Featured }) => ({
   ...project.featured,

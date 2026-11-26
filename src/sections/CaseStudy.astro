@@ -20,7 +20,7 @@ const entry = entries[locale];
 const { summary, role, timeframe, team, demo, demonstration, decisions, results, limitations, architecture: diagram } = entry.data;
 const m = caseStudyMessages[locale];
 const w = workMessages[locale];
-const cover = project.featured && "shape" in project.featured ? project.featured : { shape: "sphere", seed: 0 };
+const cover = project.featured ?? project.cover;
 const published = [...(await getCaseStudies()).values()];
 const currentIndex = published.findIndex(({ project: candidate }) => candidate.slug === project.slug);
 const next = published.length > 1 ? published[(currentIndex + 1) % published.length] : undefined;
