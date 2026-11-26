@@ -20,7 +20,7 @@
   --cat-mcp: #b99bf2;
   --cat-infra: #deba87;
   --cat-data: #cb7c94;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sans: system-ui, sans-serif;
   --mono: "Iosevka Term", "Iosevka", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --unit: 8px;
   --container: 1200px;
