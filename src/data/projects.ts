@@ -4,7 +4,7 @@ import type { MessageKey } from "../i18n/en";
 export const surfaces = ["web", "api", "tool", "infra"] as const;
 export type Surface = (typeof surfaces)[number];
 export type CoverShape = "dunes" | "ripple" | "wave" | "orbit" | "capacity" | "triage";
-export type CaseCoverShape = "scan" | "fixtures" | "pickup" | "sapflow" | "typeset" | "timetable" | "distribution" | "folio" | "mirrors";
+export type CaseCoverShape = "scan" | "fixtures" | "pickup" | "sapflow" | "typeset" | "timetable" | "distribution" | "folio" | "mirrors" | "shoreline";
 type CaseCover = { shape: CaseCoverShape; seed: number };
 export const stackFacets = { java: "Java", typescript: "TypeScript", go: "Go", node: "Node" } as const;
 export type StackFacet = keyof typeof stackFacets;
@@ -93,6 +93,14 @@ export const atlasProjects = [
     repositories: [repo("academic-triage-frontend", "web", "web", "TypeScript"), repo("academic-triage-system", "api", "api", "Java")],
     primaryRepository: "academic-triage-frontend", edges: [["academic-triage-frontend", "academic-triage-system"]],
     featured: { id: "p7", description: "academicTriage", kind: "systemTwo", categories: ["api", "web"], stack: "Angular 20, Spring Boot 3.5", href: searchRepos("academic-triage"), shape: "triage", seed: 6, live: true },
+  },
+  {
+    slug: "the-knowledge-bay", name: "The Knowledge Bay", ...webApi,
+    purpose: { en: "A learning network for sharing resources, requesting help, and studying with peers.", es: "Red de aprendizaje para compartir recursos, pedir ayuda y estudiar con otros estudiantes." },
+    stack: ["React 19", "JavaScript", "Java 21", "Spring Boot 3.4", "Spring Security", "SQLite"], stackTags: ["java"],
+    stackLayers: { frontend: ["React 19", "JavaScript"], backend: ["Java 21", "Spring Boot 3.4", "Spring Security"], data: ["SQLite"] },
+    repositories: [repo("the-knowledge-bay", "web")], primaryRepository: "the-knowledge-bay",
+    cover: { shape: "shoreline", seed: 16 },
   },
   {
     slug: "brujula", name: "Brújula", ...webApi,

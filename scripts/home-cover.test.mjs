@@ -21,7 +21,7 @@ for (const [home, work] of [["en", "work"], ["es", "trabajo"]]) {
   test(`${home}: every case study has a unique seeded cover other than the hero sphere`, () => {
     const workPath = new URL(`../dist/${home}/${work}/`, import.meta.url);
     const slugs = readdirSync(workPath, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
-    assert.equal(slugs.length, 15);
+    assert.equal(slugs.length, 16);
     const byShape = new Map();
     for (const slug of slugs) {
       const covers = read(`${home}/${work}/${slug}`).match(/<div class="field case-cover"[^>]*>/g);
@@ -35,7 +35,8 @@ for (const [home, work] of [["en", "work"], ["es", "trabajo"]]) {
     assert.deepEqual({
       sphere: byShape.get("sphere"),
       duplicates: [...byShape].filter(([, slugs]) => slugs.length > 1),
-    }, { sphere: undefined, duplicates: [] });
+      bay: byShape.get("shoreline"),
+    }, { sphere: undefined, duplicates: [], bay: ["the-knowledge-bay"] });
   });
 
   test(`${home}: Academic Triage uses priority lanes on the home and case-study covers`, () => {

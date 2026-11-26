@@ -16,10 +16,11 @@ const locales = ["en", "es"];
 // Card ids are stable per project (home anchors, projects.json); the ranking never reassigns them.
 const featuredIds = ["p4", "p1", "p7", "p3", "p2", "p5"];
 const atlasNames = [
-  "Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "RosterEdge",
+  "Legajo", "StudyDeck AI", "Academic Triage", "The Knowledge Bay", "Brújula", "Food Court", "Profundiza UQ", "doc-sentinel", "RosterEdge",
   "NexRide", "Savia", "writing-harness", "Vale", "Saber Inverso", "resume-maker", "Enterprise Monitoring Stack",
 ];
-const projectNames = atlasNames.slice(0, 6);
+// The atlas can add a top-six project without changing the approved home selection.
+const projectNames = ["Legajo", "StudyDeck AI", "Academic Triage", "Brújula", "Food Court", "Profundiza UQ"];
 // Home order: Food Court is the owner-chosen large showcase card; the other five keep the ranking.
 const homeOrder = [4, 0, 1, 2, 3, 5];
 const homeNames = homeOrder.map((i) => projectNames[i]);
@@ -30,7 +31,7 @@ const caseDir = join(root, "src/content/case-studies");
 // The production contract must not shrink if a locale file goes missing.
 const publishedSlugs = [
   "academic-triage", "brujula", "doc-sentinel", "enterprise-monitoring-stack", "food-court", "legajo", "nexride",
-  "profundiza-uq", "resume-maker", "roster-edge", "saber-inverso", "savia", "studydeck-ai", "vale", "writing-harness",
+  "profundiza-uq", "resume-maker", "roster-edge", "saber-inverso", "savia", "studydeck-ai", "the-knowledge-bay", "vale", "writing-harness",
 ];
 const caseRoute = (locale, slug) => `${workRoutes[locale]}${slug}/`;
 const caseRoutes = publishedSlugs.flatMap((slug) => locales.map((locale) => caseRoute(locale, slug)));
@@ -47,7 +48,7 @@ const featuredContracts = [
   [["4 api", "web"], [["food-court-ui", "web"], ...foodServices.map((name) => [name, "api", "Java"])], ["Spring Boot", "React"], repoSearch("food-court")],
   [["api", "web"], [["profundiza-uq-backend", "api", "Go"], ["profundiza-uq-frontend", "web", "TypeScript"]], ["Go", "pgx", "React 19"], repoUrl("profundiza-uq-backend")],
 ];
-// projects.json entries as published before the relevance ranking (diegnghtmr.me at bcf8fdb).
+// Existing projects.json entries from before the relevance ranking (bcf8fdb) and the RosterEdge addition (6e517db).
 const publishedProjects = [
 {"id":"p1","name":"StudyDeck AI","description":{"en":"Spaced-repetition flashcards with AI card generation, document RAG and an MCP server.","es":"Tarjetas de repaso espaciado con generación por IA, RAG sobre documentos y un servidor MCP."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"studydeck-backend","surface":"api","url":"https://github.com/diegnghtmr/studydeck-backend","role":"api","programmingLanguage":"Java"},{"name":"studydeck-frontend","surface":"web","url":"https://github.com/diegnghtmr/studydeck-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Java 25","pgvector","React 19"],"url":"https://github.com/diegnghtmr/studydeck-backend","live":false,"caseStudy":"https://diegnghtmr.me/en/work/studydeck-ai/"},
 {"id":"p2","name":"Food Court","description":{"en":"Ordering platform split into identity, menu, order and traceability services plus a role-based UI.","es":"Plataforma de pedidos dividida en servicios de identidad, menú, pedidos y trazabilidad, más una interfaz por roles."},"kind":{"en":"System, 5 repos","es":"Sistema, 5 repos"},"categories":["4 api","web"],"repositories":[{"name":"food-court-ui","surface":"web","url":"https://github.com/diegnghtmr/food-court-ui","role":"web"},{"name":"user-microservice","surface":"api","url":"https://github.com/diegnghtmr/user-microservice","role":"identity","programmingLanguage":"Java"},{"name":"food-court-microservice","surface":"api","url":"https://github.com/diegnghtmr/food-court-microservice","role":"menu","programmingLanguage":"Java"},{"name":"order-microservice","surface":"api","url":"https://github.com/diegnghtmr/order-microservice","role":"orders","programmingLanguage":"Java"},{"name":"traceability-microservice","surface":"api","url":"https://github.com/diegnghtmr/traceability-microservice","role":"traceability","programmingLanguage":"Java"}],"stack":["Spring Boot","React"],"url":"https://github.com/diegnghtmr?tab=repositories&q=food-court","live":false,"caseStudy":"https://diegnghtmr.me/en/work/food-court/"},
@@ -62,7 +63,8 @@ const publishedProjects = [
 {"id":"doc-sentinel","name":"doc-sentinel","description":{"en":"CLI that strips document traces and detects prompt injection.","es":"CLI que elimina rastros de documentos y detecta inyecciones de instrucciones."},"kind":{"en":"CLI","es":"CLI"},"categories":["cli"],"repositories":[{"name":"doc-sentinel","surface":"cli","url":"https://github.com/diegnghtmr/doc-sentinel","role":"cli","programmingLanguage":"Python"}],"stack":["Python"],"url":"https://github.com/diegnghtmr/doc-sentinel","live":false,"caseStudy":"https://diegnghtmr.me/en/work/doc-sentinel/"},
 {"id":"resume-maker","name":"resume-maker","description":{"en":"Build pipeline for publishing résumé PDFs.","es":"Flujo de compilación para publicar hojas de vida en PDF."},"kind":{"en":"Build pipeline","es":"Flujo de compilación"},"categories":["cli"],"repositories":[{"name":"resume-maker","surface":"cli","url":"https://github.com/diegnghtmr/resume-maker","role":"pipeline"}],"stack":["LaTeX"],"url":"https://github.com/diegnghtmr/resume-maker","live":false,"caseStudy":"https://diegnghtmr.me/en/work/resume-maker/"},
 {"id":"enterprise-monitoring-stack","name":"Enterprise Monitoring Stack","description":{"en":"Team project for containerized monitoring with redundant storage.","es":"Proyecto en equipo para monitoreo en contenedores con almacenamiento redundante."},"kind":{"en":"Infrastructure","es":"Infraestructura"},"categories":["infra"],"repositories":[{"name":"enterprise-monitoring-stack","surface":"infra","url":"https://github.com/diegnghtmr/enterprise-monitoring-stack","role":"infra"}],"stack":["Docker","RAID 1","LVM","Netdata"],"url":"https://github.com/diegnghtmr/enterprise-monitoring-stack","live":false,"caseStudy":"https://diegnghtmr.me/en/work/enterprise-monitoring-stack/"},
-{"id":"nexride","name":"NexRide","description":{"en":"Ride dispatch backend with pickup suggestions and composite scoring.","es":"Backend de asignación de viajes con sugerencias de recogida y una puntuación compuesta."},"kind":{"en":"API","es":"API"},"categories":["api"],"repositories":[{"name":"NexRide","surface":"api","url":"https://github.com/diegnghtmr/NexRide","role":"api","programmingLanguage":"TypeScript"}],"stack":["TypeScript","NestJS 11","PostgreSQL/PostGIS","Redis"],"url":"https://github.com/diegnghtmr/NexRide","live":false,"caseStudy":"https://diegnghtmr.me/en/work/nexride/"}
+{"id":"nexride","name":"NexRide","description":{"en":"Ride dispatch backend with pickup suggestions and composite scoring.","es":"Backend de asignación de viajes con sugerencias de recogida y una puntuación compuesta."},"kind":{"en":"API","es":"API"},"categories":["api"],"repositories":[{"name":"NexRide","surface":"api","url":"https://github.com/diegnghtmr/NexRide","role":"api","programmingLanguage":"TypeScript"}],"stack":["TypeScript","NestJS 11","PostgreSQL/PostGIS","Redis"],"url":"https://github.com/diegnghtmr/NexRide","live":false,"caseStudy":"https://diegnghtmr.me/en/work/nexride/"},
+{"id":"roster-edge","name":"RosterEdge","description":{"en":"Team management, match scheduling, and season reports for sports clubs.","es":"Gestión de equipos, programación de partidos e informes de temporada para clubes deportivos."},"kind":{"en":"Web + API","es":"Web + API"},"categories":["web"],"repositories":[{"name":"roster-edge","surface":"web","url":"https://github.com/diegnghtmr/roster-edge","role":"web"}],"stack":["React 19","TypeScript","Java 21","Spring Boot 3.5","PostgreSQL","Flyway"],"url":"https://github.com/diegnghtmr/roster-edge","live":false,"caseStudy":"https://diegnghtmr.me/en/work/roster-edge/"}
 ];
 const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
 const workRows = (html) => [...html.matchAll(/(<li\b[^>]*\sdata-project(?:\s[^>]*|)>)([\s\S]*?)<\/li>/g)];
@@ -176,9 +178,8 @@ test("resume.json follows JSON Resume, per locale", () => {
 
 test("projects.json keeps the featured entries and adds the complete bilingual atlas", () => {
   const { projects } = JSON.parse(read("projects.json"));
-  assert.deepEqual(projects.slice(0, 6).map(({ name }) => name), projectNames);
   assert.deepEqual(projects.map(({ name }) => name), atlasNames);
-  assert.equal(projects.length, 15);
+  assert.equal(projects.length, 16);
   for (const project of projects) {
     assert.ok(project.description.en && project.description.es, project.name);
     assert.ok(project.kind.en && project.kind.es, project.name);
@@ -194,17 +195,16 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
-test("projects.json keeps every previously published entry unchanged and only adds RosterEdge", () => {
+test("projects.json keeps every previously published entry unchanged and only adds The Knowledge Bay", () => {
   const { projects } = JSON.parse(read("projects.json"));
-  // Snapshot of projects.json as published before the ranking (diegnghtmr.me at bcf8fdb).
-  const published = publishedProjects;
-  assert.deepEqual(projects.map(({ id }) => id).sort(), [...published.map(({ id }) => id), "roster-edge"].sort());
-  const roster = projects.find(({ id }) => id === "roster-edge");
-  assert.deepEqual(roster.repositories, [{ name: "roster-edge", url: repoUrl("roster-edge"), surface: "web", role: "web" }]);
-  assert.equal(roster.url, repoUrl("roster-edge"));
-  assert.equal(roster.caseStudy, `${site}${caseRoute("en", "roster-edge")}`);
-  assert.equal(roster.live, false);
-  for (const entry of published) assert.deepEqual(projects.find(({ id }) => id === entry.id), entry, entry.id);
+  const slug = "the-knowledge-bay";
+  assert.deepEqual(projects.map(({ id }) => id).sort(), [...publishedProjects.map(({ id }) => id), slug].sort());
+  const bay = projects.find(({ id }) => id === slug);
+  assert.deepEqual(bay.repositories, [{ name: slug, url: repoUrl(slug), surface: "web", role: "web" }]);
+  assert.equal(bay.url, repoUrl(slug));
+  assert.equal(bay.caseStudy, `${site}${caseRoute("en", slug)}`);
+  assert.equal(bay.live, false);
+  for (const entry of publishedProjects) assert.deepEqual(projects.find(({ id }) => id === entry.id), entry, entry.id);
   assert.deepEqual(projects.map(({ name }) => name), atlasNames);
   const specializedRoles = new Map([
     ...foodServices.map((name, index) => [name, ["identity", "menu", "orders", "traceability"][index]]),
@@ -221,7 +221,7 @@ for (const locale of locales) {
   const path = workRoutes[locale];
   const other = locale === "en" ? "es" : "en";
   const pageTitle = workTitles[locale];
-  test(`${locale}: work index has localized metadata, navigation and 15 linked repository maps`, () => {
+  test(`${locale}: work index has localized metadata, navigation and 16 linked repository maps`, () => {
     const html = read(`${path.slice(1)}index.html`);
     assert.match(html, new RegExp(`<html lang="${locale}"`));
     assert.ok(html.includes(`<title>${pageTitle} | diegnghtmr</title>`));
@@ -238,7 +238,7 @@ for (const locale of locales) {
     const tools = header.match(/class="nav-tools[^>]*>[\s\S]*/)?.[0];
     assert.match(tools, new RegExp(`data-search-trigger[\\s\\S]*href="${workRoutes[other]}"[\\s\\S]*data-theme-toggle[\\s\\S]*data-menu-toggle`));
     const rows = [...html.matchAll(/<li\b[^>]*data-project(?:[\s=>])[^]*?<\/li>/g)];
-    assert.equal(rows.length, 15);
+    assert.equal(rows.length, 16);
     for (const [row] of rows) {
       const links = [...row.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
       assert.equal(links.length, 1);
@@ -266,7 +266,7 @@ for (const locale of locales) {
   test(`${locale}: the work command menu searches all project names and stacks and targets their rows`, () => {
     const html = read(`${path.slice(1)}index.html`);
     const options = commandProjects(html);
-    assert.equal(options.length, 15);
+    assert.equal(options.length, 16);
     assert.deepEqual(options.map(({ name }) => name), atlasNames);
     const rows = workRows(html);
     const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
@@ -290,7 +290,17 @@ for (const locale of locales) {
     assert.ok(savia);
     assert.equal(attr(savia[1], "data-surface"), "web api tool");
     assert.deepEqual([...html.matchAll(/data-breakdown="(\w+)"[^>]*>(\d+)<\/strong>/g)].map(([, surface, count]) => [surface, Number(count)]),
-      [["web", 10], ["api", 1], ["tool", 3], ["infra", 1]]);
+      [["web", 11], ["api", 1], ["tool", 3], ["infra", 1]]);
+    assert.match(html, new RegExp(`data-result-count>16 ${locale === "en" ? "projects" : "proyectos"}<`));
+    const bay = rows.find(([, tag]) => attr(tag, "id") === "the-knowledge-bay");
+    assert.ok(bay);
+    assert.equal(attr(bay[1], "data-surface"), "web");
+    assert.equal(attr(bay[1], "data-repos"), "single");
+    assert.equal(attr(bay[1], "data-stack"), "java");
+    for (const [facet, value, count] of [["surface", "web", 11], ["repos", "single", 9], ["stack", "java", 7], ["stack", "typescript", 12]]) {
+      const button = html.match(new RegExp(`<button\\b[^>]*data-facet="${facet}" value="${value}"[^>]*>[\\s\\S]*?</button>`))?.[0];
+      assert.match(button, new RegExp(`data-facet-count>${count}</span>`));
+    }
     const roster = rows.find(([, tag]) => attr(tag, "id") === "roster-edge");
     assert.ok(roster);
     assert.equal(attr(roster[1], "data-surface"), "web");
@@ -311,7 +321,7 @@ for (const locale of locales) {
       Legajo: repoUrl("legajo-frontend"), "Profundiza UQ": repoUrl("profundiza-uq-backend"), Savia: repoUrl("savia-web"),
       "Academic Triage": repoUrl("academic-triage-frontend"), Vale: repoUrl("vale"), "Saber Inverso": repoUrl("saber-inverso"),
       NexRide: repoUrl("NexRide"), "writing-harness": repoUrl("writing-harness"), "doc-sentinel": repoUrl("doc-sentinel"),
-      RosterEdge: repoUrl("roster-edge"),
+      RosterEdge: repoUrl("roster-edge"), "The Knowledge Bay": repoUrl("the-knowledge-bay"),
       "resume-maker": repoUrl("resume-maker"), "Enterprise Monitoring Stack": repoUrl("enterprise-monitoring-stack"),
     };
     const bySlug = new Map(rows.map(([, tag, body]) => [attr(tag, "id"), body]));
@@ -385,8 +395,10 @@ for (const locale of locales) {
     const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])["@graph"];
     const byType = (type) => graph.find((node) => node["@type"] === type);
     assert.equal(byType("CollectionPage").url, `${site}${path}`);
-    const items = byType("ItemList").itemListElement;
-    assert.equal(items.length, 15);
+    const itemList = byType("ItemList");
+    const items = itemList.itemListElement;
+    assert.equal(itemList.numberOfItems, 16);
+    assert.equal(items.length, 16);
     assert.deepEqual(items.map(({ item, position }) => [item.name, position]), atlasNames.map((name, i) => [name, i + 1]));
     assert.deepEqual(byType("BreadcrumbList").itemListElement.map(({ item }) => item), [`${site}/${locale}/`, `${site}${path}`]);
     assert.ok(html.includes(`<link rel="alternate" type="text/markdown" href="${path}index.md"`));
@@ -399,7 +411,7 @@ for (const locale of locales) {
 
   test(`${locale}: home Work links to the localized index without replacing section anchors`, () => {
     const home = read(`${locale}/index.html`);
-    assert.match(home, new RegExp(`<a\\b[^>]*href="${path}"[^>]*>${locale === "en" ? "All 15 projects" : "Los 15 proyectos"}`));
+    assert.match(home, new RegExp(`<a\\b[^>]*href="${path}"[^>]*>${locale === "en" ? "All 16 projects" : "Los 16 proyectos"}`));
     const header = home.match(/<header\b[^>]*data-site-nav[^>]*>[\s\S]*?<\/header>/)?.[0];
     assert.ok(header);
     for (const id of ["work", "oss", "about", "contact"]) assert.ok(header.includes(`href="#${id}" data-section-link`), id);
@@ -542,7 +554,7 @@ function assertDossierInventory(output, expected) {
   }
 }
 
-test("production publishes exactly the 15 pinned dossiers in HTML and Markdown in both locales", () => {
+test("production publishes exactly the 16 pinned dossiers in HTML and Markdown in both locales", () => {
   assertDossierInventory(dist, publishedSlugs);
   const catalog = JSON.parse(read("projects.json")).projects;
   assert.deepEqual(catalog.flatMap(({ caseStudy }) => caseStudy ? [caseStudy] : []).sort(),
@@ -780,6 +792,7 @@ function assertDiagramGeometry(html, locale, slug) {
         "food-court": [["frontend", "orders", "catalog", "catalog-db"], ["frontend", "orders", "traceability", "trace-db"], ["frontend", "orders", "identity", "user-db"], ["frontend", "orders", "orders-db"]],
         "studydeck-ai": [["frontend", "backend", "postgres"]],
         "roster-edge": [["frontend", "backend", "postgres"]],
+        "the-knowledge-bay": [["frontend", "backend", "sqlite"]],
         savia: [["web", "backend", "postgres"], ["web", "backend", "files"]],
       };
       for (const chain of chains[slug] ?? []) for (let j = 1; j < chain.length; j++) {
@@ -1042,6 +1055,32 @@ for (const slug of publishedSlugs) {
   }
 }
 
+for (const locale of locales) {
+  test(`${locale}: The Knowledge Bay shows the team, four captures, and the packaged architecture without a live demo`, () => {
+    const slug = "the-knowledge-bay";
+    const path = caseRoute(locale, slug).slice(1);
+    const html = read(`${path}index.html`);
+    assert.match(html, new RegExp(`data-case-fact="team"[^>]*><dt>[^<]*</dt><dd>${locale === "en" ? "Team of 3" : "Equipo de 3"}</dd>`));
+    assert.doesNotMatch(html, /data-case-fact="demo"/);
+    const pictures = [...html.matchAll(/<picture>[\s\S]*?<\/picture>/g)];
+    assert.deepEqual(pictures.map(([picture]) => picture.match(/<img\b[^>]*\bsrc="\/_astro\/([\w-]+)\.[^"\s]+\.webp"/)[1]),
+      ["visitor-landing", "group-feed", "chat-thread", "moderator-analytics"]);
+    for (const [picture] of pictures) assert.ok(resolves(attr(picture.match(/<img\b[^>]*>/)[0], "src")));
+    const edges = [{ from: "frontend", to: "backend" }, { from: "backend", to: "sqlite" }];
+    const diagrams = diagramSvgs(html);
+    assert.equal(diagrams.length, 2);
+    for (const svg of diagrams) {
+      assert.deepEqual(diagramNodes(svg).map(({ id, kind }) => [id, kind]), [["frontend", "container"], ["backend", "container"], ["sqlite", "store"]]);
+      assertDirectedRoutes(svg, edges);
+    }
+    const twin = read(`${path}index.md`);
+    assert.match(twin, /JDBC\/SQL/);
+    assert.ok(twin.includes("https://github.com/diegnghtmr/the-knowledge-bay/pull/1"));
+    const option = commandProjects(html).find(({ name }) => name === "The Knowledge Bay");
+    assert.equal(option?.target, `${workRoutes[locale]}#${slug}`);
+  });
+}
+
 test("writing-harness is indexed under TypeScript without adding absent demo and team facts", () => {
   const html = read("en/work/index.html");
   const row = workRows(html).find(([, tag]) => attr(tag, "id") === "writing-harness");
@@ -1078,7 +1117,7 @@ test("S23: ranking does not reassign home JSON-LD identities", () => {
 });
 
 test("S23: localized dossiers link to the next project in ranking order and wrap", () => {
-  const order = ["legajo", "studydeck-ai", "academic-triage", "brujula", "food-court", "profundiza-uq",
+  const order = ["legajo", "studydeck-ai", "academic-triage", "the-knowledge-bay", "brujula", "food-court", "profundiza-uq",
     "doc-sentinel", "roster-edge", "nexride", "savia", "writing-harness", "vale", "saber-inverso", "resume-maker", "enterprise-monitoring-stack"];
   for (const locale of locales) {
     for (const [i, slug] of order.entries()) {

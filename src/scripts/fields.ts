@@ -68,6 +68,19 @@ const shapes: Record<ArtShape, Sample> = {
     return Math.min(1, sum);
   },
 
+  // The Knowledge Bay: two uneven headlands shelter a cove, with tidal contours on the water side.
+  shoreline(u, v, t) {
+    const y = (v - .52 + .12 * (u - .5)) / .43;
+    const shore = .24 + .62 * y * y + .055 * Math.sin(4.8 * y + .57);
+    const water = u - shore;
+    const fade = clamp((u - .08) * 8) * clamp((.93 - u) * 6) * clamp((1 - Math.abs(y)) * 6);
+    const sand = .48 * clamp(1 + water * 5) * clamp(1 - water * 20);
+    const tide = .013 * Math.sin(t * .55);
+    const shallows = .62 * stroke(water - .064 - tide, .038);
+    const shoal = .38 * stroke(water - .145 - tide, .029);
+    const offshore = .24 * stroke(water - .23 - tide, .025);
+    return fade * Math.max(sand, shallows, shoal, offshore);
+  },
   // doc-sentinel: a scan band picks out traces in a skewed document plane.
   scan(u, v, t, a) {
     const x = insetX(u, a) - (v - .5) * .24;
