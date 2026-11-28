@@ -5,6 +5,9 @@ import { pathToFileURL } from "node:url";
 
 // Shared by the snapshot build and the HTTP handler so both count the actual JSON-RPC encoding.
 export const maxResponseBytes = 64 * 1024;
+// An unwarned study fits IDs encoded in at most 258 JSON bytes, including quotes.
+// This is a build diagnostic budget, not a limit on the IDs accepted at runtime.
+export const diagnosticBudgetId = "x".repeat(256);
 export const textResult = (text) => ({ content: [{ type: "text", text }] });
 export const jsonResult = (value) => textResult(JSON.stringify(value));
 export const fitsResponse = (result, id) =>
@@ -84,9 +87,7 @@ function buildSnapshot() {
   for (const project of projects) {
     if (!project.studies) continue;
     for (const locale of locales) {
-      // A one-byte ID reports studies that exceed the limit even with the smallest envelope.
-      // At request time the real ID is included, so a larger envelope is bounded too.
-      if (getProjectResult(project, locale, 0).markdownOmitted) {
+      if (getProjectResult(project, locale, diagnosticBudgetId).markdownOmitted) {
         console.warn(`MCP snapshot: get_project ${project.slug} (${locale}) exceeds 64 KiB with Markdown`);
       }
     }

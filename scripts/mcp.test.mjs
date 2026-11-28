@@ -8,6 +8,7 @@ import { Readable } from "node:stream";
 import { after, before, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import mcp from "../api/mcp.mjs";
+import { fitsResponse, getProjectResult, maxResponseBytes } from "./build-mcp-data.mjs";
 
 const protocol = "2025-11-25";
 const accept = "application/json, text/event-stream";
@@ -261,7 +262,7 @@ test("text filters that normalize to empty or whitespace return tool errors with
   assert.deepEqual(await data("list_projects"), original);
 });
 
-test("get_project keeps the public record when the encoded Spanish study would exceed the cap", async (t) => {
+test("get_project response budgets", async (t) => {
   const fixture = mkdtempSync(join(tmpdir(), "portfolio-mcp-"));
   t.after(() => rmSync(fixture, { recursive: true, force: true }));
   const buildScript = "scripts/build-mcp-data.mjs";
@@ -278,15 +279,28 @@ test("get_project keeps the public record when the encoded Spanish study would e
   const markdown = `# RosterEdge\n\n${'á"\\\n'.repeat(7_000)}`;
   assert.ok(Buffer.byteLength(markdown) < 64 * 1024);
   assert.ok(Buffer.byteLength(JSON.stringify(JSON.stringify(markdown))) > 64 * 1024);
+
+  const { caseStudy, ...record } = feed().find(({ caseStudy }) => caseStudy?.endsWith(`/${slug}/`));
+  const nearLimitStudy = { url: caseStudy, markdown: "# RosterEdge\n\n" };
+  const nearLimitProject = { ...record, slug, studies: { en: nearLimitStudy } };
+  const initial = getProjectResult(nearLimitProject, "en", 0).result;
+  const initialBytes = Buffer.byteLength(JSON.stringify({ jsonrpc: "2.0", id: 0, result: initial }));
+  nearLimitStudy.markdown += "x".repeat(maxResponseBytes - initialBytes);
+  const normalId = "1c4f9df0-88e5-4ce5-8cfd-785a9579d54c";
+  const nearLimit = getProjectResult(nearLimitProject, "en", 0);
+  assert.equal(nearLimit.markdownOmitted, false);
+  assert.equal(fitsResponse(nearLimit.result, normalId), false);
+
   const outDir = join(fixture, "custom-dist");
   const paths = ["resume.json", "es/resume.json", "projects.json", ...locales.map((locale) => `${workPath(locale)}index.html`)];
   for (const { caseStudy } of feed()) {
     if (caseStudy) paths.push(...locales.map((locale) => path(locale, new URL(caseStudy).pathname.split("/").at(-2))));
   }
+  const fixtureStudies = new Map([[path("en", slug), nearLimitStudy.markdown], [path("es", slug), markdown]]);
   for (const name of paths) {
     const target = join(outDir, name);
     mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, name === path("es", slug) ? markdown : dist(name));
+    writeFileSync(target, fixtureStudies.get(name) ?? dist(name));
   }
 
   const script = join(fixture, buildScript);
@@ -321,19 +335,37 @@ test("get_project keeps the public record when the encoded Spanish study would e
   const fixtureServer = await startServer(handler);
   t.after(() => stopServer(fixtureServer.server));
 
-  await t.test("build identifies the affected slug and locale", () => {
-    assert.equal(build.stderr, "MCP snapshot: get_project roster-edge (es) exceeds 64 KiB with Markdown\n");
+  await t.test("build warns for both the near-limit English and oversized Spanish studies", () => {
+    const warnings = "MCP snapshot: get_project roster-edge (en) exceeds 64 KiB with Markdown\n" +
+      "MCP snapshot: get_project roster-edge (es) exceeds 64 KiB with Markdown\n";
+    assert.equal(build.stderr, warnings);
+    assert.equal(linked.stderr, warnings);
   });
-  await t.test("HTTP response omits only Markdown and tells clients where to read it", async () => {
+  const markdownOmitted = "Case-study Markdown omitted because the MCP response would exceed 64 KiB. See caseStudy for the full study.";
+  await t.test("HTTP omits the oversized Spanish Markdown and retains the public study URL", async () => {
     const { projects } = await data("list_projects", { locale: "es" }, fixtureServer.endpoint);
     const project = projects.find((project) => project.slug === slug);
     assert.equal(project.caseStudy, "https://diegnghtmr.me/es/trabajo/roster-edge/");
     assert.deepEqual(await data("get_project", { slug, locale: "es" }, fixtureServer.endpoint), {
-      ...project,
-      markdownOmitted: "Case-study Markdown omitted because the MCP response would exceed 64 KiB. See caseStudy for the full study.",
+      ...project, markdownOmitted,
     });
-    assert.deepEqual(await data("get_project", { slug, locale: "en" }, fixtureServer.endpoint),
-      await data("get_project", { slug, locale: "en" }));
+  });
+  await t.test("HTTP only omits the near-limit Markdown when the real request ID makes it overflow", async () => {
+    const { projects } = await data("list_projects", { locale: "en" }, fixtureServer.endpoint);
+    const project = projects.find((project) => project.slug === slug);
+    assert.equal(project.caseStudy, "https://diegnghtmr.me/en/work/roster-edge/");
+    const params = { name: "get_project", arguments: { slug, locale: "en" } };
+    for (const [id, expected] of [[0, { ...project, markdown: nearLimitStudy.markdown }], [normalId, { ...project, markdownOmitted }]]) {
+      const response = await post({ jsonrpc: "2.0", id, method: "tools/call", params }, {}, fixtureServer.endpoint);
+      assert.equal(response.status, 200);
+      const body = await response.text();
+      const bytes = Buffer.byteLength(body);
+      if (id === 0) assert.equal(bytes, 64 * 1024);
+      else assert.ok(bytes < 64 * 1024);
+      assert.deepEqual(JSON.parse(body), {
+        jsonrpc: "2.0", id, result: { content: [{ type: "text", text: JSON.stringify(expected) }] },
+      });
+    }
   });
 });
 
