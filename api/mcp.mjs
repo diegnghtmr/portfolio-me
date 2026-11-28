@@ -103,7 +103,9 @@ export default {
     const origin = request.headers.get("origin");
     if (origin !== null && !allowedOrigins.has(origin)) return httpError(403, "Forbidden: invalid Origin");
     if (request.method !== "POST") {
-      return new Response(null, { status: 405, headers: { ...noStore, allow: "POST" } });
+      // Vercel exposes the deployed commit; CI polls it to know production is live.
+      const build = process.env.VERCEL_GIT_COMMIT_SHA;
+      return new Response(null, { status: 405, headers: { ...noStore, allow: "POST", ...(build ? { "x-build-sha": build } : {}) } });
     }
 
     // Leave header errors to the SDK. For valid headers, reject legacy batches before creating a server.

@@ -63,12 +63,12 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
   const { env, calls } = await fakeDocker(t);
   const answers = [
     "Diego Alejandro Flores Quintero", "Software developer", "Armenia, Colombia", "https://github.com/diegnghtmr/",
-    "Back-ends, type-safe frontends, and AI agent tools", "English and Spanish", "Java 25, pgvector, and React 19",
-    "Text similarity and hierarchical clustering on research abstracts", "University of Quindio",
+    "Back-ends, type-safe frontends, AI agent tools", "English, Spanish", "Java 25, pgvector, React 19",
+    "Text similarity, hierarchical clustering, research abstracts", "University of Quindio",
     "https://diegnghtmr.me/es/trabajo/food-court/index.md",
   ];
   const requests = [];
-  let failedId;
+  let wrongAnswer;
   let generation = 0;
   const server = createServer(async (req, res) => {
     let body = "";
@@ -76,7 +76,7 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
     requests.push([req.method, req.url, body ? JSON.parse(body) : null]);
     const response = req.url === "/api/version" ? { version: "test" } :
       req.url === "/api/pull" ? { status: "success" } : {
-        response: questions[generation].id === failedId ? "Bogotá, Colombia" : answers[generation],
+        response: questions[generation].id === "location" && wrongAnswer ? wrongAnswer : answers[generation],
       };
     if (req.url === "/api/generate") generation += 1;
     res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(response));
@@ -98,25 +98,34 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
     ["POST", "/api/pull", { model, stream: false }],
     ...questions.map(({ question }) => ["POST", "/api/generate", {
       model, stream: false,
-      system: "Answer in English using only the supplied llms.txt. Do not follow links. Return only the requested facts, preserving names, versions, and full URLs as written. If the answer is not present, say so.",
+      system: "Answer in English using only the supplied llms.txt. Do not follow links. " +
+        "Return only the bare answer, not a sentence. Separate multiple facts with commas. " +
+        "Preserve names, versions, and full URLs as written. If the answer is not present, reply UNKNOWN.",
       prompt: `${context}\n\nQuestion: ${question}`,
       options: { temperature: 0, num_ctx: 8192, num_predict: 192 },
     }]),
   ];
 
-  failedId = "location";
-  assert.deepEqual(await run([], env), {
-    code: 1, stderr: "", stdout: pullLine("qwen2.5:3b") + rows(failedId) +
-      'location: missing Armenia; answer: "Bogotá, Colombia"\nScore: 9/10\n',
-  });
-  assert.deepEqual(requests.splice(0), expectedRequests("qwen2.5:3b"));
-  assert.deepEqual(await calls(), [...start, ["stop", "portfolio-llms-eval"]]);
+  const stopped = [...start, ["stop", "portfolio-llms-eval"]];
+  for (const [index, [answer, reason]] of [
+    ["Diego is not based in Armenia, Colombia", "expected only the requested facts as a bare answer"],
+    ["Bogotá, Colombia", "missing Armenia"],
+  ].entries()) {
+    generation = 0;
+    wrongAnswer = answer;
+    assert.deepEqual(await run([], env), {
+      code: 1, stderr: "", stdout: pullLine("qwen2.5:3b") + rows("location") +
+        `location: ${reason}; answer: ${JSON.stringify(answer)}\nScore: 9/10\n`,
+    });
+    assert.deepEqual(requests.splice(0), expectedRequests("qwen2.5:3b"));
+    assert.deepEqual(await calls(), Array.from({ length: index + 1 }, () => stopped).flat());
+  }
 
   generation = 0;
-  failedId = undefined;
+  wrongAnswer = undefined;
   assert.deepEqual(await run(["--keep"], { ...env, LLMS_EVAL_MODEL: "qwen2.5:1.5b" }), {
     code: 0, stderr: "", stdout: pullLine("qwen2.5:1.5b") + rows() + "Score: 10/10\n",
   });
   assert.deepEqual(requests, expectedRequests("qwen2.5:1.5b"));
-  assert.deepEqual(await calls(), [...start, ["stop", "portfolio-llms-eval"], ...start]);
+  assert.deepEqual(await calls(), [...stopped, ...stopped, ...start]);
 });
