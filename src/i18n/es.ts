@@ -27,7 +27,7 @@ export const es = {
   seeWork: "Ver el trabajo",
   downloadCv: "Descargar CV",
   atAGlance: "De un vistazo",
-  systems: "sistemas multirrepositorio, de 2 a 5 repositorios cada uno",
+  projectCount: "proyectos, de {min} a {max} repositorios cada uno",
   contributions: "repositorios open source con contribuciones mías, entre ellos basecamp/omarchy",
   stack: "Stack, 16 tecnologías",
   backend: "Backend",

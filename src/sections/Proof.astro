@@ -1,18 +1,25 @@
 ---
-import { stack } from "../data/home";
+import { openSource, stack } from "../data/home";
+import { atlasProjects } from "../data/projects";
 import { t, type Locale } from "../i18n";
 
 const { locale } = Astro.props as { locale: Locale };
-const stats = [{ id: 'work', count: 8, label: 'systems' }, { id: 'oss', count: 6, label: 'contributions' }] as const;
+// Counted from the published data so the numbers never drift from the work index.
+const sizes = atlasProjects.map((project) => project.repositories.length);
+const projectsLabel = t(locale, 'projectCount').replace('{min}', String(Math.min(...sizes))).replace('{max}', String(Math.max(...sizes)));
+const stats = [
+  { id: 'work', count: atlasProjects.length, text: projectsLabel },
+  { id: 'oss', count: openSource.length, text: t(locale, 'contributions') },
+];
 ---
 
 <section class="wrap" aria-label={t(locale, 'atAGlance')}>
   <ul class="stats">
-    {stats.map(({ id, count, label }) => (
+    {stats.map(({ id, count, text }) => (
       <li class="stat" data-reveal>
         <a href={`#${id}`}>
           <span class="sr-only">{count}</span><span class="number" data-count={count} aria-hidden="true">{count}</span>
-          <span class="stat-label">{t(locale, label)}</span><span class="go" aria-hidden="true">→</span>
+          <span class="stat-label">{text}</span><span class="go" aria-hidden="true">→</span>
         </a>
       </li>
     ))}
