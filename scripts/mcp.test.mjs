@@ -106,6 +106,19 @@ test("GET and DELETE return 405 with no SSE or session termination", async () =>
   }
 });
 
+test("the 405 answer names the deployed commit only when Vercel provides it", async (t) => {
+  const previous = process.env.VERCEL_GIT_COMMIT_SHA;
+  t.after(() => (previous === undefined ? delete process.env.VERCEL_GIT_COMMIT_SHA : (process.env.VERCEL_GIT_COMMIT_SHA = previous)));
+  delete process.env.VERCEL_GIT_COMMIT_SHA;
+  const local = await fetch(endpoint, { method: "HEAD", redirect: "manual" });
+  assert.equal(local.status, 405);
+  assert.equal(local.headers.get("x-build-sha"), null);
+  process.env.VERCEL_GIT_COMMIT_SHA = "0123456789abcdef0123456789abcdef01234567";
+  const deployed = await fetch(endpoint, { method: "HEAD", redirect: "manual" });
+  assert.equal(deployed.status, 405);
+  assert.equal(deployed.headers.get("x-build-sha"), "0123456789abcdef0123456789abcdef01234567");
+});
+
 test("POST rejects an unsupported revision and malformed JSON; Origin and input size are checked", async () => {
   const ping = { jsonrpc: "2.0", id: 1, method: "ping" };
   for (const [body, headers, status, code] of [
@@ -265,20 +278,45 @@ test("get_project keeps the public record when the encoded Spanish study would e
   const markdown = `# RosterEdge\n\n${'á"\\\n'.repeat(7_000)}`;
   assert.ok(Buffer.byteLength(markdown) < 64 * 1024);
   assert.ok(Buffer.byteLength(JSON.stringify(JSON.stringify(markdown))) > 64 * 1024);
+  const outDir = join(fixture, "custom-dist");
   const paths = ["resume.json", "es/resume.json", "projects.json", ...locales.map((locale) => `${workPath(locale)}index.html`)];
   for (const { caseStudy } of feed()) {
     if (caseStudy) paths.push(...locales.map((locale) => path(locale, new URL(caseStudy).pathname.split("/").at(-2))));
   }
   for (const name of paths) {
-    const target = join(fixture, "dist", name);
+    const target = join(outDir, name);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, name === path("es", slug) ? markdown : dist(name));
   }
 
-  const build = spawnSync(process.execPath, [join(fixture, buildScript)], { cwd: fixture, encoding: "utf8" });
+  const script = join(fixture, buildScript);
+  const options = { cwd: fixture, encoding: "utf8" };
+  const snapshot = join(fixture, "api/_generated/portfolio.json");
+  const imported = spawnSync(process.execPath, ["--input-type=module", "--eval", "await import(process.argv[1])", pathToFileURL(script).href], options);
+  assert.ifError(imported.error);
+  assert.deepEqual([imported.status, imported.stdout, imported.stderr], [0, "", ""]);
+  assert.throws(() => readFileSync(snapshot), { code: "ENOENT" });
+
+  // Reproduce a Node runtime without import.meta.main while still executing the entry point directly.
+  const preload = `import { registerHooks } from "node:module";
+    registerHooks({ load(url, context, nextLoad) {
+      const loaded = nextLoad(url, context);
+      return url === ${JSON.stringify(pathToFileURL(script).href)}
+        ? { ...loaded, source: "delete import.meta.main;\\n" + loaded.source } : loaded;
+    } });`;
+  const build = spawnSync(process.execPath, [`--import=data:text/javascript,${encodeURIComponent(preload)}`, script, outDir], options);
   assert.ifError(build.error);
   assert.equal(build.status, 0, build.stderr);
-  assert.match(build.stdout, /^MCP snapshot: \d+ projects, \d+ bytes\n$/);
+  const contents = readFileSync(snapshot, "utf8");
+  assert.equal(build.stdout, `MCP snapshot: ${feed().length} projects, ${Buffer.byteLength(contents)} bytes\n`);
+  // A symlinked entry point still builds: Node resolves import.meta.url through the link.
+  const fs = await import("node:fs");
+  const link = join(fixture, "build-mcp-data-link.mjs");
+  fs.symlinkSync(script, link);
+  fs.rmSync(snapshot);
+  const linked = spawnSync(process.execPath, [link, outDir], options);
+  assert.equal(linked.status, 0, linked.stderr);
+  assert.equal(readFileSync(snapshot, "utf8"), contents);
   const { default: handler } = await import(pathToFileURL(join(fixture, handlerPath)).href);
   const fixtureServer = await startServer(handler);
   t.after(() => stopServer(fixtureServer.server));
@@ -309,12 +347,28 @@ function runSmoke(...args) {
 }
 
 test("smoke CLI passes on the local HTTP server and fails a trailing-slash redirect", async (t) => {
-  assert.deepEqual(await runSmoke(endpoint.origin), { status: 0, stdout: "MCP smoke passed\n", stderr: "" });
+  for (const baseUrl of [endpoint.origin, `${endpoint.origin}/`]) {
+    assert.deepEqual(await runSmoke(baseUrl), { status: 0, stdout: "MCP smoke passed\n", stderr: "" });
+  }
   const redirecting = await startServer(mcp, { redirectSlash: true });
   t.after(() => stopServer(redirecting.server));
   assert.deepEqual(await runSmoke(redirecting.endpoint.origin), {
     status: 1, stdout: "", stderr: "MCP smoke failed: initialize /mcp/: expected HTTP 200, got 308\n",
   });
+});
+
+test("smoke CLI rejects a non-root base URL without making requests", async (t) => {
+  let requests = 0;
+  const count = () => { requests += 1; };
+  server.on("request", count);
+  t.after(() => server.off("request", count));
+  assert.deepEqual(await runSmoke(`${endpoint.origin}/deployment/`), {
+    status: 1, stdout: "", stderr: "MCP smoke failed: baseUrl must not include a path prefix\n",
+  });
+  assert.deepEqual(await runSmoke(), {
+    status: 1, stdout: "", stderr: "MCP smoke failed: usage: node scripts/mcp-smoke.mjs <baseUrl> (site root, no path prefix)\n",
+  });
+  assert.equal(requests, 0);
 });
 
 test("the official MCP Client completes discovery and a tool call over the real HTTP endpoint", async () => {
