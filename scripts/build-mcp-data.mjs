@@ -26,6 +26,14 @@ export function getProjectResult(project, locale, requestId) {
   }) };
 }
 
+// Clients send their own request IDs (often UUIDs), so the build measures each study
+// with a reserved ID budget instead of the smallest possible envelope.
+export const reservedIdBytes = 256;
+export const oversizedStudies = (projects, locales = ["en", "es"]) => projects.flatMap((project) =>
+  project.studies ? locales
+    .filter((locale) => getProjectResult(project, locale, "x".repeat(reservedIdBytes)).markdownOmitted)
+    .map((locale) => ({ slug: project.slug, locale })) : []);
+
 function buildSnapshot() {
   // Astro's build hook passes the directory it actually wrote (honours --outDir).
   const dist = process.argv[2] ? pathToFileURL(`${process.argv[2].replace(/\/$/, "")}/`) : new URL("../dist/", import.meta.url);
@@ -81,15 +89,8 @@ function buildSnapshot() {
   if (new Set(projects.map(({ slug }) => slug)).size !== projects.length) {
     throw new Error("MCP snapshot: duplicate project slug");
   }
-  for (const project of projects) {
-    if (!project.studies) continue;
-    for (const locale of locales) {
-      // A one-byte ID reports studies that exceed the limit even with the smallest envelope.
-      // At request time the real ID is included, so a larger envelope is bounded too.
-      if (getProjectResult(project, locale, 0).markdownOmitted) {
-        console.warn(`MCP snapshot: get_project ${project.slug} (${locale}) exceeds 64 KiB with Markdown`);
-      }
-    }
+  for (const { slug, locale } of oversizedStudies(projects, locales)) {
+    console.warn(`MCP snapshot: get_project ${slug} (${locale}) is within ${reservedIdBytes} bytes of 64 KiB or over it with Markdown`);
   }
   mkdirSync(output, { recursive: true });
   const snapshot = JSON.stringify({ profiles, projects });
