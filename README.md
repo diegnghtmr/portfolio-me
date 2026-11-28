@@ -31,6 +31,19 @@ pnpm test:mcp       # MCP over loopback HTTP, including the official SDK client 
 
 Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or `pnpm favicon`.
 
+## Evaluate llms.txt
+
+Run `pnpm build` first, then:
+
+```sh
+node --test scripts/llms-facts.test.mjs  # deterministic check; also runs in CI
+pnpm eval:llms                          # local only; requires Docker
+```
+
+The deterministic test checks that `dist/llms.txt` contains the expected facts for all 10 questions in [the eval set](evals/llm-questions.json). It does not run a model.
+
+The local evaluator starts Ollama in Docker on loopback, pulls `qwen2.5:3b` by default (override with `LLMS_EVAL_MODEL`), and gives the model only the built `llms.txt` and each question. It prints a pass/fail row per question and exits 1 if any answer omits an expected fact. The first run downloads the Docker image and model; the model is cached in the `portfolio-llms-eval-models` Docker volume. The `portfolio-llms-eval` container stops after the run unless you pass `pnpm eval:llms --keep`. The model evaluation never runs in CI and requires no API key.
+
 ## Portfolio MCP
 
 Endpoint: **`https://diegnghtmr.me/mcp`**. Configure it as a **Streamable HTTP** server in your MCP client. It is read-only, stateless, and does not require authentication. It negotiates the `2025-11-25` handshake revision, returns JSON to POST requests, and returns 405 to GET because it does not open an SSE stream.

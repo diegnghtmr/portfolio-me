@@ -1,0 +1,104 @@
+[
+  {
+    "id": "identity",
+    "question": "What is Diego's full name?",
+    "expected": [
+      "Diego Alejandro Flores Quintero"
+    ]
+  },
+  {
+    "id": "role",
+    "question": "What is Diego's professional role?",
+    "expected": [
+      [
+        "software engineer",
+        "software developer"
+      ]
+    ]
+  },
+  {
+    "id": "location",
+    "question": "In what city and country is Diego based?",
+    "expected": [
+      "Armenia",
+      "Colombia"
+    ]
+  },
+  {
+    "id": "github",
+    "question": "What is the URL of Diego's GitHub profile?",
+    "expected": [
+      "https://github.com/diegnghtmr"
+    ]
+  },
+  {
+    "id": "focus",
+    "question": "What three types of software does Diego say he builds?",
+    "expected": [
+      [
+        "backends",
+        "back-ends",
+        "backend",
+        "back-end"
+      ],
+      [
+        "typed frontends",
+        "typed front-ends",
+        "typed frontend",
+        "type-safe frontends"
+      ],
+      [
+        "tools for AI agents",
+        "AI agent tools",
+        "AI agents' tools"
+      ]
+    ]
+  },
+  {
+    "id": "languages",
+    "question": "In what two languages is Diego's portfolio available?",
+    "expected": [
+      "English",
+      "Spanish"
+    ]
+  },
+  {
+    "id": "studydeck-stack",
+    "question": "What three technologies and listed versions are in the StudyDeck AI stack?",
+    "expected": [
+      "Java 25",
+      "pgvector",
+      "React 19"
+    ]
+  },
+  {
+    "id": "legajo",
+    "question": "What two techniques does the Legajo project apply, and to what material?",
+    "expected": [
+      "text similarity",
+      "hierarchical clustering",
+      [
+        "scientific abstracts",
+        "research abstracts"
+      ]
+    ]
+  },
+  {
+    "id": "brujula",
+    "question": "Which university is the Brújula academic-planning project for?",
+    "expected": [
+      [
+        "Universidad del Quindío",
+        "University of Quindío",
+        "University of the Quindío"
+      ]
+    ]
+  },
+  {
+    "id": "food-court",
+    "question": "What is the full URL for the Spanish Markdown case study of Diego's Food Court project?",
+    "expected": [
+      "https://diegnghtmr.me/es/trabajo/food-court/index.md"
+    ]
+  }
+]

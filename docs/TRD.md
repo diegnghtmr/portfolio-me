@@ -95,8 +95,8 @@ portfolio-me/
 │  │  ├─ project.yaml        language-neutral facts (repos, links, dates, shape data)
 │  │  ├─ en.md · es.md       narrative (problem, decisions, reflection…)
 │  │  ├─ media/              originals (png/webm), casts (*.cast.json), exchanges (*.http.json)
-│  ├─ open-source/*.yaml
-│  └─ evals/llm-questions.yaml
+│  └─ open-source/*.yaml
+├─ evals/llm-questions.json   10 fixed questions and expected facts
 ├─ data/github.snapshot.json generated, committed
 ├─ scripts/                  sync-github, dither-assets, og, layout-maps, tokens, contrast, indexnow, eval-llms
 ├─ src/
@@ -249,7 +249,7 @@ Phase 2 MCP server: `api/mcp.mjs` is a stateless, unauthenticated Node.js Vercel
 | Accessibility | axe on every route ×2 locales; focus ring visible on every control (F-2); reduced-motion run asserts no animation (F-3); `forced-colors` and no-JS runs keep content (F-5) | Playwright + axe |
 | Visual | Screenshot baselines per route/viewport/theme | Playwright |
 | Performance | §9 budgets | LHCI, size-limit |
-| Agent | 10 fixed questions answered from `/llms.txt` only; diffed against expected facts | `scripts/eval-llms.ts` (manual/nightly, needs API key in CI secret) |
+| Agent | Check expected facts for 10 fixed questions in built `/llms.txt`; locally, score answers grounded only in that file | `node --test scripts/llms-facts.test.mjs` after build in CI; `pnpm eval:llms` locally with Ollama in Docker (no API key or model in CI) |
 
 ## 11. CI/CD
 
