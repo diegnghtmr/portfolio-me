@@ -1,0 +1,30 @@
+name: Production MCP smoke
+
+# Vercel reports deployments as "Vercel" commit statuses (it creates no GitHub
+# deployments here), and every push to main deploys to production.
+on:
+  status:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke live MCP
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.context == 'Vercel' &&
+      github.event.state == 'success' &&
+      contains(github.event.branches.*.name, 'main'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - run: node scripts/mcp-smoke.mjs https://diegnghtmr.me
