@@ -309,6 +309,14 @@ test("get_project keeps the public record when the encoded Spanish study would e
   assert.equal(build.status, 0, build.stderr);
   const contents = readFileSync(snapshot, "utf8");
   assert.equal(build.stdout, `MCP snapshot: ${feed().length} projects, ${Buffer.byteLength(contents)} bytes\n`);
+  // A symlinked entry point still builds: Node resolves import.meta.url through the link.
+  const fs = await import("node:fs");
+  const link = join(fixture, "build-mcp-data-link.mjs");
+  fs.symlinkSync(script, link);
+  fs.rmSync(snapshot);
+  const linked = spawnSync(process.execPath, [link, outDir], options);
+  assert.equal(linked.status, 0, linked.stderr);
+  assert.equal(readFileSync(snapshot, "utf8"), contents);
   const { default: handler } = await import(pathToFileURL(join(fixture, handlerPath)).href);
   const fixtureServer = await startServer(handler);
   t.after(() => stopServer(fixtureServer.server));

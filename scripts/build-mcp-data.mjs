@@ -1,5 +1,5 @@
 // Package only the already-rendered public assets. No Astro or network I/O at request time.
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -97,4 +97,9 @@ function buildSnapshot() {
   console.log(`MCP snapshot: ${projects.length} projects, ${Buffer.byteLength(snapshot)} bytes`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) buildSnapshot();
+// Node resolves the entry module through symlinks, so compare real paths;
+// argv[1] may not be a file at all when this module is imported.
+const entryUrl = () => {
+  try { return pathToFileURL(realpathSync(resolve(process.argv[1]))).href; } catch { return null; }
+};
+if (process.argv[1] && import.meta.url === entryUrl()) buildSnapshot();

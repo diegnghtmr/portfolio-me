@@ -12,7 +12,7 @@ test("S38: CI runs for pushes and pull requests and discovers all script tests",
 });
 
 test("S38: smoke waits until production serves the pushed commit, then probes production", () => {
-  assert.match(smoke, /^on:\n  push:\n    branches: \[main\]\n  workflow_dispatch:\n/m);
+  assert.match(smoke, /^on:\n  push:\n    branches: \[main\]\n  schedule:\n    - cron: '17 \*\/6 \* \* \*'\n  workflow_dispatch:\n/m);
   assert.match(smoke, /EXPECTED_SHA: \$\{\{ github\.sha \}\}/);
   assert.match(smoke, /tolower\(\$1\) == "x-build-sha"/);
   assert.match(smoke, /id: deployment\n/);

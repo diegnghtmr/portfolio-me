@@ -5,9 +5,13 @@ name: Production MCP smoke
 # production itself: /mcp answers with the X-Build-Sha header of the commit it
 # serves. Each push waits independently: smoke its own SHA, or skip when
 # production is already serving a descendant.
+# A schedule also probes whatever main's head is, so a commit whose push run
+# timed out before it went live is still checked once it is.
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'
   workflow_dispatch:
 
 permissions:
