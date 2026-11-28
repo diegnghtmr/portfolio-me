@@ -1,7 +1,9 @@
 // Package only the already-rendered public assets. No Astro or network I/O at request time.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
-const dist = new URL("../dist/", import.meta.url);
+// Astro's build hook passes the directory it actually wrote (honours --outDir).
+const dist = process.argv[2] ? pathToFileURL(`${process.argv[2].replace(/\/$/, "")}/`) : new URL("../dist/", import.meta.url);
 const output = new URL("../api/_generated/", import.meta.url);
 const read = (path) => readFileSync(new URL(path, dist), "utf8");
 const locales = ["en", "es"];

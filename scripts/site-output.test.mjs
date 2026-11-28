@@ -569,7 +569,7 @@ function buildCaseFixture(t, english = fixtureSource("writing-harness", "en"), e
   const fixture = mkdtempSync(join(tmpdir(), "portfolio-case-"));
   t.after(() => rmSync(fixture, { recursive: true, force: true }));
   // Run the real Astro config, loader and routes, with their own output and caches.
-  for (const file of ["astro.config.mjs", "package.json", "tsconfig.json"]) cpSync(join(root, file), join(fixture, file));
+  for (const file of ["astro.config.mjs", "package.json", "tsconfig.json", "scripts/build-mcp-data.mjs"]) cpSync(join(root, file), join(fixture, file));
   cpSync(join(root, "src"), join(fixture, "src"), {
     recursive: true,
     filter: (path) => path !== caseDir && !basename(path).startsWith("."),
