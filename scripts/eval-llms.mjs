@@ -89,18 +89,51 @@ async function evaluate(keep, signal) {
     }
 
     await waitForOllama(request, signal);
+    // Pulls and CPU generations can outlast fetch's 300 s header timeout when Ollama
+    // answers in one piece, so ask for NDJSON: headers arrive at once, then one object per line.
+    async function stream(path, body, timeout) {
+      const response = await fetch(`http://127.0.0.1:${port}${path}`, {
+        redirect: "error",
+        signal: AbortSignal.any([signal, AbortSignal.timeout(timeout)]),
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...body, stream: true }),
+      });
+      if (!response.ok) throw new Error(`Ollama ${path}: HTTP ${response.status}`);
+      const lines = [];
+      let buffered = "";
+      const decoder = new TextDecoder();
+      const take = (text) => {
+        for (const line of text.split("\n")) {
+          if (!line.trim()) continue;
+          const item = JSON.parse(line);
+          if (item.error) throw new Error(`Ollama ${path}: ${item.error}`);
+          lines.push(item);
+        }
+      };
+      for await (const chunk of response.body) {
+        buffered += decoder.decode(chunk, { stream: true });
+        const end = buffered.lastIndexOf("\n");
+        if (end >= 0) { take(buffered.slice(0, end)); buffered = buffered.slice(end + 1); }
+      }
+      take(buffered + decoder.decode());
+      return lines;
+    }
+
     console.log(`Ollama: pulling ${model} (volume: ${volume})`);
-    const pull = await request("/api/pull", { model, stream: false }, 15 * 60_000);
-    if (pull.status !== "success") throw new Error(`Ollama did not confirm the pull for ${model}`);
+    const pull = await stream("/api/pull", { model }, 60 * 60_000);
+    if (pull.at(-1)?.status !== "success") throw new Error(`Ollama did not confirm the pull for ${model}`);
 
     const failures = [];
     console.log("Status\tID\tQuestion");
     for (const { id, question, expected } of questions) {
-      const { response: answer } = await request("/api/generate", {
-        model, stream: false, system,
+      const parts = await stream("/api/generate", {
+        model, system,
         prompt: `${context}\n\nQuestion: ${question}`,
         options: { temperature: 0, num_ctx: 8192, num_predict: 192 },
-      }, 5 * 60_000);
+      }, 15 * 60_000);
+      const answer = parts.some((part) => typeof part.response === "string")
+        ? parts.map((part) => part.response ?? "").join("") : undefined;
       if (typeof answer !== "string") throw new Error(`Ollama returned no text for ${id}`);
       const pass = isBareAnswer(answer, expected);
       console.log(`${pass ? "PASS" : "FAIL"}\t${id}\t${question}`);

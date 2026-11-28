@@ -74,12 +74,19 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
     let body = "";
     for await (const chunk of req) body += chunk;
     requests.push([req.method, req.url, body ? JSON.parse(body) : null]);
-    const response = req.url === "/api/version" ? { version: "test" } :
-      req.url === "/api/pull" ? { status: "success" } : {
-        response: questions[generation].id === "location" && wrongAnswer ? wrongAnswer : answers[generation],
-      };
+    if (req.url === "/api/version") return res.writeHead(200, { "content-type": "application/json" }).end('{"version":"test"}');
+    // Ollama streams NDJSON; headers go out at once, so a long pull never hits fetch's header timeout.
+    const lines = req.url === "/api/pull"
+      ? [{ status: "pulling manifest" }, { status: "downloading", completed: 1, total: 2 }, { status: "success" }]
+      : (() => {
+        const text = questions[generation].id === "location" && wrongAnswer ? wrongAnswer : answers[generation];
+        const cut = Math.ceil(text.length / 2);
+        return [{ response: text.slice(0, cut), done: false }, { response: text.slice(cut), done: true }];
+      })();
     if (req.url === "/api/generate") generation += 1;
-    res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(response));
+    res.writeHead(200, { "content-type": "application/x-ndjson" });
+    for (const line of lines) res.write(JSON.stringify(line) + "\n");
+    res.end();
   });
   await new Promise((resolve, reject) => server.once("error", reject).listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
@@ -95,9 +102,9 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
   const pullLine = (model) => `Ollama: pulling ${model} (volume: portfolio-llms-eval-models)\n`;
   const expectedRequests = (model) => [
     ["GET", "/api/version", null],
-    ["POST", "/api/pull", { model, stream: false }],
+    ["POST", "/api/pull", { model, stream: true }],
     ...questions.map(({ question }) => ["POST", "/api/generate", {
-      model, stream: false,
+      model, stream: true,
       system: "Answer in English using only the supplied llms.txt. Do not follow links. " +
         "Return only the bare answer, not a sentence. Separate multiple facts with commas. " +
         "Preserve names, versions, and full URLs as written. If the answer is not present, reply UNKNOWN.",
