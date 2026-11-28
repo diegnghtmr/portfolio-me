@@ -257,6 +257,8 @@ export function llmsTxt(studies: CaseStudies) {
     "",
     "Every page has a markdown twin: request it with `Accept: text/markdown` or add `index.md` to the page path. Content is the same in English and Spanish.",
     "",
+    `Portfolio MCP: connect a Streamable HTTP client to <${absolute("/mcp")}> for the public profile and projects in English or Spanish.`,
+    "",
     "## Profile",
     "",
     `- [Home in English](${absolute(markdownPath("en"))}): profile, selected work, open source, experience and stack`,

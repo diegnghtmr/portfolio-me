@@ -1,6 +1,8 @@
 {
-  "trailingSlash": true,
   "cleanUrls": false,
+  "functions": {
+    "api/mcp.mjs": { "includeFiles": "api/_generated/portfolio.json" }
+  },
   "headers": [
     {
       "source": "/(dither/[^/]+\\.png|favicon\\.svg)",
@@ -74,6 +76,16 @@
       "source": "/",
       "destination": "/en/",
       "permanent": false
+    },
+    {
+      "source": "/:path((?!(?:api/)?mcp/?$|\\.well-known(?:/|$))(?:[^/]+/)*[^/.]+)",
+      "destination": "/:path/",
+      "permanent": true
+    },
+    {
+      "source": "/:path((?!\\.well-known(?:/|$))(?:[^/]+/)*[^/]+\\.\\w+)/",
+      "destination": "/:path",
+      "permanent": true
     }
   ]
 }

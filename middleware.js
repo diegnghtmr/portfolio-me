@@ -3,7 +3,7 @@
 // `Accept: text/markdown` would always get index.html. Middleware runs first and
 // rewrites it to the markdown twin; browsers never send text/markdown, so they
 // always get HTML. Vary: Accept is set in vercel.json for the cache.
-export const config = { matcher: ["/en/", "/es/", "/en/work/", "/es/trabajo/", "/en/work/([a-z0-9-]+)/", "/es/trabajo/([a-z0-9-]+)/"] };
+export const config = { matcher: ["/en/", "/es/", "/en/work/", "/es/trabajo/", "/en/work/([a-z0-9-]+)/", "/es/trabajo/([a-z0-9-]+)/", "/mcp", "/mcp/"] };
 
 /** q-value of a media type in an Accept header, or 0 when it is absent. */
 function quality(accept, type) {
@@ -17,6 +17,11 @@ function quality(accept, type) {
 }
 
 export default function middleware(request) {
+  const pathname = new URL(request.url).pathname;
+  if (pathname === "/mcp" || pathname === "/mcp/") {
+    return new Response(null, { headers: { "x-middleware-rewrite": new URL("/api/mcp", request.url).href } });
+  }
+
   const accept = request.headers.get("accept") ?? "";
   const markdown = quality(accept, "text/markdown");
   if (markdown === 0 || markdown < quality(accept, "text/html")) return undefined;
