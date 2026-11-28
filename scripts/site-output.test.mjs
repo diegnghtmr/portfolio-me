@@ -56,7 +56,7 @@ const publishedProjects = [
 {"id":"p4","name":"Legajo","description":{"en":"Text similarity and hierarchical clustering over scientific abstracts, with traces and dendrograms.","es":"Similitud de textos y agrupamiento jerárquico sobre resúmenes científicos, con trazas y dendrogramas."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"legajo-backend","surface":"api","url":"https://github.com/diegnghtmr/legajo-backend","role":"api","programmingLanguage":"Java"},{"name":"legajo-frontend","surface":"web","url":"https://github.com/diegnghtmr/legajo-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Java 25","React 19"],"url":"https://github.com/diegnghtmr/legajo-frontend","live":true,"caseStudy":"https://diegnghtmr.me/en/work/legajo/"},
 {"id":"p5","name":"Profundiza UQ","description":{"en":"Elective enrollment with server-generated arrival order and per-group capacity under row-level locking.","es":"Inscripción a electivas con orden de llegada generado en el servidor y cupos por grupo bajo bloqueo de filas."},"kind":{"en":"System, 2 repos","es":"Sistema, 2 repos"},"categories":["api","web"],"repositories":[{"name":"profundiza-uq-backend","surface":"api","url":"https://github.com/diegnghtmr/profundiza-uq-backend","role":"api","programmingLanguage":"Go"},{"name":"profundiza-uq-frontend","surface":"web","url":"https://github.com/diegnghtmr/profundiza-uq-frontend","role":"web","programmingLanguage":"TypeScript"}],"stack":["Go","pgx","React 19"],"url":"https://github.com/diegnghtmr/profundiza-uq-backend","live":false,"caseStudy":"https://diegnghtmr.me/en/work/profundiza-uq/"},
 {"id":"p6","name":"writing-harness","description":{"en":"Spanish writing skills plus a verifier that measures whether a text follows them. Runs on Node 22.6 with nothing installed.","es":"Skills de redacción en español y un verificador que mide si un texto las cumple. Corre en Node 22.6 sin instalar nada."},"kind":{"en":"Headless, 1 repo","es":"Sin interfaz, 1 repo"},"categories":["cli"],"repositories":[{"name":"writing-harness","surface":"cli","url":"https://github.com/diegnghtmr/writing-harness","role":"cli","programmingLanguage":"TypeScript"}],"stack":["Node","zero deps"],"url":"https://github.com/diegnghtmr/writing-harness","live":false,"caseStudy":"https://diegnghtmr.me/en/work/writing-harness/"},
-{"id":"savia","name":"Savia","description":{"en":"Personal finance across web, mobile, API and MCP. In progress.","es":"Finanzas personales con web, móvil, API y MCP. En desarrollo."},"kind":{"en":"Web + mobile + API + MCP","es":"Web + móvil + API + MCP"},"categories":["web","api","cli"],"repositories":[{"name":"savia-web","surface":"web","url":"https://github.com/diegnghtmr/savia-web","role":"web"},{"name":"savia-mobile","surface":"web","url":"https://github.com/diegnghtmr/savia-mobile","role":"mobile"},{"name":"savia-backend","surface":"api","url":"https://github.com/diegnghtmr/savia-backend","role":"api"},{"name":"savia-mcp","surface":"cli","url":"https://github.com/diegnghtmr/savia-mcp","role":"mcp"}],"stack":["NestJS/Fastify","Next.js","Expo"],"url":"https://github.com/diegnghtmr/savia-web","live":false,"caseStudy":"https://diegnghtmr.me/en/work/savia/"},
+{"id":"savia","name":"Savia","description":{"en":"Personal finance across web, mobile, API, MCP and CLI.","es":"Finanzas personales con web, móvil, API, MCP y CLI."},"kind":{"en":"Web + mobile + API + MCP + CLI","es":"Web + móvil + API + MCP + CLI"},"categories":["web","api","cli"],"repositories":[{"name":"savia-web","surface":"web","url":"https://github.com/diegnghtmr/savia-web","role":"web"},{"name":"savia-mobile","surface":"web","url":"https://github.com/diegnghtmr/savia-mobile","role":"mobile"},{"name":"savia-backend","surface":"api","url":"https://github.com/diegnghtmr/savia-backend","role":"api"},{"name":"savia-mcp","surface":"cli","url":"https://github.com/diegnghtmr/savia-mcp","role":"mcp"},{"name":"savia-cli","surface":"cli","url":"https://github.com/diegnghtmr/savia-cli","role":"cli","programmingLanguage":"TypeScript"}],"stack":["NestJS/Fastify","Next.js","Expo"],"url":"https://github.com/diegnghtmr/savia-web","live":false,"caseStudy":"https://diegnghtmr.me/en/work/savia/"},
 {"id":"academic-triage","name":"Academic Triage","description":{"en":"Academic request triage over a Java backend contract.","es":"Clasificación de solicitudes académicas sobre un contrato de backend en Java."},"kind":{"en":"Web + API","es":"Web + API"},"categories":["web","api"],"repositories":[{"name":"academic-triage-frontend","surface":"web","url":"https://github.com/diegnghtmr/academic-triage-frontend","role":"web","programmingLanguage":"TypeScript"},{"name":"academic-triage-system","surface":"api","url":"https://github.com/diegnghtmr/academic-triage-system","role":"api","programmingLanguage":"Java"}],"stack":["Angular 20","Java 21","Spring Boot 3.5","MariaDB 11"],"url":"https://github.com/diegnghtmr/academic-triage-frontend","live":false,"caseStudy":"https://diegnghtmr.me/en/work/academic-triage/"},
 {"id":"vale","name":"Vale","description":{"en":"Academic schedule planner with calendar export.","es":"Planificador de horarios académicos con exportación al calendario."},"kind":{"en":"Web app","es":"Aplicación web"},"categories":["web"],"repositories":[{"name":"vale","surface":"web","url":"https://github.com/diegnghtmr/vale","role":"web","programmingLanguage":"TypeScript"}],"stack":["TypeScript","React","Vite","FullCalendar"],"url":"https://github.com/diegnghtmr/vale","live":false,"caseStudy":"https://diegnghtmr.me/en/work/vale/"},
 {"id":"saber-inverso","name":"Saber Inverso","description":{"en":"Estimates Saber 11 scores from a UQ program and weighted admission score, with uncertainty.","es":"Estima puntajes de Saber 11 a partir de un programa de la UQ y su puntaje ponderado de admisión, con incertidumbre."},"kind":{"en":"Web app","es":"Aplicación web"},"categories":["web"],"repositories":[{"name":"saber-inverso","surface":"web","url":"https://github.com/diegnghtmr/saber-inverso","role":"web"}],"stack":["Astro","TypeScript","Python","FastAPI"],"url":"https://github.com/diegnghtmr/saber-inverso","live":false,"caseStudy":"https://diegnghtmr.me/en/work/saber-inverso/"},
@@ -190,12 +190,17 @@ test("projects.json keeps the featured entries and adds the complete bilingual a
   const docSentinel = projects.find(({ name }) => name === "doc-sentinel");
   assert.deepEqual(docSentinel.stack, ["Python"]);
   assert.equal(docSentinel.repositories[0].programmingLanguage, "Python");
+  const savia = projects.find(({ id }) => id === "savia");
+  assert.equal(savia.repositories.length, 5);
+  assert.deepEqual(savia.repositories.find(({ name }) => name === "savia-cli"), {
+    name: "savia-cli", surface: "cli", url: repoUrl("savia-cli"), role: "cli", programmingLanguage: "TypeScript",
+  });
   const nexRide = projects.find(({ name }) => name === "NexRide");
   assert.deepEqual(nexRide.stack, ["TypeScript", "NestJS 11", "PostgreSQL/PostGIS", "Redis"]);
   assert.equal(nexRide.repositories[0].programmingLanguage, "TypeScript");
 });
 
-test("projects.json keeps every previously published entry unchanged and only adds The Knowledge Bay", () => {
+test("projects.json matches the published-entry snapshot and includes The Knowledge Bay", () => {
   const { projects } = JSON.parse(read("projects.json"));
   const slug = "the-knowledge-bay";
   assert.deepEqual(projects.map(({ id }) => id).sort(), [...publishedProjects.map(({ id }) => id), slug].sort());
@@ -336,7 +341,7 @@ for (const locale of locales) {
         .map(([, from, to]) => [nodes.get(from), nodes.get(to)]);
     };
     assert.deepEqual(edgesFor("Food Court"), foodServices.map((name) => ["food-court-ui", name]));
-    assert.deepEqual(edgesFor("Savia"), [["savia-web", "savia-backend"]]);
+    assert.deepEqual(edgesFor("Savia"), [["savia-web", "savia-backend"], ["savia-cli", "savia-backend"]]);
   });
 
   test(`${locale}: repository map accessible labels describe roles and connections`, () => {
@@ -349,7 +354,7 @@ for (const locale of locales) {
     const foodRoles = locale === "en" ? ["Identity", "Menu", "Orders", "Traceability"] : ["Identidad", "Menú", "Pedidos", "Trazabilidad"];
     assert.equal(labelFor("Food Court"), `Web: food-court-ui; ${foodServices.map((name, i) => `${foodRoles[i]}: ${name}`).join("; ")}. food-court-ui ${connects} ${foodServices.join(", ")}.`);
     const mobile = locale === "en" ? "Mobile" : "Móvil";
-    assert.equal(labelFor("Savia"), `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend.`);
+    assert.equal(labelFor("Savia"), `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp; CLI: savia-cli. savia-web ${connects} savia-backend; savia-cli ${connects} savia-backend.`);
     assert.equal(labelFor("Saber Inverso"), "Web: saber-inverso");
   });
 
@@ -361,7 +366,7 @@ for (const locale of locales) {
     const connects = locale === "en" ? "connects to" : "se conecta con";
     const mobile = locale === "en" ? "Mobile" : "Móvil";
     const foodRoles = locale === "en" ? ["Identity", "Menu", "Orders", "Traceability"] : ["Identidad", "Menú", "Pedidos", "Trazabilidad"];
-    const check = (slug, description, connected, detached = []) => {
+    const check = (slug, description, connected, detached = [], moreConnected = []) => {
       if (/^architecture:/m.test(caseSource(slug, locale))) {
         assert.match(chapter(slug), /class="case-arch"/);
         assert.equal(mapFor(slug), undefined);
@@ -376,14 +381,15 @@ for (const locale of locales) {
       const rows = [...map.matchAll(/<div\b[^>]*class="map-network( map-detached)?"[^>]*>([\s\S]*?)<\/div>/g)];
       assert.deepEqual(rows.map(([, isolated, row]) => [Boolean(isolated), [...row.matchAll(
         /<span\b[^>]*class="map-name"[^>]*>([^<]+)<\/span>\s*<span\b[^>]*class="map-role"[^>]*>([^<]+)<\/span>/g,
-      )].map(([, name, role]) => [name, role])]), [[false, connected], ...(detached.length ? [[true, detached]] : [])], slug);
+      )].map(([, name, role]) => [name, role])]), [connected, ...moreConnected].map((network) => [false, network])
+        .concat(detached.length ? [[true, detached]] : []), slug);
     };
     check("brujula", `API: brujula-backend; Web: brujula-frontend. brujula-backend ${connects} brujula-frontend.`,
       [["brujula-backend", "API"], ["brujula-frontend", "Web"]]);
     check("food-court", `Web: food-court-ui; ${foodServices.map((name, i) => `${foodRoles[i]}: ${name}`).join("; ")}. food-court-ui ${connects} ${foodServices.join(", ")}.`,
       [["food-court-ui", "Web"], ...foodServices.map((name, i) => [name, foodRoles[i]])]);
-    check("savia", `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp. savia-web ${connects} savia-backend.`,
-      [["savia-web", "Web"], ["savia-backend", "API"]], [["savia-mobile", mobile], ["savia-mcp", "MCP"]]);
+    check("savia", `Web: savia-web; ${mobile}: savia-mobile; API: savia-backend; MCP: savia-mcp; CLI: savia-cli. savia-web ${connects} savia-backend; savia-cli ${connects} savia-backend.`,
+      [["savia-web", "Web"], ["savia-backend", "API"]], [["savia-mobile", mobile], ["savia-mcp", "MCP"]], [[["savia-cli", "CLI"], ["savia-backend", "API"]]]);
     for (const slug of publishedSlugs) assertDiagramGeometry(chapter(slug), locale, slug);
     assert.equal(mapFor("writing-harness"), undefined);
     assert.match(chapter("writing-harness"), /<a href="https:\/\/github\.com\/diegnghtmr\/writing-harness"[^>]*><strong>writing-harness<\/strong>/);
@@ -793,14 +799,17 @@ function assertDiagramGeometry(html, locale, slug) {
         "studydeck-ai": [["frontend", "backend", "postgres"]],
         "roster-edge": [["frontend", "backend", "postgres"]],
         "the-knowledge-bay": [["frontend", "backend", "postgres"], ["frontend", "backend", "attachments"]],
-        savia: [["web", "backend", "postgres"], ["web", "backend", "files"]],
+        savia: [["web", "backend", "postgres"], ["web", "backend", "files"], ["cli", "backend"]],
       };
       for (const chain of chains[slug] ?? []) for (let j = 1; j < chain.length; j++) {
         assert.ok(column(chain[j - 1]) < column(chain[j]), `${context}: ${chain[j - 1]} → ${chain[j]} must advance left to right`);
       }
       if (slug === "savia") {
-        for (const peer of ["mobile", "mcp"]) assert.equal(column(peer), column("web"), `${context}: ${peer} in first column`);
-        for (const dependency of ["auth", "jwt-keys"]) assert.ok(column(dependency) > right, `${context}: ${dependency} right of the system boundary`);
+        for (const peer of ["mobile", "mcp", "cli"]) assert.equal(column(peer), column("web"), `${context}: ${peer} in first column`);
+        for (const dependency of ["auth", "jwt-keys"]) {
+          const [, y] = nodes.find(({ id }) => id === dependency).bounds;
+          assert.ok(y > bottom, `${context}: ${dependency} below the system boundary`);
+        }
       }
     }
   }
@@ -1056,6 +1065,47 @@ for (const slug of publishedSlugs) {
 }
 
 for (const locale of locales) {
+  test(`${locale}: Savia documents the CLI and its API connection without unfinished-work claims`, () => {
+    const path = caseRoute(locale, "savia").slice(1);
+    const en = locale === "en";
+    const html = read(`${path}index.html`);
+    const twin = read(`${path}index.md`);
+    const stale = /in progress|in development|being built|en desarrollo|se está desarrollando|exposes no tools|no expone herramientas|does not load financial data|no carga datos financieros/i;
+    for (const output of [html, twin]) assert.equal(output.match(stale)?.[0], undefined);
+    assert.ok(twin.includes(en ? "- Surfaces: Web + mobile + API + MCP + CLI" : "- Interfaces: Web + móvil + API + MCP + CLI"));
+    assert.ok(twin.includes(`- [savia-cli](${repoUrl("savia-cli")}) (CLI)`));
+    assert.ok(twin.includes(en ? "uploads statements for import and receipts for OCR" : "sube estados de cuenta para importar y recibos para OCR"));
+    const flow = en ? "savia-cli → savia-backend (HTTP): Manages finances" : "savia-cli → savia-backend (HTTP): Gestiona finanzas";
+    assert.ok(twin.includes(`- ${flow}`));
+    const variants = diagramSvgs(html);
+    assert.equal(variants.length, 2);
+    for (const svg of variants) {
+      const nodes = diagramNodes(svg).map(({ id, kind }) => [id, kind]).sort();
+      assert.deepEqual(nodes, [
+        ["auth", "external"], ["backend", "container"], ["cli", "container"], ["files", "store"],
+        ["jwt-keys", "external"], ["mcp", "container"], ["mobile", "container"], ["postgres", "store"], ["web", "container"],
+      ]);
+      assert.ok(svg.match(/<desc\b[^>]*>([^<]+)<\/desc>/)?.[1].split("\n").includes(flow));
+    }
+  });
+
+  test(`${locale}: Savia publishes diagram variants sized to their display frames`, () => {
+    const html = read(`${caseRoute(locale, "savia").slice(1)}index.html`);
+    assert.match(html, /class="arch-plot arch-plot-responsive"/);
+    const layouts = new Map(diagramSvgs(html).map((svg) => [
+      attr(svg, "aria-labelledby").match(/-arch-(wide|narrow)-title$/)[1], svg,
+    ]));
+    // The width query switches to wide at 800px. At a 390px viewport,
+    // page gutters and the figure's padding and borders leave 324px for narrow.
+    for (const [variant, maxWidth] of [["wide", 800], ["narrow", 324]]) {
+      const svg = layouts.get(variant);
+      assert.ok(svg, `${variant} diagram`);
+      const width = Number(attr(svg, "width"));
+      assert.ok(width > 0 && width <= maxWidth, `${variant} diagram: ${width}px exceeds ${maxWidth}px`);
+      assert.ok(html.includes(`class="arch-layout arch-layout-${variant}" style="--arch-width: ${width}px"`));
+    }
+  });
+
   test(`${locale}: The Knowledge Bay shows the team, four captures, and the packaged architecture without a live demo`, () => {
     const slug = "the-knowledge-bay";
     const path = caseRoute(locale, slug).slice(1);

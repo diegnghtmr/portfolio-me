@@ -153,13 +153,13 @@ export const atlasProjects = [
     cover: { shape: "pickup", seed: 9 },
   },
   {
-    slug: "savia", name: "Savia", ...webApi, surfaceLabel: { en: "Web + mobile + API + MCP", es: "Web + móvil + API + MCP" },
-    purpose: { en: "Personal finance across web, mobile, API and MCP. In progress.", es: "Finanzas personales con web, móvil, API y MCP. En desarrollo." },
+    slug: "savia", name: "Savia", ...webApi, surfaceLabel: { en: "Web + mobile + API + MCP + CLI", es: "Web + móvil + API + MCP + CLI" },
+    purpose: { en: "Personal finance across web, mobile, API, MCP and CLI.", es: "Finanzas personales con web, móvil, API, MCP y CLI." },
     stack: ["NestJS/Fastify", "Next.js", "Expo"], stackTags: ["typescript", "node"],
     stackLayers: { frontend: ["Next.js", "Expo"], backend: ["NestJS/Fastify"] },
-    repositories: [repo("savia-web", "web"), repo("savia-mobile", "web", "mobile"), repo("savia-backend", "api"), repo("savia-mcp", "cli", "mcp")],
+    repositories: [repo("savia-web", "web"), repo("savia-mobile", "web", "mobile"), repo("savia-backend", "api"), repo("savia-mcp", "cli", "mcp"), repo("savia-cli", "cli", "cli", "TypeScript")],
     primaryRepository: "savia-web",
-    edges: [["savia-web", "savia-backend"]],
+    edges: [["savia-web", "savia-backend"], ["savia-cli", "savia-backend"]],
     cover: { shape: "sapflow", seed: 10 },
   },
   {

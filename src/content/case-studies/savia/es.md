@@ -1,6 +1,6 @@
 ---
 project: savia
-summary: Savia es una aplicación de finanzas personales en desarrollo para gestionar cuentas, gastos y presupuestos en un solo espacio.
+summary: Savia es una aplicación de finanzas personales para gestionar cuentas, gastos y presupuestos en un solo espacio.
 role: Desarrollador único
 timeframe: "2026"
 demonstration:
@@ -62,10 +62,9 @@ results:
 limitations:
   - No se ejecutó un flujo financiero autenticado contra una base de datos PostgreSQL en funcionamiento. El verificador de OpenAPI no comprueba la fuente original de planificación.
   - En la suite completa pasaron 3101 pruebas, fallaron 3 y se omitió 1. Dos pruebas de OCR necesitan Tesseract, que no está instalado en la imagen ligera. Una prueba de recurrencia mensual usa el reloj del sistema, pero espera una fecha fija.
-  - La app móvil no carga datos financieros ni permite registrar movimientos. El servidor MCP local inicia el protocolo y responde a ping, pero no expone herramientas ni se conecta con la API.
 architecture:
   system: Savia
-  caption: La configuración inicial llama a la API desde el servidor web; la aplicación móvil y MCP funcionan por separado.
+  caption: El servidor web y la CLI llaman a la API; la aplicación móvil y el servidor MCP funcionan por separado.
   nodes:
     - id: web
       kind: container
@@ -94,6 +93,15 @@ architecture:
       does: Responde a inicio y ping por E/S estándar
       col: 0
       row: 2
+    - id: cli
+      kind: container
+      label: CLI
+      name: savia-cli
+      repo: savia-cli
+      tech: Node.js / TypeScript
+      does: Ejecuta comandos desde la terminal
+      col: 0
+      row: 3
     - id: backend
       kind: container
       label: API y proceso en segundo plano
@@ -138,6 +146,11 @@ architecture:
       protocol: HTTP/JSON
       verb: Envía el alta del espacio
       evidence: https://github.com/diegnghtmr/savia-web/blob/main/src/lib/onboarding-gateway.ts
+    - from: cli
+      to: backend
+      protocol: HTTP
+      verb: Gestiona finanzas
+      evidence: https://github.com/diegnghtmr/savia-cli/blob/main/src/http/authenticated-request.mts
     - from: web
       to: auth
       protocol: HTTP/JSON
@@ -162,7 +175,7 @@ architecture:
 
 ## Problema
 
-Quienes llevan sus finanzas personales necesitan saber a qué cuenta pertenece un movimiento, en qué moneda se hizo y cómo afecta el dinero disponible para el resto del mes. Una transferencia entre cuentas no equivale a un ingreso ni a un gasto. Savia se está desarrollando a partir de esas diferencias, con cuentas, movimientos y presupuestos organizados dentro de un espacio de trabajo.
+Quienes llevan sus finanzas personales necesitan saber a qué cuenta pertenece un movimiento, en qué moneda se hizo y cómo afecta el dinero disponible para el resto del mes. Una transferencia entre cuentas no equivale a un ingreso ni a un gasto. Savia distingue esos casos, con cuentas, movimientos y presupuestos organizados dentro de un espacio de trabajo.
 
 Configurar ese espacio es una tarea aparte. La persona elige una moneda base y preferencias como el formato de fechas y números. Si se repite la primera solicitud porque no llegó la respuesta, el sistema debe devolver el espacio que ya creó, en lugar de crear otro.
 
@@ -170,6 +183,8 @@ Configurar ese espacio es una tarea aparte. La persona elige una moneda base y p
 
 El sitio en Next.js muestra un inicio público y formularios de registro e inicio de sesión. Su servidor usa Supabase Auth para gestionar la sesión y escribe las cookies de sesión con el atributo HTTP-only. La página para configurar el espacio exige una sesión. Recoge el perfil, el nombre del espacio y las preferencias de visualización y los envía a una acción de servidor de Next.js. La acción llama a `POST /v1/onboarding` en la API de Fastify con el token de acceso de la sesión.
 
-La API obtiene la identidad del usuario a partir del token. El servicio de configuración usa una sola transacción de PostgreSQL para consultar si el espacio ya existe y, en el primer uso, guardar el perfil, el espacio personal y la membresía de propietario. Si se repite la misma solicitud, devuelve los identificadores originales. La API también contiene código para cuentas, movimientos y presupuestos. Calcula la próxima fecha de las [reglas de recurrencia mensual](https://github.com/diegnghtmr/savia-backend/blob/main/test/recurring/recurring-command.spec.ts#L39). El inicio público no consulta esos datos financieros.
+La API obtiene la identidad del usuario a partir del token. El servicio de configuración usa una sola transacción de PostgreSQL para consultar si el espacio ya existe y, en el primer uso, guardar el perfil, el espacio personal y la membresía de propietario. Si se repite la misma solicitud, devuelve los identificadores originales. La API también gestiona cuentas, movimientos y presupuestos. Calcula la próxima fecha de las [reglas de recurrencia mensual](https://github.com/diegnghtmr/savia-backend/blob/main/test/recurring/recurring-command.spec.ts#L39).
 
-El repositorio de Expo contiene una interfaz móvil independiente. El de MCP ejecuta un proceso local separado que usa JSON-RPC por entrada y salida estándar, sin llamar a la API.
+El repositorio de Expo contiene la interfaz móvil. El servidor MCP se ejecuta como un proceso local separado que usa JSON-RPC por entrada y salida estándar.
+
+La [CLI en TypeScript](https://github.com/diegnghtmr/savia-cli) llama a la misma API para gestionar cuentas, movimientos, transferencias, presupuestos y fondos. Ejecuta informes y escenarios, solicita exportaciones y pronósticos, sube estados de cuenta para importar y recibos para OCR, consulta al agente de Savia y gestiona permisos MCP. Resuelve el espacio y las credenciales localmente antes de enviar solicitudes.
