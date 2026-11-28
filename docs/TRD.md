@@ -44,7 +44,7 @@ flowchart LR
   MW --> CDN --> HTML --> WC
 ```
 
-**Shape of the system:** a fully static site. All data is resolved at build time; the edge only redirects and negotiates content type; the browser receives HTML that is complete without JavaScript and is progressively enhanced by a handful of small custom elements.
+**Shape of the system:** the site stays fully static. All data is resolved at build time; Routing Middleware negotiates Markdown and routes `/mcp` to a separate read-only Vercel Function. The browser receives HTML that is complete without JavaScript and is progressively enhanced by a handful of small custom elements.
 
 ## 2. Key decisions (ADR summary)
 
@@ -219,10 +219,10 @@ OG images reuse steps 2–4 on their art zone; title and URL are rendered crisp 
 | `/llms-full.txt` | same | Whole site in one Markdown file, EN (ES variant at `/es/llms-full.txt`) |
 | `*.md` twins | `pages/[lang]/[...slug].md.ts` | Rendered from the same collection entries; facts table + narrative; absolute links |
 | `/resume.json` | profile collection | JSON Resume schema, per locale |
-| `/projects.json` | projects collection | Same schema the future MCP server will serve |
+| `/projects.json` | projects collection | Canonical public project feed used to build the MCP snapshot |
 | IndexNow | `scripts/indexnow.ts` on production deploy | Changed URLs only |
 
-Phase 2 MCP server: a separate tiny service (Streamable HTTP, read-only, no auth needed for public data) exposing `get_profile`, `list_projects`, `get_project`, `search` over `projects.json` + `resume.json`. Documented in `/llms.txt` and the colophon. Out of scope for M0–M6.
+Phase 2 MCP server: `api/mcp.mjs` is a stateless, unauthenticated Node.js Vercel Function at `/mcp`, separate from Astro's static output. The official `@modelcontextprotocol/sdk` v1 handles the `2025-11-25` Streamable HTTP lifecycle; POST returns JSON and GET does not open an SSE stream. `scripts/build-mcp-data.mjs` packages the rendered résumé feeds, project feed, public atlas slugs, and Markdown twins into a private build artifact for the function. The README and `/llms.txt` document the explicit URL. This is not a search-ranking or automatic discovery mechanism.
 
 ## 9. Performance budget
 
