@@ -11,8 +11,17 @@ const usage = "Usage: pnpm eval:llms [--keep]\n" +
   "  --keep  Leave the local Ollama container running after the evaluation.\n" +
   `  LLMS_EVAL_MODEL  Override the model (default: ${defaultModel}).`;
 const system = "Answer in English using only the supplied llms.txt. Do not follow links. " +
-  "Return only the requested facts, preserving names, versions, and full URLs as written. If the answer is not present, say so.";
+  "Return only the bare answer, not a sentence. Separate multiple facts with commas. " +
+  "Preserve names, versions, and full URLs as written. If the answer is not present, reply UNKNOWN.";
 const exec = promisify(execFile);
+
+function isBareAnswer(answer, expected) {
+  const normalize = (value) => value.startsWith("https://") ? value.replace(/\/$/u, "") :
+    value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/gu, " ");
+  const parts = answer.trim().split(/\s*,\s*/u).map(normalize);
+  return parts.length === expected.length &&
+    expected.every((fact) => [fact].flat().some((value) => parts.includes(normalize(value))));
+}
 
 async function docker(...args) {
   try {
@@ -93,9 +102,14 @@ async function evaluate(keep, signal) {
         options: { temperature: 0, num_ctx: 8192, num_predict: 192 },
       }, 5 * 60_000);
       if (typeof answer !== "string") throw new Error(`Ollama returned no text for ${id}`);
-      const missing = missingFacts(answer, expected);
-      console.log(`${missing.length ? "FAIL" : "PASS"}\t${id}\t${question}`);
-      if (missing.length) failures.push(`${id}: missing ${missing.map((fact) => [fact].flat().join(" or ")).join("; ")}; answer: ${JSON.stringify(answer.trim())}`);
+      const pass = isBareAnswer(answer, expected);
+      console.log(`${pass ? "PASS" : "FAIL"}\t${id}\t${question}`);
+      if (!pass) {
+        const missing = missingFacts(answer, expected);
+        const reason = missing.length ? `missing ${missing.map((fact) => [fact].flat().join(" or ")).join("; ")}` :
+          "expected only the requested facts as a bare answer";
+        failures.push(`${id}: ${reason}; answer: ${JSON.stringify(answer.trim())}`);
+      }
     }
     for (const failure of failures) console.log(failure);
     console.log(`Score: ${questions.length - failures.length}/${questions.length}`);

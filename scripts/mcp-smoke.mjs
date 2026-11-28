@@ -53,7 +53,7 @@ async function smoke(baseUrl) {
 }
 
 try {
-  if (process.argv.length !== 3) throw new Error("usage: node scripts/mcp-smoke.mjs <baseUrl>");
+  if (process.argv.length !== 3) throw new Error("usage: node scripts/mcp-smoke.mjs <baseUrl> (site root, no path prefix)");
   let baseUrl;
   try {
     baseUrl = new URL(process.argv[2]);
@@ -62,6 +62,9 @@ try {
   }
   if (!["http:", "https:"].includes(baseUrl.protocol) || baseUrl.username || baseUrl.password) {
     throw new Error("baseUrl must be an absolute HTTP or HTTPS URL without credentials");
+  }
+  if (baseUrl.pathname && baseUrl.pathname !== "/") {
+    throw new Error("baseUrl must not include a path prefix");
   }
   await smoke(baseUrl);
   console.log("MCP smoke passed");

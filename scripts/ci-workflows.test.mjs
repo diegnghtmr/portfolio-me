@@ -15,9 +15,18 @@ test("S38: smoke waits until production serves the pushed commit, then probes pr
   assert.match(smoke, /^on:\n  push:\n    branches: \[main\]\n  workflow_dispatch:\n/m);
   assert.match(smoke, /EXPECTED_SHA: \$\{\{ github\.sha \}\}/);
   assert.match(smoke, /tolower\(\$1\) == "x-build-sha"/);
-  assert.match(smoke, /if \[ "\$live" = "\$EXPECTED_SHA" \]; then[^\n]*exit 0; fi/);
-  assert.match(smoke, /- run: node scripts\/mcp-smoke\.mjs "\$SITE"$/m);
+  assert.match(smoke, /id: deployment\n/);
+  assert.match(smoke, /if \[ "\$live" = "\$EXPECTED_SHA" \]; then\n\s+echo "Production serves \$EXPECTED_SHA"\n\s+echo "ready=true" >> "\$GITHUB_OUTPUT"\n\s+exit 0\n\s+fi/);
+  assert.match(smoke, /- if: steps\.deployment\.outputs\.ready == 'true'\n\s+run: node scripts\/mcp-smoke\.mjs "\$SITE"$/m);
   assert.match(smoke, /SITE: https:\/\/diegnghtmr\.me$/m);
+});
+
+test("S38: independent smoke runs skip only when production serves a descendant", () => {
+  assert.doesNotMatch(smoke, /cancel-in-progress:\s*true/);
+  assert.match(smoke, /fetch-depth: 0/);
+  assert.match(smoke, /git fetch --no-tags origin main/);
+  assert.match(smoke, /git merge-base --is-ancestor "\$EXPECTED_SHA" "\$live"; then\n\s+echo "[^"\n]*superseded[^"\n]*"\n\s+exit 0\n\s+fi/);
+  assert.match(smoke, /echo "Production never served \$EXPECTED_SHA" >&2\n\s+exit 1/);
 });
 
 for (const [name, text] of [["CI", ci], ["smoke", smoke]]) {

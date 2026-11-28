@@ -3,7 +3,8 @@ name: Production MCP smoke
 # Every push to main deploys to production on Vercel. Vercel's commit statuses
 # do not say whether a deployment is production or a preview, so the job asks
 # production itself: /mcp answers with the X-Build-Sha header of the commit it
-# serves, and the smoke runs only once that header names this push.
+# serves. Each push waits independently: smoke its own SHA, or skip when
+# production is already serving a descendant.
 on:
   push:
     branches: [main]
@@ -11,11 +12,6 @@ on:
 
 permissions:
   contents: read
-
-# A newer push supersedes an older one; the older commit never goes live.
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
 
 jobs:
   smoke:
@@ -29,17 +25,30 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
       - name: Wait for production to serve this commit
+        id: deployment
         run: |
           for _ in $(seq 1 60); do
             live=$(curl -sSI --max-time 10 "$SITE/mcp" | tr -d '\r' | awk -F': ' 'tolower($1) == "x-build-sha" { print $2 }')
-            if [ "$live" = "$EXPECTED_SHA" ]; then echo "Production serves $EXPECTED_SHA"; exit 0; fi
+            if [ "$live" = "$EXPECTED_SHA" ]; then
+              echo "Production serves $EXPECTED_SHA"
+              echo "ready=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [[ "$live" =~ ^[0-9a-f]{40}$ ]] &&
+              { git cat-file -e "$live^{commit}" 2>/dev/null || git fetch --no-tags origin main; } &&
+              git merge-base --is-ancestor "$EXPECTED_SHA" "$live"; then
+              echo "Production serves $live; $EXPECTED_SHA was superseded"
+              exit 0
+            fi
             echo "Production serves ${live:-unknown}; waiting for $EXPECTED_SHA"
             sleep 15
           done
           echo "Production never served $EXPECTED_SHA" >&2
           exit 1
-      - run: node scripts/mcp-smoke.mjs "$SITE"
+      - if: steps.deployment.outputs.ready == 'true'
+        run: node scripts/mcp-smoke.mjs "$SITE"
