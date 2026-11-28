@@ -265,7 +265,7 @@ From [research/02](research/02-seo-and-ai-first.md). Principle: **a crawlable, f
 - A markdown twin for every page (`/en/work/brujula.md`), advertised with `<link rel="alternate" type="text/markdown">`; `Accept: text/markdown` negotiation on the HTML URL where the host allows it.
 - `/resume.json` (JSON Resume schema) and `/projects.json` — the same content collection, machine-readable.
 - `robots.txt` explicitly allows search/answer bots (`OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Claude-SearchBot`, `Claude-User`, `Bingbot`, `Googlebot`) and disallows training bots (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`, `Applebot-Extended`) — decision D3. `Google-Extended` does not affect Google Search indexing.
-- Phase 2: a small **read-only remote MCP server** (`get_profile`, `list_projects`, `get_project`, `search`) over the same JSON. It is useful for configured agents and — given Diego's MCP work — is itself a portfolio piece. It is not a discovery or ranking lever.
+- Phase 2: a small **read-only remote MCP server** at `https://diegnghtmr.me/mcp` (`get_profile`, `list_projects`, `get_project`, `search`), backed by the same bilingual JSON and case-study Markdown as the static site. Point configured agents at the documented Streamable HTTP URL; it is not a discovery or ranking lever and does not assume `/.well-known/mcp`.
 - An eval script with 10 questions verifies an LLM answers correctly from `llms.txt` alone.
 
 ## 11. GitHub repository presentation (workstream)

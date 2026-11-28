@@ -249,7 +249,7 @@ export function workMarkdown(locale: Locale, studies: CaseStudies) {
 }
 
 /** llms.txt (llmstxt.org): what the site is and where the machine-readable files live. */
-export function llmsTxt(studies: CaseStudies) {
+export function llmsTxt(studies: CaseStudies, { mcp = false }: { mcp?: boolean } = {}) {
   return [
     `# ${siteName}`,
     "",
@@ -257,6 +257,7 @@ export function llmsTxt(studies: CaseStudies) {
     "",
     "Every page has a markdown twin: request it with `Accept: text/markdown` or add `index.md` to the page path. Content is the same in English and Spanish.",
     "",
+    ...(mcp ? [`Portfolio MCP: connect a Streamable HTTP client to <${absolute("/mcp")}> for the public profile and projects in English or Spanish.`, ""] : []),
     "## Profile",
     "",
     `- [Home in English](${absolute(markdownPath("en"))}): profile, selected work, open source, experience and stack`,

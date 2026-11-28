@@ -13,7 +13,7 @@ Personal portfolio of **Diego Alejandro Flores Quintero**, software engineer in 
 
 ## Stack
 
-Astro 7 · TypeScript (strict) · Tailwind CSS 4 · [Paper Shaders](https://github.com/paper-design/shaders) for the hero · sharp + image-q for build-time dither assets · Vercel (static output plus Routing Middleware).
+Astro 7 · TypeScript (strict) · Tailwind CSS 4 · [Paper Shaders](https://github.com/paper-design/shaders) for the hero · sharp + image-q for build-time dither assets · Vercel (static output, Routing Middleware, and a standalone Node.js function for MCP).
 
 ## Develop
 
@@ -26,9 +26,38 @@ pnpm check          # type check
 pnpm build          # static site in dist/
 pnpm test:assets    # dither, OG card and favicon generators
 pnpm test:site      # SEO and agent outputs (after pnpm build)
+pnpm test:mcp       # MCP over loopback HTTP, including the official SDK client (after pnpm build)
 ```
 
 Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or `pnpm favicon`.
+
+## Portfolio MCP
+
+Endpoint: **`https://diegnghtmr.me/mcp`**. Configure it as a **Streamable HTTP** server in your MCP client. It is read-only, stateless, and does not require authentication. It negotiates the `2025-11-25` handshake revision, returns JSON to POST requests, and returns 405 to GET because it does not open an SSE stream.
+
+| Tool | Arguments and result |
+|---|---|
+| `get_profile` | Public résumé, including experience, education, skills, and links. |
+| `list_projects` | All projects in site order. Optional `stack` (technology substring) and `kind` (`web`, `api`, `cli`, or `infra`, matched against a project's repositories). |
+| `get_project` | Required `slug` from `list_projects`; returns the project record and the exact Markdown twin when available. |
+| `search` | Required `query`; returns project records matching all terms in the name, slug, localized description, kind, stack, or repository names. Optional `limit` (1–10, default 5). No relevance scores. |
+
+Every tool accepts `locale: "en" | "es"` (default `en`). Search and stack matching ignore case and accents. Tool results return JSON in a text content block. Bad arguments and unknown project slugs return tool errors; requests and responses are bounded to 16 KiB and 64 KiB respectively.
+
+Example VS Code configuration (`.vscode/mcp.json`):
+
+```json
+{
+  "servers": {
+    "portfolio": {
+      "type": "http",
+      "url": "https://diegnghtmr.me/mcp"
+    }
+  }
+}
+```
+
+The build bundles a snapshot of the rendered résumé, project index, and case-study Markdown with the Vercel Function. Requests make no calls to the site or any other service. This interface is for explicitly configured clients, not discovery or search ranking; there is no `/.well-known/mcp` discovery endpoint.
 
 ## Layout
 
@@ -40,7 +69,8 @@ Generated assets are committed. Regenerate them with `pnpm dither`, `pnpm og` or
 | `src/data`, `src/i18n` | Bilingual profile and project content shared by pages and agent files |
 | `src/lib/profile.ts` | JSON-LD, Markdown twins, `llms.txt`, JSON Resume, `projects.json` |
 | `src/scripts` | Client behavior: hero shader, cover fields, footer horizon, command menu, work filters |
-| `scripts` | Asset generators and their tests |
+| `scripts` | Asset and MCP snapshot generators, plus build-output and MCP HTTP tests |
+| `api/mcp.mjs` | Stateless MCP Vercel Function, using the generated snapshot |
 | `middleware.js`, `vercel.json` | Markdown negotiation, headers, root locale redirect |
 | `docs`, `design`, `odd` | PRD, TRD, research, design artboards and the task log |
 
@@ -50,7 +80,7 @@ Use the project slug from `src/data/projects.ts` and follow the [content contrac
 
 ## Deploy
 
-Every push to `main` deploys to production on Vercel; other branches get preview URLs.
+Every push to `main` deploys to production on Vercel; other branches get preview URLs. The `vercel-build` script runs the static Astro build and generates `api/_generated/portfolio.json`. Vercel bundles that file with the function, not with the static site. Routing Middleware sends `/mcp` and `/mcp/` to the function without redirecting the client.
 
 ## License
 
