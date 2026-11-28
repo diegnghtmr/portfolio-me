@@ -21,7 +21,7 @@ const script = fileURLToPath(new URL("./eval-llms.mjs", import.meta.url));
 const exec = promisify(execFile);
 const usage = "Usage: pnpm eval:llms [--keep]\n" +
   "  --keep  Leave the local Ollama container running after the evaluation.\n" +
-  "  LLMS_EVAL_MODEL  Override the model (default: qwen2.5:3b).\n";
+  "  LLMS_EVAL_MODEL  Override the model (default: qwen2.5:7b).\n";
 
 async function run(args, env) {
   try {
@@ -63,8 +63,8 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
   const { env, calls } = await fakeDocker(t);
   const answers = [
     "Diego Alejandro Flores Quintero", "Software developer", "Armenia, Colombia", "https://github.com/diegnghtmr/",
-    "Back-ends, type-safe frontends, AI agent tools", "English, Spanish", "Java 25, pgvector, React 19",
-    "Text similarity, hierarchical clustering, research abstracts", "University of Quindio",
+    "backends, typed frontends, and tools for AI agents", "English, Spanish", "Java 25, pgvector, React 19",
+    "text similarity and hierarchical clustering over scientific abstracts", "University of Quindio",
     "https://diegnghtmr.me/es/trabajo/food-court/index.md",
   ];
   const requests = [];
@@ -121,10 +121,10 @@ test("eval scores ten independent answers, returns 1 on a wrong answer, and hono
     generation = 0;
     wrongAnswer = answer;
     assert.deepEqual(await run([], env), {
-      code: 1, stderr: "", stdout: pullLine("qwen2.5:3b") + rows("location") +
+      code: 1, stderr: "", stdout: pullLine("qwen2.5:7b") + rows("location") +
         `location: ${reason}; answer: ${JSON.stringify(answer)}\nScore: 9/10\n`,
     });
-    assert.deepEqual(requests.splice(0), expectedRequests("qwen2.5:3b"));
+    assert.deepEqual(requests.splice(0), expectedRequests("qwen2.5:7b"));
     assert.deepEqual(await calls(), Array.from({ length: index + 1 }, () => stopped).flat());
   }
 

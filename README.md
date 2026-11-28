@@ -42,7 +42,7 @@ pnpm eval:llms                          # local only; requires Docker
 
 The deterministic test checks that `dist/llms.txt` contains the expected facts for all 10 questions in [the eval set](evals/llm-questions.json). It does not run a model.
 
-The local evaluator starts Ollama in Docker on loopback, pulls `qwen2.5:3b` by default (override with `LLMS_EVAL_MODEL`), and gives the model only the built `llms.txt` and each question. It prints a pass/fail row per question and exits 1 if any answer omits an expected fact. The first run downloads the Docker image and model; the model is cached in the `portfolio-llms-eval-models` Docker volume. The `portfolio-llms-eval` container stops after the run unless you pass `pnpm eval:llms --keep`. The model evaluation never runs in CI and requires no API key.
+The local evaluator starts Ollama in Docker on loopback, pulls `qwen2.5:7b` by default (about 4.7 GB; it scored 10/10 where `qwen2.5:3b` scored 6/10; override with `LLMS_EVAL_MODEL`), and gives the model only the built `llms.txt` and each question. It prints a pass/fail row per question and exits 1 if any answer omits an expected fact. The first run downloads the Docker image and model; the model is cached in the `portfolio-llms-eval-models` Docker volume. The `portfolio-llms-eval` container stops after the run unless you pass `pnpm eval:llms --keep`. The model evaluation never runs in CI and requires no API key.
 
 ## Portfolio MCP
 

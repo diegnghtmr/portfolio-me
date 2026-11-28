@@ -6,7 +6,7 @@ import { missingFacts, readContext, readQuestions } from "../evals/llm-facts.mjs
 const container = "portfolio-llms-eval";
 const volume = "portfolio-llms-eval-models";
 const label = "portfolio.llms-eval";
-const defaultModel = "qwen2.5:3b";
+const defaultModel = "qwen2.5:7b";
 const usage = "Usage: pnpm eval:llms [--keep]\n" +
   "  --keep  Leave the local Ollama container running after the evaluation.\n" +
   `  LLMS_EVAL_MODEL  Override the model (default: ${defaultModel}).`;
@@ -18,7 +18,9 @@ const exec = promisify(execFile);
 function isBareAnswer(answer, expected) {
   const normalize = (value) => value.startsWith("https://") ? value.replace(/\/$/u, "") :
     value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/gu, " ");
-  const parts = answer.trim().split(/\s*,\s*/u).map(normalize);
+  // Commas and plain connectors separate facts ("A, B, and C", "A and B over C"); no expected
+  // fact contains these words, and a negated sentence still matches none of the facts.
+  const parts = answer.trim().split(/\s*,\s*(?:and\s+)?|\s+(?:and|over|on|to)\s+/iu).filter(Boolean).map(normalize);
   return parts.length === expected.length &&
     expected.every((fact) => [fact].flat().some((value) => parts.includes(normalize(value))));
 }
