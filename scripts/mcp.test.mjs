@@ -322,7 +322,7 @@ test("get_project keeps the public record when the encoded Spanish study would e
   t.after(() => stopServer(fixtureServer.server));
 
   await t.test("build identifies the affected slug and locale", () => {
-    assert.equal(build.stderr, "MCP snapshot: get_project roster-edge (es) exceeds 64 KiB with Markdown\n");
+    assert.equal(build.stderr, "MCP snapshot: get_project roster-edge (es) is within 256 bytes of 64 KiB or over it with Markdown\n");
   });
   await t.test("HTTP response omits only Markdown and tells clients where to read it", async () => {
     const { projects } = await data("list_projects", { locale: "es" }, fixtureServer.endpoint);
@@ -423,4 +423,17 @@ test("only llms.txt advertises the MCP endpoint", () => {
   assert.match(dist("llms.txt"), announcement);
   assert.doesNotMatch(dist("llms-full.txt"), announcement);
   assert.doesNotMatch(dist("es/llms-full.txt"), announcement);
+});
+
+test("the build warns about a study that fits only with a tiny request ID", async () => {
+  const { getProjectResult, oversizedStudies } = await import("./build-mcp-data.mjs");
+  const study = (markdown) => ({ slug: "near-limit", studies: { en: { url: "u", markdown }, es: { url: "u", markdown: "" } },
+    description: { en: "", es: "" }, kind: { en: "", es: "" } });
+  let size = 60 * 1024;
+  while (!getProjectResult(study("x".repeat(size + 1)), "en", 0).markdownOmitted) size++;
+  const nearLimit = study("x".repeat(size));
+  assert.equal(getProjectResult(nearLimit, "en", 0).markdownOmitted, false);
+  assert.equal(getProjectResult(nearLimit, "en", "8f14e45f-ceea-467f-a0e6-5b0f1e7a9c2d").markdownOmitted, true);
+  assert.deepEqual(oversizedStudies([nearLimit]), [{ slug: "near-limit", locale: "en" }]);
+  assert.deepEqual(oversizedStudies([study("short")]), []);
 });
