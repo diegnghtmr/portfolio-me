@@ -9,6 +9,13 @@ on:
 permissions:
   contents: read
 
+# For status events github.sha is the head of main, so a green "Vercel"
+# status on that exact commit is its production deployment; earlier preview
+# statuses of the same commit arrive before it becomes main's head.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   smoke:
     name: Smoke live MCP
@@ -16,7 +23,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.context == 'Vercel' &&
       github.event.state == 'success' &&
-      contains(github.event.branches.*.name, 'main'))
+      github.event.sha == github.sha)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
