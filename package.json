@@ -20,6 +20,7 @@
     "favicon": "node scripts/favicon.mjs",
     "test:site": "node --test scripts/site-output.test.mjs scripts/home-cover.test.mjs",
     "test:mcp": "node --test scripts/mcp.test.mjs",
+    "eval:llms": "node scripts/eval-llms.mjs",
     "test:assets": "node --test scripts/dither-assets.test.mjs scripts/og-image.test.mjs scripts/favicon.test.mjs"
   },
   "dependencies": {
