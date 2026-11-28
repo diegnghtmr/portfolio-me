@@ -263,3 +263,11 @@ test("/mcp and /mcp/ rewrite to the function and are exempt from slash redirects
     assert.equal(result.headers.get("location"), null);
   }
 });
+
+// S36(c), S36(d)
+test("only llms.txt advertises the MCP endpoint", () => {
+  const announcement = /^Portfolio MCP: connect a Streamable HTTP client to <https:\/\/diegnghtmr\.me\/mcp>/m;
+  assert.match(dist("llms.txt"), announcement);
+  assert.doesNotMatch(dist("llms-full.txt"), announcement);
+  assert.doesNotMatch(dist("es/llms-full.txt"), announcement);
+});
