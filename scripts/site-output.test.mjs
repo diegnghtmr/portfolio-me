@@ -792,7 +792,7 @@ function assertDiagramGeometry(html, locale, slug) {
         "food-court": [["frontend", "orders", "catalog", "catalog-db"], ["frontend", "orders", "traceability", "trace-db"], ["frontend", "orders", "identity", "user-db"], ["frontend", "orders", "orders-db"]],
         "studydeck-ai": [["frontend", "backend", "postgres"]],
         "roster-edge": [["frontend", "backend", "postgres"]],
-        "the-knowledge-bay": [["frontend", "backend", "sqlite"]],
+        "the-knowledge-bay": [["frontend", "backend", "postgres"], ["frontend", "backend", "attachments"]],
         savia: [["web", "backend", "postgres"], ["web", "backend", "files"]],
       };
       for (const chain of chains[slug] ?? []) for (let j = 1; j < chain.length; j++) {
@@ -1066,16 +1066,23 @@ for (const locale of locales) {
     assert.deepEqual(pictures.map(([picture]) => picture.match(/<img\b[^>]*\bsrc="\/_astro\/([\w-]+)\.[^"\s]+\.webp"/)[1]),
       ["visitor-landing", "group-feed", "chat-thread", "moderator-analytics"]);
     for (const [picture] of pictures) assert.ok(resolves(attr(picture.match(/<img\b[^>]*>/)[0], "src")));
-    const edges = [{ from: "frontend", to: "backend" }, { from: "backend", to: "sqlite" }];
+    const edges = [
+      { from: "frontend", to: "backend" }, // HTTP/JSON API
+      { from: "frontend", to: "backend" }, // Authenticated SSE stream
+      { from: "backend", to: "postgres" }, // JDBC reads and writes
+      { from: "backend", to: "postgres" }, // LISTEN/NOTIFY subscription
+      { from: "backend", to: "attachments" }, // Attachment bytes
+    ];
     const diagrams = diagramSvgs(html);
     assert.equal(diagrams.length, 2);
     for (const svg of diagrams) {
-      assert.deepEqual(diagramNodes(svg).map(({ id, kind }) => [id, kind]), [["frontend", "container"], ["backend", "container"], ["sqlite", "store"]]);
+      assert.deepEqual(diagramNodes(svg).map(({ id, kind }) => [id, kind]), [["frontend", "container"], ["backend", "container"], ["postgres", "store"], ["attachments", "store"]]);
       assertDirectedRoutes(svg, edges);
     }
     const twin = read(`${path}index.md`);
     assert.match(twin, /JDBC\/SQL/);
-    assert.ok(twin.includes("https://github.com/diegnghtmr/the-knowledge-bay/pull/1"));
+    assert.ok(twin.includes("https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/persistence.md"));
+    assert.doesNotMatch(twin, /SQLite as the source|SQLite como fuente/);
     const option = commandProjects(html).find(({ name }) => name === "The Knowledge Bay");
     assert.equal(option?.target, `${workRoutes[locale]}#${slug}`);
   });

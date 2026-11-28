@@ -21,21 +21,34 @@ demonstration:
       alt: Panel de moderación con actividad por tema, participación semanal y una tabla de comunidades estudiantiles
       caption: El panel muestra sobre qué temas escriben los estudiantes y qué intereses comparten. Las cifras provienen de datos sintéticos.
 decisions:
-  - question: ¿Dónde deben quedar los aportes de los estudiantes al reiniciar el servidor?
+  - question: ¿Dónde se guardan los datos cuando hay más de una instancia en ejecución?
     options:
-      - label: Colecciones mutables en el proceso de Java
-        reason: Eran sencillas de conectar en la primera versión, pero al reiniciar se perdían cuentas, intereses y publicaciones.
-      - label: SQLite como fuente de verdad
-        reason: Los identificadores de la base de datos y las transacciones permiten guardar juntos los cambios relacionados sin un servicio de base de datos separado.
+      - label: Conservar la base de datos en un archivo
+        reason: La configuración anterior no necesitaba un servicio de base de datos separado, pero cada copia del archivo tendría sus propios datos.
+      - label: Compartir una base de datos PostgreSQL
+        reason: Las instancias consultan los mismos datos persistentes y Flyway aplica migraciones versionadas del esquema al arrancar.
         chosen: true
-    consequence: Las cuentas, las publicaciones y los mensajes se conservan al reiniciar con el mismo archivo. Los grupos consultan las publicaciones originales en vez de guardar copias.
+    consequence: Las publicaciones, las cuentas y las sesiones se conservan tras un reinicio. Una copia sin la aplicación en ejecución mueve los registros en una sola transacción; los archivos adjuntos se trasladan por separado.
     evidence:
-      - label: Contrato de persistencia en SQLite
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/docs/persistence-contract.md
-      - label: Prueba de persistencia tras el reinicio
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/PersistenceContractTest.java
-      - label: Prueba de concurrencia con barrera
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/ConcurrentDomainTest.java
+      - label: Persistencia en PostgreSQL y copia única de datos
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/persistence.md
+      - label: Implementación de la copia con la aplicación detenida
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/infrastructure/persistence/SqliteImport.java
+  - question: ¿Cómo llega el chat en vivo a un estudiante conectado a otra instancia?
+    options:
+      - label: Notificar solo a las conexiones de la instancia emisora
+        reason: Un proceso puede avisar a sus propias conexiones, pero no a quien está conectado a otra instancia.
+      - label: Notificar a las instancias mediante LISTEN/NOTIFY de PostgreSQL
+        reason: La notificación se emite al confirmar la transacción y solo contiene los identificadores de los participantes y del mensaje. Cada instancia recupera el mensaje mediante la consulta autorizada de la conversación.
+        chosen: true
+    consequence: El chat se actualiza entre instancias sin recargar la página. Las reservas en la base de datos imponen un límite compartido de conexiones por estudiante y el historial HTTP permite recuperar mensajes si se pierde un evento.
+    evidence:
+      - label: Persistencia y distribución del chat
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/persistence.md#sessions-and-messages
+      - label: Límite de conexiones y respaldo por HTTP
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/api.md#chat
+      - label: Pruebas de chat y del límite con dos instancias
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/DurableFeaturesTest.java#L232-L312
   - question: ¿De dónde obtiene la API la identidad de quien hace la petición?
     options:
       - label: Interpretar la identidad en cada controlador
@@ -49,33 +62,25 @@ decisions:
         url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/infrastructure/config/BearerSessionFilter.java
       - label: Reglas de acceso en Spring Security
         url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/infrastructure/config/SecurityConfig.java
-  - question: ¿Para qué sirven las estructuras propias si SQLite se encarga de guardar los cambios?
-    options:
-      - label: Mantener un grafo mutable separado
-        reason: Habría que sincronizarlo cada vez que cambien los perfiles o las relaciones de seguimiento.
-      - label: Reconstruir el grafo con las relaciones guardadas
-        reason: Se conserva el grafo no dirigido para recorrer las relaciones sin convertirlo en un segundo almacén.
-        chosen: true
-    consequence: Los seguimientos mutuos forman aristas y una cola permite recorrerlas para hallar el camino más corto. El panel calcula la actividad por tema y la participación a partir de los registros guardados.
-    evidence:
-      - label: Proyecciones del grafo y del panel
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/core/model/TheKnowledgeBay.java
 results:
-  - label: Spring Boot y SQLite
-    detail: Pasaron las 109 pruebas del servidor, que incluyen un reinicio con el mismo archivo SQLite y escrituras que arrancan juntas mediante una barrera.
-    url: https://github.com/diegnghtmr/the-knowledge-bay/tree/main/server/src/test
-  - label: Pruebas de React y compilación de producción
-    detail: Pasaron las 31 pruebas del cliente y ESLint no reportó errores ni advertencias. La carga diferida de rutas redujo el archivo inicial de Vite de 1394 kB a 454 kB (minificado, antes de gzip).
-    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/src/App.jsx
-  - label: Chromium contra el paquete final y CI
-    detail: Pasaron diez escenarios de Chromium contra el JAR de Spring con la SPA compilada y una base SQLite desechable. Los trabajos de verificación del PR #1 integrado pasaron.
-    url: https://github.com/diegnghtmr/the-knowledge-bay/pull/1
+  - label: Pruebas del servidor con PostgreSQL
+    detail: Pasaron las 123 pruebas del servidor, incluidas la entrega entre dos instancias y la aplicación del límite compartido de conexiones.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/DurableFeaturesTest.java
+  - label: Pruebas del cliente, lint y compilación de producción
+    detail: Pasaron las 33 pruebas del cliente, el análisis de código con ESLint y la compilación de producción.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/tree/main/client/tests
+  - label: Pruebas con Chromium sobre el paquete final
+    detail: Pasaron los 12 escenarios de Chromium contra el JAR de Spring, la SPA compilada y una base PostgreSQL desechable. Cubren el chat en vivo y la conservación de sesiones y adjuntos tras reiniciar.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/tests/production-audit.mjs
+  - label: GitHub Actions
+    detail: El trabajo verify pasó en el PR de PostgreSQL (#4) y en el de Docker (#5). El trabajo image también pasó en el PR de Docker.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/.github/workflows/ci.yml
 limitations:
-  - Los tokens de sesión viven en el proceso de Java. Tras un reinicio, los estudiantes y moderadores deben volver a iniciar sesión.
-  - El chat usa peticiones HTTP en lugar de WebSockets. Las publicaciones de recursos guardan el nombre del adjunto, pero no permiten descargarlo.
+  - Las publicaciones antiguas que solo guardaban el nombre del adjunto siguen siendo legibles, pero no ofrecen un archivo para descargar.
+  - Las réplicas en distintos hosts de Docker necesitan almacenamiento persistente compartido para los adjuntos. Un volumen local con nombre no se comparte entre hosts.
 architecture:
   system: The Knowledge Bay
-  caption: En el despliegue empaquetado, Spring sirve la SPA compilada y su API desde el mismo origen.
+  caption: Una imagen incluye la SPA y la API; todas las instancias usan la misma base PostgreSQL y el mismo almacén privado de adjuntos.
   nodes:
     - id: frontend
       kind: container
@@ -88,31 +93,54 @@ architecture:
       row: 0
     - id: backend
       kind: container
-      label: API REST
+      label: Servicio API
       name: The Knowledge Bay API
       tech: Java 21 / Spring Boot 3.4
-      does: Sirve la SPA y atiende peticiones a la API
+      does: Sirve la SPA, la API y el chat en vivo
       col: 1
       row: 0
-    - id: sqlite
+    - id: postgres
       kind: store
       label: Base de datos
-      name: SQLite
-      tech: SQLite
-      does: Guarda estudiantes, aportes y mensajes
-      col: 2
+      name: PostgreSQL
+      tech: PostgreSQL 17
+      does: Datos, sesiones y reservas
+      col: 3
       row: 0
+    - id: attachments
+      kind: store
+      label: Archivos
+      name: Uploads
+      tech: Volume
+      does: Bytes de adjuntos
+      col: 3
+      row: 1
   edges:
     - from: frontend
       to: backend
       protocol: HTTP/JSON
-      verb: Llama a la API del sitio
+      verb: Llama a la API
       evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/src/services/apiClient.js
+    - from: frontend
+      to: backend
+      protocol: SSE
+      verb: Abre el chat
+      evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/src/services/chatApi.js
     - from: backend
-      to: sqlite
+      to: postgres
       protocol: JDBC/SQL
-      verb: Lee y escribe registros
+      verb: Lee y escribe
       evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/core/repository/DomainRepository.java
+    - from: backend
+      to: postgres
+      protocol: LISTEN/NOTIFY
+      verb: Escucha avisos
+      evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/api/controller/PostgresChatListener.java#L49-L121
+    - from: backend
+      to: attachments
+      protocol: Files
+      verb: Guarda archivos
+      evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/core/service/AttachmentStorage.java
 ---
 
 ## Problema
@@ -123,8 +151,12 @@ El equipo desarrolló la primera versión entre marzo y junio de 2025. Un reinic
 
 ## Cómo funciona
 
-La SPA de React y la API de Spring Boot están en un mismo repositorio. En el despliegue empaquetado, Spring sirve el cliente compilado, responde a las rutas internas de la SPA y atiende `/api`. El navegador envía un token bearer en las peticiones protegidas. Spring identifica al estudiante o moderador antes de ejecutar el controlador. React carga las rutas de chat, perfiles y moderación solo al abrirlas, sin incluirlas en el paquete inicial.
+Docker empaqueta el cliente React y el servidor Spring Boot, que sirve la SPA y `/api` desde el mismo origen. Compose comprueba `/api/interests` y conserva la base de datos y los adjuntos en volúmenes con nombre (`pgdata` y `uploads`). El arranque exige un `MODERATOR_PASSWORD` que no esté en blanco y un directorio de adjuntos existente, con permisos de escritura y fuera del árbol de archivos estáticos.
 
-Los repositorios de Java escriben en un archivo SQLite. Una sola transacción guarda al estudiante, sus intereses y las asociaciones con los grupos automáticos. La pertenencia a los grupos se deriva de los intereses y los muros consultan los mismos registros. Editar una publicación no exige actualizar una segunda copia. El formulario espera la respuesta de la API y bloquea envíos repetidos mientras se guarda. La base de datos asigna identificadores distintos a publicaciones independientes.
+Flyway aplica migraciones versionadas al arrancar. El comando `--import-sqlite` lee la base SQLite anterior sin alterarla y copia los registros a una base PostgreSQL 17 vacía en una sola transacción. Los archivos adjuntos se copian por separado. Los grupos consultan las publicaciones originales y el grafo de afinidad se reconstruye a partir de los seguimientos mutuos guardados.
 
-El grafo de afinidad se reconstruye a partir de una lectura de la base de datos. Los seguimientos mutuos forman aristas y una búsqueda en anchura encuentra el camino más corto entre un par de estudiantes. El panel de moderación calcula la actividad por tema y la participación con los registros guardados, sin llevar contadores aparte.
+Las peticiones protegidas envían un token bearer en la cabecera. PostgreSQL guarda su huella, no el token. Las sesiones sobreviven a los reinicios hasta que caducan o se revocan.
+
+El chat usa eventos autenticados enviados por el servidor. Al confirmar la escritura, PostgreSQL notifica mediante `LISTEN/NOTIFY` solo los identificadores de los participantes y del mensaje. Cada instancia recupera el mensaje mediante la consulta autorizada de la conversación. Las reservas en la base de datos limitan las conexiones por estudiante entre instancias. Al superar el límite, se devuelve HTTP `429` con `Retry-After: 2` antes de abrir la conexión. El historial HTTP sirve de respaldo.
+
+Los adjuntos PDF, PNG y JPEG de hasta 5 MiB se guardan en privado y solo se sirven como descargas autorizadas.

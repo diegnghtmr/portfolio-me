@@ -21,21 +21,34 @@ demonstration:
       alt: Moderator dashboard with activity by topic, weekly participation, and a table of student communities
       caption: Moderators can see which topics students post about and which interests they share. The figures come from synthetic data.
 decisions:
-  - question: What should own students’ work after a restart?
+  - question: Where should application records live when more than one instance is running?
     options:
-      - label: Mutable collections in the Java process
-        reason: Fast to wire into the first version, but accounts, interests, and posts disappeared when the process restarted.
-      - label: SQLite as the source of truth
-        reason: Database-assigned IDs and repository transactions let related changes commit together without a separate database service.
+      - label: Keep the file-based database
+        reason: The previous setup ran without a separate database service, but each copy of the file would have its own state.
+      - label: Share one PostgreSQL database
+        reason: App instances use the same durable records, and Flyway applies versioned schema migrations on startup.
         chosen: true
-    consequence: Accounts, content, and messages survive restarting the server on the same file. Group feeds read canonical posts rather than storing a second copy.
+    consequence: Posts, accounts, and sessions survive restarts. An offline copy moves existing database records in one transaction; attachment files move separately.
     evidence:
-      - label: SQLite persistence contract
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/docs/persistence-contract.md
-      - label: Restart persistence test
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/PersistenceContractTest.java
-      - label: Barrier-driven concurrency test
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/ConcurrentDomainTest.java
+      - label: PostgreSQL persistence and one-time copy
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/persistence.md
+      - label: Offline copy implementation
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/infrastructure/persistence/SqliteImport.java
+  - question: How does a live chat reach a student connected to another instance?
+    options:
+      - label: Notify only streams on the sending instance
+        reason: A process can reach its own streams, not a peer connected elsewhere.
+      - label: Notify instances through PostgreSQL LISTEN/NOTIFY
+        reason: A committed notification carries only the participant and message IDs. Each instance reloads the message through the authorized conversation.
+        chosen: true
+    consequence: Chat updates without refreshing across instances. Database leases share one stream cap per student, and HTTP history covers missed events.
+    evidence:
+      - label: Chat persistence and fan-out
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/persistence.md#sessions-and-messages
+      - label: Stream limits and HTTP fallback
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/docs/api.md#chat
+      - label: Two-instance chat and capacity tests
+        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/DurableFeaturesTest.java#L232-L312
   - question: Where should the API get the identity of the caller?
     options:
       - label: Interpret identity separately in each controller
@@ -49,33 +62,25 @@ decisions:
         url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/infrastructure/config/BearerSessionFilter.java
       - label: Spring Security route rules
         url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/infrastructure/config/SecurityConfig.java
-  - question: What should the custom data structures do once SQLite owns writes?
-    options:
-      - label: Keep a separate mutable graph as application state
-        reason: The graph would need to stay in sync with every change to follows and profiles.
-      - label: Rebuild the graph from stored relationships
-        reason: Keep the custom undirected graph for traversal without making it a second store.
-        chosen: true
-    consequence: Mutual follows become graph edges, and a queue traverses them to find a shortest path. Topic and participation views are computed from stored activity.
-    evidence:
-      - label: Graph and analytics projections
-        url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/core/model/TheKnowledgeBay.java
 results:
-  - label: Spring Boot and SQLite
-    detail: All 109 server tests passed, including a restart against the same SQLite file and writes released together by a concurrency barrier.
-    url: https://github.com/diegnghtmr/the-knowledge-bay/tree/main/server/src/test
-  - label: React checks and production build
-    detail: All 31 client tests passed, and ESLint reported no errors or warnings. Lazy routes reduced the Vite entry chunk from 1,394 kB to 454 kB (minified, before gzip).
-    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/src/App.jsx
-  - label: Packaged Chromium and CI
-    detail: Ten Chromium scenarios passed against the Spring JAR with the built SPA and a disposable SQLite file. The verify jobs passed on merged PR #1.
-    url: https://github.com/diegnghtmr/the-knowledge-bay/pull/1
+  - label: Server tests against PostgreSQL
+    detail: All 123 server tests passed, including delivery between two instances and enforcement of the shared stream cap.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/test/java/co/edu/uniquindio/theknowledgebay/DurableFeaturesTest.java
+  - label: Client tests, lint, and production build
+    detail: All 33 client tests passed. Lint and the production build also passed.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/tree/main/client/tests
+  - label: Packaged Chromium audit
+    detail: All 12 Chromium scenarios passed against the Spring JAR, the built SPA, and disposable PostgreSQL. They cover live messaging and session and attachment persistence across restart.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/tests/production-audit.mjs
+  - label: GitHub Actions
+    detail: The verify job passed for the PostgreSQL PR (#4) and the Docker PR (#5). The image build job also passed for PR #5.
+    url: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/.github/workflows/ci.yml
 limitations:
-  - Session tokens live in the Java process, so students and moderators sign in again after a restart.
-  - Chat uses HTTP requests rather than WebSockets. Resource posts store attachment names, not downloadable files.
+  - Older posts that saved only an attachment name remain readable but have no file to download.
+  - Replicas on different Docker hosts need shared persistent storage for attachments. A default local named volume is not shared across hosts.
 architecture:
   system: The Knowledge Bay
-  caption: In the packaged deployment Spring serves the built SPA and its API on the same origin.
+  caption: One image packages the SPA and API; every instance uses the same PostgreSQL database and private attachment store.
   nodes:
     - id: frontend
       kind: container
@@ -88,31 +93,54 @@ architecture:
       row: 0
     - id: backend
       kind: container
-      label: REST API
+      label: API service
       name: The Knowledge Bay API
       tech: Java 21 / Spring Boot 3.4
-      does: Serves the SPA and handles API requests
+      does: Serves the SPA, API, and chat streams
       col: 1
       row: 0
-    - id: sqlite
+    - id: postgres
       kind: store
       label: Data store
-      name: SQLite
-      tech: SQLite
-      does: Stores students, posts, and messages
-      col: 2
+      name: PostgreSQL
+      tech: PostgreSQL 17
+      does: Records, sessions, stream leases
+      col: 3
       row: 0
+    - id: attachments
+      kind: store
+      label: File store
+      name: Uploads
+      tech: Volume
+      does: Attachment bytes
+      col: 3
+      row: 1
   edges:
     - from: frontend
       to: backend
       protocol: HTTP/JSON
-      verb: Calls the same-origin API
+      verb: Calls API
       evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/src/services/apiClient.js
+    - from: frontend
+      to: backend
+      protocol: SSE
+      verb: Opens chat stream
+      evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/client/src/services/chatApi.js
     - from: backend
-      to: sqlite
+      to: postgres
       protocol: JDBC/SQL
-      verb: Reads and writes records
+      verb: Reads and writes
       evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/core/repository/DomainRepository.java
+    - from: backend
+      to: postgres
+      protocol: LISTEN/NOTIFY
+      verb: Listens for IDs
+      evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/api/controller/PostgresChatListener.java#L49-L121
+    - from: backend
+      to: attachments
+      protocol: Files
+      verb: Stores files
+      evidence: https://github.com/diegnghtmr/the-knowledge-bay/blob/main/server/src/main/java/co/edu/uniquindio/theknowledgebay/core/service/AttachmentStorage.java
 ---
 
 ## Problem
@@ -123,8 +151,12 @@ The team built the original app from March to June 2025. In that version, a rest
 
 ## How it works
 
-The React SPA and Spring Boot API live in one repository. In the packaged deployment, Spring serves the built client and its route fallback as well as `/api`. The browser sends a bearer token with protected requests. Spring resolves the token to a student or moderator before a handler runs. React loads chat, profile, and moderation routes on demand instead of including them all in the entry bundle.
+The Docker image packages the React client and Spring Boot server. Spring serves the SPA and `/api` on the same origin. Compose checks readiness at `/api/interests` and keeps database and attachment data in named volumes (`pgdata` and `uploads`). The server refuses to start without a nonblank `MODERATOR_PASSWORD` or if the attachment directory is missing, unwritable, or inside the static file tree.
 
-The Java repositories write to one SQLite file. Creating a student with interests is one transaction, including the automatic study group associations. Groups derive membership from interests and query the same records as the global feed, so editing a post does not require updating a second copy. The publish form waits for the API and disables repeat submissions while a request is in flight; the database still gives separate posts distinct IDs.
+Flyway applies versioned migrations at startup. The offline `--import-sqlite` command reads the old SQLite database without altering it and copies records to an empty PostgreSQL 17 database in one transaction. Attachment files are copied separately. Group feeds still read canonical posts, and the affinity graph is rebuilt from stored mutual follows.
 
-The affinity graph is rebuilt from a database snapshot. Mutual follows create edges, and a breadth-first search finds the shortest path between two students. The moderation dashboard reads topic activity and participation from stored records rather than keeping an independent counter.
+Protected requests carry a bearer token in the header. PostgreSQL stores its hash, not the token itself. Sessions survive server restarts until expiry or revocation.
+
+Chat uses authenticated server-sent events. On commit, PostgreSQL delivers a `LISTEN/NOTIFY` signal containing only the participant and message IDs. Each instance reloads the message through the authorized conversation before sending it to connected participants. Database leases enforce a shared cap per student across instances. An excess request gets HTTP `429` with `Retry-After: 2` before the stream opens. HTTP history remains the fallback.
+
+PDF, PNG, and JPEG attachments up to 5 MiB are stored privately. Authorized readers download them as files, not inline.
