@@ -95,7 +95,7 @@ Use the project slug from `src/data/projects.ts` and follow the [content contrac
 
 Every push to `main` deploys to production on Vercel; other branches get preview URLs. The `vercel-build` script runs the static Astro build and generates `api/_generated/portfolio.json`. Vercel bundles that file with the function, not with the static site. Routing Middleware sends `/mcp` and `/mcp/` to the function without redirecting the client.
 
-CI (GitHub Actions) runs on every push and pull request: frozen install, build and every `scripts/*.test.mjs`. When the `Vercel` status turns green on the head of `main` (its production deployment), **Production MCP smoke** runs `node scripts/mcp-smoke.mjs https://diegnghtmr.me`; it can also be started from **Actions → Production MCP smoke → Run workflow**.
+CI (GitHub Actions) runs on every push and pull request: frozen install, build and every `scripts/*.test.mjs`. After each push to `main`, **Production MCP smoke** waits until `https://diegnghtmr.me/mcp` answers with an `X-Build-Sha` header naming that commit (Vercel provides `VERCEL_GIT_COMMIT_SHA`), then runs `node scripts/mcp-smoke.mjs https://diegnghtmr.me`; it can also be started from **Actions → Production MCP smoke → Run workflow**.
 
 ## License
 

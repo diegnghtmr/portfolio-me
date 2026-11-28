@@ -106,6 +106,19 @@ test("GET and DELETE return 405 with no SSE or session termination", async () =>
   }
 });
 
+test("the 405 answer names the deployed commit only when Vercel provides it", async (t) => {
+  const previous = process.env.VERCEL_GIT_COMMIT_SHA;
+  t.after(() => (previous === undefined ? delete process.env.VERCEL_GIT_COMMIT_SHA : (process.env.VERCEL_GIT_COMMIT_SHA = previous)));
+  delete process.env.VERCEL_GIT_COMMIT_SHA;
+  const local = await fetch(endpoint, { method: "HEAD", redirect: "manual" });
+  assert.equal(local.status, 405);
+  assert.equal(local.headers.get("x-build-sha"), null);
+  process.env.VERCEL_GIT_COMMIT_SHA = "0123456789abcdef0123456789abcdef01234567";
+  const deployed = await fetch(endpoint, { method: "HEAD", redirect: "manual" });
+  assert.equal(deployed.status, 405);
+  assert.equal(deployed.headers.get("x-build-sha"), "0123456789abcdef0123456789abcdef01234567");
+});
+
 test("POST rejects an unsupported revision and malformed JSON; Origin and input size are checked", async () => {
   const ping = { jsonrpc: "2.0", id: 1, method: "ping" };
   for (const [body, headers, status, code] of [

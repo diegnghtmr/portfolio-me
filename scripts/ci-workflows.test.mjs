@@ -11,11 +11,13 @@ test("S38: CI runs for pushes and pull requests and discovers all script tests",
   assert.match(ci, /- run: pnpm install --frozen-lockfile\s+- run: pnpm build\s+- run: node --test scripts\/\*\.test\.mjs/);
 });
 
-test("S38: smoke runs only for the green Vercel status of main's head, on that SHA, against production", () => {
-  assert.match(smoke, /^on:\n  status:\n  workflow_dispatch:\n/m);
-  assert.match(smoke, /github\.event\.context == 'Vercel' &&\s+github\.event\.state == 'success' &&\s+github\.event\.sha == github\.sha/);
-  assert.match(smoke, /ref: \$\{\{ github\.event\.sha \|\| github\.sha \}\}/);
-  assert.match(smoke, /- run: node scripts\/mcp-smoke\.mjs https:\/\/diegnghtmr\.me$/m);
+test("S38: smoke waits until production serves the pushed commit, then probes production", () => {
+  assert.match(smoke, /^on:\n  push:\n    branches: \[main\]\n  workflow_dispatch:\n/m);
+  assert.match(smoke, /EXPECTED_SHA: \$\{\{ github\.sha \}\}/);
+  assert.match(smoke, /tolower\(\$1\) == "x-build-sha"/);
+  assert.match(smoke, /if \[ "\$live" = "\$EXPECTED_SHA" \]; then[^\n]*exit 0; fi/);
+  assert.match(smoke, /- run: node scripts\/mcp-smoke\.mjs "\$SITE"$/m);
+  assert.match(smoke, /SITE: https:\/\/diegnghtmr\.me$/m);
 });
 
 for (const [name, text] of [["CI", ci], ["smoke", smoke]]) {

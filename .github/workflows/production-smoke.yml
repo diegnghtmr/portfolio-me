@@ -1,17 +1,18 @@
 name: Production MCP smoke
 
-# Vercel reports deployments as "Vercel" commit statuses (it creates no GitHub
-# deployments here), and every push to main deploys to production.
+# Every push to main deploys to production on Vercel. Vercel's commit statuses
+# do not say whether a deployment is production or a preview, so the job asks
+# production itself: /mcp answers with the X-Build-Sha header of the commit it
+# serves, and the smoke runs only once that header names this push.
 on:
-  status:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# For status events github.sha is the head of main, so a green "Vercel"
-# status on that exact commit is its production deployment; earlier preview
-# statuses of the same commit arrive before it becomes main's head.
+# A newer push supersedes an older one; the older commit never goes live.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -19,19 +20,26 @@ concurrency:
 jobs:
   smoke:
     name: Smoke live MCP
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.context == 'Vercel' &&
-      github.event.state == 'success' &&
-      github.event.sha == github.sha)
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 20
+    env:
+      SITE: https://diegnghtmr.me
+      EXPECTED_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
-      - run: node scripts/mcp-smoke.mjs https://diegnghtmr.me
+      - name: Wait for production to serve this commit
+        run: |
+          for _ in $(seq 1 60); do
+            live=$(curl -sSI --max-time 10 "$SITE/mcp" | tr -d '\r' | awk -F': ' 'tolower($1) == "x-build-sha" { print $2 }')
+            if [ "$live" = "$EXPECTED_SHA" ]; then echo "Production serves $EXPECTED_SHA"; exit 0; fi
+            echo "Production serves ${live:-unknown}; waiting for $EXPECTED_SHA"
+            sleep 15
+          done
+          echo "Production never served $EXPECTED_SHA" >&2
+          exit 1
+      - run: node scripts/mcp-smoke.mjs "$SITE"
