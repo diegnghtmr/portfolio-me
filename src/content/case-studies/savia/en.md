@@ -1,6 +1,6 @@
 ---
 project: savia
-summary: Savia is a personal finance app in development for people who want to manage accounts, spending, and budgets in one workspace.
+summary: Savia is a personal finance app for people who want to manage accounts, spending, and budgets in one workspace.
 role: Sole developer
 timeframe: "2026"
 demonstration:
@@ -62,10 +62,9 @@ results:
 limitations:
   - No authenticated finance workflow was run against a live PostgreSQL database. The OpenAPI verifier does not check the upstream planning source.
   - The full suite had 3,101 passes, 3 failures, and 1 skip. Two OCR tests need Tesseract, which is absent from the slim image. One monthly recurrence test uses the real clock but expects a fixed date.
-  - The mobile app does not load financial data or record transactions. The local MCP server handles protocol startup and ping, but exposes no tools and does not connect to the API.
 architecture:
   system: Savia
-  caption: Onboarding calls the API from the web server; mobile and MCP run independently.
+  caption: The web server and CLI call the API; the mobile app and MCP server run separately.
   nodes:
     - id: web
       kind: container
@@ -94,6 +93,15 @@ architecture:
       does: Handles initialization and ping over stdio
       col: 0
       row: 2
+    - id: cli
+      kind: container
+      label: CLI
+      name: savia-cli
+      repo: savia-cli
+      tech: Node.js / TypeScript
+      does: Runs finance commands in the terminal
+      col: 0
+      row: 3
     - id: backend
       kind: container
       label: API and worker
@@ -138,6 +146,11 @@ architecture:
       protocol: HTTP/JSON
       verb: Submits workspace setup
       evidence: https://github.com/diegnghtmr/savia-web/blob/main/src/lib/onboarding-gateway.ts
+    - from: cli
+      to: backend
+      protocol: HTTP
+      verb: Manages finances
+      evidence: https://github.com/diegnghtmr/savia-cli/blob/main/src/http/authenticated-request.mts
     - from: web
       to: auth
       protocol: HTTP/JSON
@@ -162,7 +175,7 @@ architecture:
 
 ## Problem
 
-People who track their own finances need to know which account a transaction belongs to, what currency it uses, and how it affects the money available for the rest of the month. A transfer between accounts is not the same as new income or spending. Savia is being built around those distinctions, with accounts, a ledger, and budgets scoped to a workspace.
+People who track their own finances need to know which account a transaction belongs to, what currency it uses, and how it affects the money available for the rest of the month. A transfer between accounts is not the same as new income or spending. Savia models those distinctions, with accounts, a ledger, and budgets scoped to a workspace.
 
 Setting up that workspace is a separate task. The user chooses a base currency and preferences such as date and number formats. If the first submission is retried after a lost response, it should return the workspace already created rather than create another one.
 
@@ -170,6 +183,8 @@ Setting up that workspace is a separate task. The user chooses a base currency a
 
 The Next.js site serves a public home and forms for registration and sign-in. Its server code uses Supabase Auth for the session and writes session cookies as HTTP-only. The workspace setup page requires a session. It collects the user's profile, workspace name, and display preferences, then submits them to a Next.js Server Action. The action sends `POST /v1/onboarding` to the Fastify API with the access token from the session.
 
-The API derives the user's identity from the token. Its onboarding service uses one PostgreSQL transaction to read any existing setup and, on first use, save the profile, personal workspace, and owner membership. A matching retry returns the original identifiers. The API also contains work for accounts, ledger entries, and budgets. It computes the next date for [monthly recurring rules](https://github.com/diegnghtmr/savia-backend/blob/main/test/recurring/recurring-command.spec.ts#L39). The public web home does not read those financial records.
+The API derives the user's identity from the token. Its onboarding service uses one PostgreSQL transaction to read any existing setup and, on first use, save the profile, personal workspace, and owner membership. A matching retry returns the original identifiers. The API also manages accounts, ledger entries, and budgets. It computes the next date for [monthly recurring rules](https://github.com/diegnghtmr/savia-backend/blob/main/test/recurring/recurring-command.spec.ts#L39).
 
-The Expo repository contains a standalone mobile shell. The MCP repository is a separate local process that speaks JSON-RPC over standard input and output, without calling the backend.
+The Expo repository provides the mobile interface. The MCP server runs as a separate local JSON-RPC process over standard input and output.
+
+The [TypeScript CLI](https://github.com/diegnghtmr/savia-cli) calls the same API to manage accounts, transactions, transfers, budgets, and funds. It runs reports and scenarios, requests exports and forecasts, uploads statements for import and receipts for OCR, asks the Savia agent questions, and manages MCP grants. It resolves the workspace and credentials locally before sending requests.
