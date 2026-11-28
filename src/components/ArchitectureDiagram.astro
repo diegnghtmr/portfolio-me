@@ -13,9 +13,10 @@ const description = describeArchitecture(architecture, locale).join("\n");
 const title = m.diagramTitle(architecture.system);
 const narrow = await layoutArchitecture(architecture, "narrow");
 // Judge the routed result, not node count: detached nodes do not create turns.
-// Limit both route complexity and the depth of the 1:1 mobile diagram.
-const useNarrow = narrow.bends <= 60 && narrow.height <= 1800;
-const wide = await layoutArchitecture(architecture, useNarrow ? "wide" : "wide-scroll");
+// Moderately dense graphs can still fit a single-column mobile diagram.
+const useNarrow = narrow.bends <= 72 && narrow.height <= 1800;
+const wideVariant = !useNarrow ? "wide-scroll" : narrow.bends > 60 ? "wide-compact" : "wide";
+const wide = await layoutArchitecture(architecture, wideVariant);
 const layouts = [{ name: "wide", ...wide }, ...(useNarrow ? [{ name: "narrow", ...narrow }] : [])];
 const surfaces = new Map(project.repositories.map(({ name, surface }) => [name, surface]));
 const category = ({ kind, repo }: Architecture["nodes"][number]) => kind === "store" ? "data" : kind === "external" ? "external" : repo ? surfaces.get(repo) : "api";

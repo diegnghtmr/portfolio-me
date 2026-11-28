@@ -98,8 +98,9 @@ function shape(item: ElkNode | ElkLabel): Rect {
   return { x, y, w, h };
 }
 
-export async function layoutArchitecture({ nodes, edges, system }: Architecture, variant: "narrow" | "wide" | "wide-scroll") {
+export async function layoutArchitecture({ nodes, edges, system }: Architecture, variant: "narrow" | "wide" | "wide-compact" | "wide-scroll") {
   const narrow = variant === "narrow";
+  const compactWide = variant === "wide-compact";
   const options: LayoutOptions = {
     "elk.algorithm": "layered",
     "elk.direction": narrow ? "DOWN" : "RIGHT",
@@ -131,13 +132,14 @@ export async function layoutArchitecture({ nodes, edges, system }: Architecture,
   };
   const external = new Set(nodes.filter(({ kind }) => kind === "external").map(({ id }) => id));
   const finalColumn = Math.max(...nodes.filter(({ kind }) => kind !== "external").map(({ col }) => col));
-  // Keep dependencies beside scroll-only graphs: a dependency below the
-  // boundary reserves a blank band whenever it is horizontally offscreen.
-  const right = !narrow && external.size > 0 && (variant === "wide-scroll" ||
+  // Keep dependencies beside scroll-only graphs so a horizontally offscreen
+  // dependency doesn't reserve a blank band. Compact wide graphs trade that
+  // extra column for a row below the boundary without reducing text size.
+  const right = !narrow && !compactWide && external.size > 0 && (variant === "wide-scroll" ||
     nodes.some(({ id, kind, col }) => kind === "external" && col > finalColumn &&
       edges.some(({ from, to }) => (to === id && !external.has(from)) || (from === id && !external.has(to)))));
   const below = !narrow && external.size > 0 && !right;
-  const compact = !narrow && (finalColumn >= 3 || right);
+  const compact = !narrow && (compactWide || finalColumn >= 3 || right);
   const nodeWidth = compact ? 176 : 232;
   const boxes = nodes.map((node) => makeBox(node, nodeWidth));
   const flow = edges.map((edge, i) => {
